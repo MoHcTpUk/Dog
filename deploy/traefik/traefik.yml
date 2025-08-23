@@ -1,0 +1,22 @@
+# traefik/traefik.yml
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+providers:
+  docker:
+    exposedByDefault: false
+
+api:
+  dashboard: true
+  insecure: true
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: oleg.shmatkoff@gmail.com
+      storage: /letsencrypt/acme.json
+      httpChallenge:
+        entryPoint: web

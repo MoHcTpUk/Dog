@@ -1,0 +1,8 @@
+using Shared.Infrastructure.Repository;
+using Users.Domain.Aggregates;
+
+namespace Users.Infrastructure.Repositories;
+
+public interface IUserRepository : IRepository<UserAggregate>
+{
+}

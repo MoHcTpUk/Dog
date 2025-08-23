@@ -1,0 +1,10 @@
+using Shared.Dtos;
+
+namespace Shared.Api.Storages;
+
+public interface IStorage
+{
+    Task UploadFileAsync(Guid fileId, Stream stream, string contentType);
+
+    public Task<FileDownloadResult> DownloadFileAsync(Guid fileId);
+}
