@@ -34,13 +34,10 @@ public static class Extensions
                 typeof(BaseMappingProfile).IsAssignableFrom(type) && type is { IsAbstract: false, IsClass: true })
             .ToList();
 
-        var mapperConfig = new MapperConfiguration(cfg =>
+        services.AddAutoMapper(cfg =>
         {
             foreach (var profile in profiles) cfg.AddProfile((Profile)Activator.CreateInstance(profile)!);
         });
-
-        var mapper = mapperConfig.CreateMapper();
-        services.AddSingleton(mapper);
 
         return services;
     }

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Shared.Application;
 using Users.Api.Services;
 using Users.Infrastructure;
@@ -12,7 +13,7 @@ public static class Extensions
         IConfiguration configuration)
     {
         services.AddScoped<IUserService, UserService>();
-
+        
         services.AddUsersInfrastructure(configuration);
         services.AddSharedApplication(configuration);
 
