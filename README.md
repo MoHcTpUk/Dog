@@ -15,6 +15,9 @@ remove_all_local.sh - clean all
 Run frontend: npm i / npm run dev
 
 Traefik: http://localhost:8080/dashboard/#/
-Portainer: http://127.0.0.1:9000/
+
+Portainer: http://localhost:9000/
 
 Backend: http://localhost/api
+
+MinIO: http://localhost:9001/
