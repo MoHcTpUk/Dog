@@ -1,0 +1,112 @@
+services:
+  gateway:
+    image: ghcr.io/mohctpuk/dog-gateway:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.middlewares.strip-api-prefix.stripprefix.prefixes=/api"
+      - "traefik.http.routers.backend.middlewares=strip-api-prefix"
+      - "traefik.http.services.backend.loadbalancer.server.port=8080"
+    networks:
+      - infra_traefik
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    deploy:
+      restart_policy:
+          condition: on-failure
+          delay: 5s
+          max_attempts: 10
+          window: 60s
+          
+  users:
+    image: ghcr.io/mohctpuk/dog-users:latest
+    networks:
+      - infra_traefik
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+    deploy:
+      restart_policy:
+          condition: on-failure
+          delay: 5s
+          max_attempts: 10
+          window: 60s
+
+  frontend:
+    image: ghcr.io/mohctpuk/activity-frontend:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+    networks:
+      - infra_traefik
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./keycloak/init-keycloak.sql:/docker-entrypoint-initdb.d/init-keycloak.sql
+    ports:
+      - "4321:5432"
+    networks:
+      - infra_traefik
+
+  nats:
+    image: nats:latest
+    command: ["-js", "-m", "8222"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    volumes:
+      - nats_data:/data
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - infra_traefik
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9009:9000"     # API
+      - "9001:9001"     # Web UI
+    environment:
+      MINIO_ROOT_USER: adminadmin
+      MINIO_ROOT_PASSWORD: adminadmin
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    command:
+      - start-dev
+    environment:
+      # DB
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://app_postgres:5432/keycloak
+      KC_DB_USERNAME: user
+      KC_DB_PASSWORD: password
+      # Админ
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8085:8080"
+    depends_on:
+      - postgres
+    networks:
+      - infra_traefik
+
+volumes:
+  postgres_data:
+  nats_data:
+  minio_data:
+
+networks:
+  infra_traefik:
+    external: true
