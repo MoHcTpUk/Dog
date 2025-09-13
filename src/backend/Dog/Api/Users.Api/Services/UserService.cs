@@ -10,8 +10,12 @@ namespace Users.Api.Services;
 public class UserService(ICommandBus commandBus)
     : Service<CreateUserCommand, UpdateUserCommand, DeleteUserCommand, UserQuery, UserDto>(commandBus), IUserService
 {
+    private readonly ICommandBus _commandBus = commandBus;
+
     public Task CreateRegistrationRequest(CreateRegistrationRequest request)
     {
-        throw new NotImplementedException();
+        _commandBus.SendAsync(request, Subject);
+        
+        return Task.CompletedTask;
     }
 }

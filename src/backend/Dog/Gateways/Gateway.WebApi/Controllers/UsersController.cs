@@ -13,8 +13,10 @@ public class UsersController(IUserService userService)
         UserDto>(userService)
 {
     [HttpPost(nameof(CreateRegistrationRequest))]
-    public async Task CreateRegistrationRequest(CreateRegistrationRequest request)
-    {
-        await userService.CreateRegistrationRequest(request);
+    public Task CreateRegistrationRequest(CreateRegistrationRequest request)
+    { 
+        userService.CreateRegistrationRequest(request);
+
+        return Task.CompletedTask;
     }
 }

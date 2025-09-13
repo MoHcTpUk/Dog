@@ -10,3 +10,12 @@ public interface ICommandHandler<in TCommand, TResult> : IRequestHandler<TComman
         return Handle(command, CancellationToken.None);
     }
 }
+
+public interface ICommandHandler<in TCommand> : IRequestHandler<TCommand>
+    where TCommand : ICommand
+{
+    Task HandleAsync(TCommand command)
+    {
+        return Handle(command, CancellationToken.None);
+    }
+}

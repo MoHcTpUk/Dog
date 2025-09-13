@@ -23,9 +23,10 @@ public class NatsCommandBus : ICommandBus
 
         _commandTypes = AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(a => a.GetTypes())
-            .Where(t => !t.IsAbstract && !t.IsInterface)
+            .Where(t => t is { IsAbstract: false, IsInterface: false })
             .Where(t => t.GetInterfaces().Any(i =>
-                i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICommand<>)))
+                typeof(ICommand).IsAssignableFrom(t) ||
+                (i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICommand<>))))
             .ToDictionary(t => t.Name, t => t);
     }
 
@@ -48,6 +49,27 @@ public class NatsCommandBus : ICommandBus
             if (resultEnvelope == null) throw new Exception("No response");
 
             return resultEnvelope;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Requested stream: {subject} Error: {e}");
+            throw;
+        }
+    }
+
+
+    public void SendAsync<TCommand>(TCommand command, string subject)
+        where TCommand : ICommand
+    {
+        var envelope = new Envelope<TCommand>
+        {
+            Data = command
+        };
+
+        var payload = JsonSerializer.SerializeToUtf8Bytes(envelope, _jsonOpts);
+        try
+        {
+            _connection.Publish($"{subject}.default", payload);
         }
         catch (Exception e)
         {
