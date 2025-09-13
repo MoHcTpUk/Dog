@@ -7,12 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Folder Include="Entities\"/>
-        <Folder Include="Interfaces\"/>
-        <Folder Include="ValueObjects\"/>
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\..\..\Shared\Shared.Domain\Shared.Domain.csproj" />
     </ItemGroup>
 
