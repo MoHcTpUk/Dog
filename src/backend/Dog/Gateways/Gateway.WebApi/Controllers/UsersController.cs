@@ -13,10 +13,10 @@ public class UsersController(IUserService userService)
         UserDto>(userService)
 {
     [HttpPost(nameof(CreateRegistrationRequest))]
-    public Task CreateRegistrationRequest(CreateRegistrationRequest request)
-    { 
-        userService.CreateRegistrationRequest(request);
+    public Task<RegistrationRequestDto> CreateRegistrationRequest(CreateRegistrationRequestCommand requestCommand)
+    {
+        var result = userService.CreateRegistrationRequest(requestCommand);
 
-        return Task.CompletedTask;
+        return result;
     }
 }

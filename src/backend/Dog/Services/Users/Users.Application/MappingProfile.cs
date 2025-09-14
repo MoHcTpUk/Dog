@@ -12,5 +12,7 @@ public class MappingProfile : BaseMappingProfile
         CreateMap<CreateUserCommand, UserAggregate>();
         CreateMap<UpdateUserCommand, UserAggregate>();
         CreateMap<UserAggregate, UserDto>();
+
+        CreateMap<RegistrationRequest, RegistrationRequestDto>();
     }
 }

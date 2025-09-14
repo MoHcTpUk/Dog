@@ -8,5 +8,5 @@ namespace Users.Api.Services;
 
 public interface IUserService : IService<CreateUserCommand, UpdateUserCommand, DeleteUserCommand, UserQuery, UserDto>
 {
-    Task CreateRegistrationRequest(CreateRegistrationRequest request);
+    Task<RegistrationRequestDto> CreateRegistrationRequest(CreateRegistrationRequestCommand requestCommand);
 }

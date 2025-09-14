@@ -11,7 +11,8 @@ public static class Extensions
         IConfiguration configuration)
     {
         services.AddScoped<IUserRepository, UserRepository>();
-
+        services.AddScoped<IRegistrationRequestRepository, RegistrationRequestRepository>();
+        
         services.AddSharedInfrastructure();
 
         return services;
