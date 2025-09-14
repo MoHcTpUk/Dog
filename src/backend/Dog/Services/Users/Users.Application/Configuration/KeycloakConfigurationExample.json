@@ -1,0 +1,10 @@
+{
+  "Keycloak": {
+    "BaseUrl": "http://localhost:8080",
+    "Realm": "master",
+    "ClientId": "admin-cli",
+    "ClientSecret": "your-client-secret",
+    "AdminUsername": "admin",
+    "AdminPassword": "admin"
+  }
+}
