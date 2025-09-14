@@ -1,21 +1,27 @@
 using Microsoft.AspNetCore.Mvc;
-using Shared.Api;
 using Users.Api.Commands.RegistrationRequest;
-using Users.Api.Commands.User;
 using Users.Api.Dtos;
-using Users.Api.Queries;
 using Users.Api.Services;
 
 namespace Gateway.Api.Controllers;
 
+[ApiController]
+[Route("[controller]")]
 public class UsersController(IUserService userService)
-    : AbstractController<IUserService, UserDto, CreateUserCommand, UpdateUserCommand, DeleteUserCommand, UserQuery,
-        UserDto>(userService)
+    : ControllerBase
 {
     [HttpPost(nameof(CreateRegistrationRequest))]
     public Task<RegistrationRequestDto> CreateRegistrationRequest(CreateRegistrationRequestCommand requestCommand)
     {
         var result = userService.CreateRegistrationRequest(requestCommand);
+
+        return result;
+    }
+
+    [HttpPost(nameof(VerifyRegistrationRequest))]
+    public Task<BearerTokenDto> VerifyRegistrationRequest(VerifyRegistrationRequestCommand requestCommand)
+    {
+        var result = userService.VerifyRegistrationRequest(requestCommand);
 
         return result;
     }

@@ -1,5 +1,4 @@
 using Shared.Api.Services;
-using Shared.Dtos;
 using Shared.Messaging.Messaging;
 using Users.Api.Commands.RegistrationRequest;
 using Users.Api.Commands.User;
@@ -17,6 +16,15 @@ public class UserService(ICommandBus commandBus)
     {
         var result =
             await _commandBus.SendAsync<CreateRegistrationRequestCommand, RegistrationRequestDto>(
+                command, Subject);
+
+        return result;
+    }
+
+    public async Task<BearerTokenDto> VerifyRegistrationRequest(VerifyRegistrationRequestCommand command)
+    {
+        var result =
+            await _commandBus.SendAsync<VerifyRegistrationRequestCommand, BearerTokenDto>(
                 command, Subject);
 
         return result;
