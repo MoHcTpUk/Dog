@@ -1,4 +1,3 @@
-using Shared.Domain;
 using Shared.Domain.Interfaces;
 
 namespace Users.Domain.Aggregates;
