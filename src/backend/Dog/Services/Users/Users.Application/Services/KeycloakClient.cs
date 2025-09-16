@@ -58,6 +58,35 @@ public class KeycloakClient : IKeycloakClient
         throw new HttpRequestException($"Ошибка создания пользователя: {response.StatusCode}");
     }
 
+    public async Task SetUserPasswordAsync(string userId, string password)
+    {
+        var token = await GetAdminTokenAsync();
+        
+        var passwordRequest = new
+        {
+            type = "password",
+            value = password,
+            temporary = false
+        };
+
+        var json = JsonConvert.SerializeObject(passwordRequest);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token.AccessToken);
+
+        var response = await _httpClient.PutAsync($"/admin/realms/master/users/{userId}/reset-password", content);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            _logger.LogError("Ошибка установки пароля: {Error}", errorContent);
+            throw new HttpRequestException($"Ошибка установки пароля: {response.StatusCode}");
+        }
+
+        _logger.LogInformation("Пароль установлен для пользователя: {UserId}", userId);
+    }
+
     #endregion
 
     #region Аутентификация
@@ -104,6 +133,25 @@ public class KeycloakClient : IKeycloakClient
         var tokenResponse = JsonConvert.DeserializeObject<KeycloakTokenResponse>(content);
 
         return tokenResponse ?? throw new InvalidOperationException("Не удалось получить клиентский токен");
+    }
+
+    public async Task<KeycloakTokenResponse> GetUserTokenAsync(string username, string password)
+    {
+        var tokenRequest = new FormUrlEncodedContent([
+            new KeyValuePair<string, string>("grant_type", "password"),
+            new KeyValuePair<string, string>("client_id", _configuration.ClientId),
+            new KeyValuePair<string, string>("client_secret", _configuration.ClientSecret),
+            new KeyValuePair<string, string>("username", username),
+            new KeyValuePair<string, string>("password", password)
+        ]);
+
+        var response = await _httpClient.PostAsync("protocol/openid-connect/token", tokenRequest);
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        var tokenResponse = JsonConvert.DeserializeObject<KeycloakTokenResponse>(content);
+
+        return tokenResponse ?? throw new InvalidOperationException("Не удалось получить токен пользователя");
     }
 
     public async Task<KeycloakTokenResponse> RefreshTokenAsync(string refreshToken)

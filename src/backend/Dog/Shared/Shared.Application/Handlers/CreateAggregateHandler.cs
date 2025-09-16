@@ -1,6 +1,5 @@
 using AutoMapper;
 using Shared.Api.Commands;
-using Shared.Domain;
 using Shared.Domain.Interfaces;
 using Shared.Dtos;
 using Shared.Infrastructure.Repository;

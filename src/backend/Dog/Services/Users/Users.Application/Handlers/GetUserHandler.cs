@@ -16,8 +16,7 @@ public class GetUserHandler(IUserRepository repository, IMapper mapper)
     {
         return
         [
-            (query => query.Ids != null, x => request.Ids!.Contains(x.Id)),
-            (query => query.Name != null, x => x.FirstName.Contains(request.Name!))
+            (query => query.Ids != null, x => request.Ids!.Contains(x.Id))
         ];
     }
 }
