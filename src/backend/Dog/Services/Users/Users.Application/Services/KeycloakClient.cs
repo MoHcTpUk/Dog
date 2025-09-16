@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Users.Application.Interfaces;
-using Users.Application.Models;
 using Users.Application.Models.Keycloak;
 
 namespace Users.Application.Services;
@@ -31,7 +30,7 @@ public class KeycloakClient : IKeycloakClient
 
     #region Управление пользователями
 
-    public async Task<string> CreateUserAsync(CreateKeycloakUserRequest userRequest)
+    public async Task<Guid> CreateUserAsync(CreateKeycloakUserRequest userRequest)
     {
         var token = await GetAdminTokenAsync();
         var json = JsonConvert.SerializeObject(userRequest);
@@ -49,7 +48,7 @@ public class KeycloakClient : IKeycloakClient
             {
                 var userId = location.Split('/').Last();
                 _logger.LogInformation("Пользователь создан с ID: {UserId}", userId);
-                return userId;
+                return Guid.Parse(userId);
             }
         }
 
@@ -58,10 +57,10 @@ public class KeycloakClient : IKeycloakClient
         throw new HttpRequestException($"Ошибка создания пользователя: {response.StatusCode}");
     }
 
-    public async Task SetUserPasswordAsync(string userId, string password)
+    public async Task SetUserPasswordAsync(Guid userId, string password)
     {
         var token = await GetAdminTokenAsync();
-        
+
         var passwordRequest = new
         {
             type = "password",

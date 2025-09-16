@@ -9,6 +9,6 @@ public interface IKeycloakClient
     Task<KeycloakTokenResponse> RefreshTokenAsync(string refreshToken);
     Task<KeycloakTokenResponse> GetUserTokenAsync(string username, string password);
 
-    Task<string> CreateUserAsync(CreateKeycloakUserRequest userRequest);
-    Task SetUserPasswordAsync(string userId, string password);
+    Task<Guid> CreateUserAsync(CreateKeycloakUserRequest userRequest);
+    Task SetUserPasswordAsync(Guid userId, string password);
 }

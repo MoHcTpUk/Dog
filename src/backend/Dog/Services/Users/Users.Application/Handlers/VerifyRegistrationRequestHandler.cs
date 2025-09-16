@@ -4,6 +4,7 @@ using Users.Api.Commands.RegistrationRequest;
 using Users.Api.Dtos;
 using Users.Application.Interfaces;
 using Users.Application.Models.Keycloak;
+using Users.Domain.Aggregates;
 using Users.Infrastructure.Repositories;
 
 namespace Users.Application.Handlers;
@@ -46,6 +47,14 @@ public class VerifyRegistrationRequestHandler(
 
         var tokenResponse = await keycloakClient.GetUserTokenAsync(username, password);
 
+        var newUser = new UserAggregate
+        {
+            Email = registrationRequest.Email,
+            Id = userId
+        };
+
+        await userRepository.CreateAsync([newUser], cancellationToken);
+        await userRepository.SaveChangesAsync();
 
         return new BearerTokenDto
         {
