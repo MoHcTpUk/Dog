@@ -27,7 +27,7 @@ public class CreateRegistrationRequestHandler(
         {
             Email = requestCommand.Email,
             ActivationCode = activationCode,
-            Id = default
+            Id = Guid.Empty
         };
 
         var result =
@@ -36,7 +36,7 @@ public class CreateRegistrationRequestHandler(
 
         await registrationRequestRepository.SaveChangesAsync();
 
-        var dto = mapper.Map<RegistrationRequestDto>(registrationRequest);
+        var dto = mapper.Map<RegistrationRequestDto>(result.First());
 
         return dto;
     }

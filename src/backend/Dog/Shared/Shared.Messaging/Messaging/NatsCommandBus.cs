@@ -9,7 +9,7 @@ namespace Shared.Messaging.Messaging;
 
 public class NatsCommandBus : ICommandBus
 {
-    private const int TimeoutMs = 5000;
+    private const int TimeoutMs = 5000 * 1000;
 
     private readonly Dictionary<string, Type> _commandTypes;
     private readonly IConnection _connection;
