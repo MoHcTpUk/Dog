@@ -1,0 +1,458 @@
+/* src/global.css */
+
+/* 1. СНАЧАЛА импорт Tailwind */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+/* 2. ПОТОМ конфигурация Tailwind */
+@theme {
+  /* Legacy colors (keeping for backward compatibility) */
+  --color-primary: #5c6bc0;
+  --color-primary-light: #7986cb;
+  --color-primary-dark: #5161a9;
+
+  --color-accent: #ffca28;
+  --color-accent-light: #ffcf3e;
+  --color-accent-dark: #e0b223;
+
+  /* Theme-aware color palette */
+  /* Primary colors */
+  --color-primary: #3f335a;
+  --color-primary-light: #645a7a;
+  --color-primary-dark: #2d2440;
+
+  /* Secondary colors */
+  --color-secondary: #23ba6e;
+  --color-secondary-light: #4cd085;
+  --color-secondary-dark: #1a9456;
+
+  /* Background colors */
+  --color-background: #ffffff;
+  --color-background-secondary: #f3f3f3;
+  --color-surface: #ffffff;
+  --color-surface-secondary: #e4dff0;
+
+  /* Text colors */
+  --color-text-primary: #3f335a;
+  --color-text-secondary: #645a7a;
+  --color-text-muted: #808794;
+  --color-text-on-primary: #ffffff;
+  --color-text-on-secondary: #ffffff;
+
+  /* Border colors */
+  --color-border: #e4dff0;
+  --color-border-light: #f3eeff;
+  --color-border-dark: #645a7a;
+
+  /* State colors */
+  --color-success: #23ba6e;
+  --color-warning: #fe9cc5;
+  --color-error: #f43f5e;
+  --color-info: #8552ff;
+
+  /* Utility colors */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-transparent: transparent;
+
+  /* Font family */
+  --font-family-sans: "Golos Text", system-ui, -apple-system, sans-serif;
+
+  /* Input specific */
+  --font-size-input: 16px;
+  --line-height-input: 21px;
+  --font-size-error-text: 14px;
+  --line-height-error-text: 18px;
+
+  --spacing-5: 20px;
+  --spacing-1-5: 6px;
+
+  --height-input: 64px;
+  --height-textarea: 124px;
+
+  --border-radius-input: 16px;
+
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply antialiased font-sans;
+  }
+
+  /* Обнуление margin для заголовков */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 0;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply backdrop-blur-md bg-white/80;
+  }
+
+  .shadow-neumorphic {
+    box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.1),
+      -6px -6px 12px rgba(255, 255, 255, 0.9);
+  }
+
+  .shadow-neumorphic-inset {
+    box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.1),
+      inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .skeleton {
+    @apply animate-pulse bg-background-secondary rounded;
+  }
+}
+
+/* 3. ПОТОМ все остальные кастомные стили */
+
+/* Ionic overrides for better integration with Tailwind */
+ion-content {
+  --background: var(--color-background-secondary);
+  --padding-bottom: env(safe-area-inset-bottom);
+}
+
+ion-toolbar {
+  --min-height: 56px;
+}
+
+ion-button {
+  --border-radius: 12px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  transition: all 0.2s ease-in-out;
+}
+
+ion-chip {
+  --border-radius: 9999px;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  border: none;
+}
+
+ion-card {
+  margin: 0;
+  box-shadow: none;
+}
+
+/* Remove Ionic's default button ripple for custom implementation */
+ion-button.custom-ripple {
+  --ripple-color: transparent;
+}
+
+/* Smooth transitions */
+ion-page {
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Safe area handling */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Skeleton loading animation */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-loading {
+  background: linear-gradient(
+    90deg,
+    var(--color-background-secondary) 25%,
+    var(--color-border) 50%,
+    var(--color-background-secondary) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-dark);
+}
+
+/* Скрытие скроллбара для горизонтального скролла */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+ion-button:active {
+  transform: scale(0.98);
+}
+
+ion-chip:hover {
+  transform: translateY(-2px);
+}
+
+/* Анимация для избранного */
+.text-error {
+  animation: heartBeat 0.3s ease-in-out;
+}
+
+@keyframes heartBeat {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Более плавные переходы для карточек */
+.active\:scale-\[0\.98\] {
+  transition: transform 0.15s ease-in-out;
+}
+
+/* Улучшенные тени для карточек активностей */
+.shadow-xl {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Минимальная высота для кликабельных элементов */
+ion-button,
+ion-chip {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Улучшенная типографика */
+h1,
+h2,
+h3 {
+  letter-spacing: -0.02em;
+}
+
+/* Более мягкие закругления */
+.rounded-2xl {
+  border-radius: 20px;
+}
+
+.rounded-\[32px\] {
+  border-radius: 32px;
+}
+
+/* Оптимизация производительности для теней */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+  }
+}
+
+/* Оптимизации для работы с клавиатурой */
+
+/* Базовые настройки для предотвращения zoom на iOS */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="date"],
+textarea {
+  font-size: 16px !important;
+  transform: translateZ(0); /* Аппаратное ускорение */
+}
+
+/* Улучшения для Ionic компонентов */
+ion-input,
+ion-textarea {
+  --highlight-color-focused: var(--ion-color-primary);
+  --padding-bottom: 0;
+  --padding-top: 0;
+}
+
+/* Плавные переходы при появлении клавиатуры */
+ion-content {
+  --keyboard-offset: 0px;
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Состояния клавиатуры */
+.keyboard-is-open ion-content {
+  --keyboard-offset: env(keyboard-inset-height, 0px);
+}
+
+.keyboard-is-open body {
+  --keyboard-height: env(keyboard-inset-height, 0px);
+}
+
+/* Улучшенная прокрутка */
+ion-content.ion-padding {
+  --padding-bottom: calc(var(--ion-padding) + var(--keyboard-offset, 0px));
+}
+
+/* Предотвращение скачков при смене orientation */
+@media screen and (orientation: landscape) {
+  .keyboard-is-open ion-content {
+    transform: translateY(calc(-1 * var(--keyboard-offset, 0px) / 2));
+  }
+}
+
+@media screen and (orientation: portrait) {
+  .keyboard-is-open ion-content {
+    transform: translateY(0);
+  }
+}
+
+/* Дополнительные улучшения для мобильных устройств */
+@media (max-width: 768px) {
+  /* Увеличиваем область тапа для инпутов */
+  ion-input,
+  ion-textarea {
+    min-height: 48px;
+  }
+
+  /* Оптимизация для touch устройств */
+  ion-input input,
+  ion-textarea textarea {
+    touch-action: manipulation;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}
+
+/* Анимации для плавности */
+.input-focus-transition {
+  transition: all 0.15s ease-out;
+}
+
+/* Стили для состояния фокуса */
+.ion-focused {
+  transform: translateZ(0);
+}
+
+/* Предотвращение bounce эффекта на iOS */
+.keyboard-is-open {
+  overflow: hidden;
+}
+
+/* Дополнительная безопасная зона */
+.safe-area-keyboard {
+  padding-bottom: calc(
+    var(--keyboard-offset, 0px) + env(safe-area-inset-bottom, 0px)
+  );
+}
+
+/* Отключение rubber band эффекта во время ввода */
+.keyboard-is-open ion-content {
+  overscroll-behavior: none;
+  -webkit-overscroll-behavior: none;
+}
+
+/* Улучшения для status bar */
+.keyboard-is-open {
+  --ion-safe-area-top: env(safe-area-inset-top);
+}
+
+/* Оптимизация для разных размеров экрана */
+@media (max-height: 600px) {
+  /* На маленьких экранах более агрессивное позиционирование */
+  .keyboard-is-open ion-content {
+    transform: translateY(calc(-1 * var(--keyboard-offset, 0px) * 0.7));
+  }
+}
+
+@media (min-height: 800px) {
+  /* На больших экранах менее агрессивное */
+  .keyboard-is-open ion-content {
+    transform: translateY(calc(-1 * var(--keyboard-offset, 0px) * 0.3));
+  }
+}
+
+/* Swiper customizations for onboarding */
+.onboarding-swiper {
+  --swiper-theme-color: var(--color-primary);
+  --swiper-navigation-color: var(--color-primary);
+  --swiper-pagination-color: var(--color-primary);
+}
+
+.onboarding-swiper .swiper-slide {
+  transition: transform 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.onboarding-swiper .swiper-slide-active {
+  transform: scale(1);
+}
+
+.onboarding-swiper .swiper-slide-prev,
+.onboarding-swiper .swiper-slide-next {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+/* Smooth transitions */
+.onboarding-swiper .swiper-wrapper {
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Hide scrollbars in swiper slides */
+.onboarding-swiper .swiper-slide {
+  overflow: hidden;
+}
+
+/* Touch feedback */
+.onboarding-swiper {
+  touch-action: pan-y pinch-zoom;
+}
+
+/* Enhanced native feel */
+.onboarding-swiper.swiper {
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
