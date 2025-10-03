@@ -30,7 +30,7 @@ yarn-error.log*
 # Optional eslint cache
 .eslintcache
 
-/ios
-/android
+ios/
+android/
 !ios/App/App/Assets.xcassets/
 !android/app/src/main/res/

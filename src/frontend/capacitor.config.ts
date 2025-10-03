@@ -7,15 +7,15 @@ const config: CapacitorConfig = {
   webDir: "dist",
   // временно. потом удалить
 
-  server: {
-    url: "http://192.168.0.119:5173",
-    cleartext: true,
-  },
+  // server: {
+  //   url: "http://192.168.1.13:5173",
+  //   cleartext: true,
+  // },
 
   plugins: {
     Keyboard: {
-      resize: KeyboardResize.Body,
-      resizeOnFullScreen: true,
+      resize: KeyboardResize.Ionic,
+      resizeOnFullScreen: false,
     },
   },
 };
