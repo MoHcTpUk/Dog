@@ -48,7 +48,7 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
       - ./keycloak/init-keycloak.sql:/docker-entrypoint-initdb.d/init-keycloak.sql
     ports:
       - "4321:5432"
