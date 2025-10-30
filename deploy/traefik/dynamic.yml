@@ -1,0 +1,5 @@
+#dynamic.yml
+tls:
+  certificates:
+    - certFile: /etc/traefik/fullchain.pem
+      keyFile: /etc/traefik/privkey.pem
