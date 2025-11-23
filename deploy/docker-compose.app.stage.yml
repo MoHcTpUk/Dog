@@ -9,10 +9,27 @@ services:
   #     - "traefik.http.routers.backend.middlewares=strip-api-prefix"
   #     - "traefik.http.services.backend.loadbalancer.server.port=8080"
 
-  frontend:
+  # frontend:
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.frontend.rule=Host(`mohctpuk.ddnsfree.com`) && PathPrefix(`/`)"
+  #     - "traefik.http.routers.frontend.entrypoints=websecure"
+  #     - "traefik.http.routers.frontend.tls=true"
+  #     - "traefik.http.services.frontend.loadbalancer.server.port=80"
+
+  landing:
+    # build:
+    #   context: ..
+    #   dockerfile: build/landing/DogLanding.Dockerfile
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`mohctpuk.ddnsfree.com`) && PathPrefix(`/`)"
-      - "traefik.http.routers.frontend.entrypoints=websecure"
-      - "traefik.http.routers.frontend.tls=true"
-      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      - "traefik.http.routers.landing.rule=Host(`dogappa.com`)"
+      - "traefik.http.routers.landing.entrypoints=websecure"
+      - "traefik.http.routers.landing.tls.certresolver=letsencrypt"
+      - "traefik.http.services.landing.loadbalancer.server.port=80"
+    networks:
+      - infra_traefik
+
+networks:
+  infra_traefik:
+    external: true

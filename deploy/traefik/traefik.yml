@@ -5,20 +5,21 @@ entryPoints:
   websecure:
     address: ":443"
 
-providers:
-  docker:
-    exposedByDefault: false
-  file:
-    filename: /etc/traefik/dynamic.yml
-    watch: true
+# providers:
+#   docker:
+#     exposedByDefault: false
+#   file:
+#     filename: /etc/traefik/dynamic.yml
+#     watch: true
 
 api:
   dashboard: true
   insecure: true
 
-#certificatesResolvers:
-#  letsencrypt:
-#    acme:
-#      email: oleg.shmatkoff@gmail.com
-#      storage: /letsencrypt/acme.json
-#      tlsChallenge: {}
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: oleg.shmatkoff@gmail.com
+      storage: /letsencrypt/acme.json
+      tlsChallenge: {}
+      caServer: https://acme-v02.api.letsencrypt.org/directory
