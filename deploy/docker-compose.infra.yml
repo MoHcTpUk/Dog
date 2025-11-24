@@ -10,25 +10,30 @@ services:
         published: 443
         protocol: tcp
         mode: host
-      # - target: 8080
-      #   published: 8080
-      #   protocol: tcp
-      #   mode: host
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: host
     command:
       - "--log.level=DEBUG"
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=infra_traefik"
       - "--entryPoints.web.address=:80"
       - "--entryPoints.websecure.address=:443"
     volumes:
-      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./traefik/acme.json:/letsencrypt/acme.json
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
     networks:
       - traefik
 
 networks:
   traefik:
+    name: infra_traefik
     driver: overlay
     attachable: true
