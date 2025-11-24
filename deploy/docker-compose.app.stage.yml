@@ -27,9 +27,10 @@ services:
       - "traefik.http.routers.landing-http.rule=Host(`dogappa.com`)"
       - "traefik.http.routers.landing-http.entrypoints=web"
       - "traefik.http.routers.landing-http.middlewares=landing-redirect"
-      # HTTPS router
+      # HTTPS router with automatic SSL certificate
       - "traefik.http.routers.landing.rule=Host(`dogappa.com`)"
       - "traefik.http.routers.landing.entrypoints=websecure"
+      - "traefik.http.routers.landing.tls=true"
       - "traefik.http.routers.landing.tls.certresolver=letsencrypt"
       # Redirect middleware
       - "traefik.http.middlewares.landing-redirect.redirectscheme.scheme=https"
