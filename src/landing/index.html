@@ -3,7 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dog Appa - Приложение для владельцев собак</title>
+    <title>Dog Appa - Приложение для владельцев собак | Совместные прогулки и дог-френдли места</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Dog Appa — мобильное приложение для владельцев собак. Находите друзей для питомца, безопасные маршруты для прогулок и дог-френдли заведения в вашем городе.">
+    <meta name="keywords" content="приложение для собак, прогулки с собакой, дог-френдли места, друзья для собаки, владельцы собак, выгул собак, карта для собак, Dog Appa">
+    <meta name="author" content="Dog Appa">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+    <link rel="canonical" href="https://dogappa.com/">
+
+    <!-- Yandex Meta Tags -->
+    <meta name="yandex-verification" content="">
+    <meta name="geo.region" content="RU">
+    <meta name="geo.placename" content="Moscow">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://dogappa.com/">
+    <meta property="og:title" content="Dog Appa - Приложение для владельцев собак">
+    <meta property="og:description" content="Находите друзей для питомца, безопасные маршруты для прогулок и дог-френдли заведения в вашем городе.">
+    <meta property="og:image" content="https://dogappa.com/assets/images/og-image.webp">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:site_name" content="Dog Appa">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://dogappa.com/">
+    <meta name="twitter:title" content="Dog Appa - Приложение для владельцев собак">
+    <meta name="twitter:description" content="Находите друзей для питомца, безопасные маршруты для прогулок и дог-френдли заведения в вашем городе.">
+    <meta name="twitter:image" content="https://dogappa.com/assets/images/og-image.webp">
+
+    <!-- Mobile App Meta -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Dog Appa">
+    <meta name="application-name" content="Dog Appa">
+    <meta name="theme-color" content="#3F335A">
+    <meta name="msapplication-TileColor" content="#3F335A">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="./assets/images/fav.png">
+    <link rel="apple-touch-icon" href="./assets/images/fav.png">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "MobileApplication",
+        "name": "Dog Appa",
+        "description": "Мобильное приложение для владельцев собак. Совместные прогулки, карта дог-френдли мест, ИИ-кинолог.",
+        "operatingSystem": "iOS, Android",
+        "applicationCategory": "LifestyleApplication",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "RUB",
+            "description": "Год подписки в подарок для первых пользователей"
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "Dog Appa",
+            "url": "https://dogappa.com",
+            "email": "hello@dogappa.com",
+            "sameAs": [
+                "https://t.me/dogappa"
+            ]
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "5",
+            "ratingCount": "1",
+            "bestRating": "5",
+            "worstRating": "1"
+        }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Dog Appa",
+        "url": "https://dogappa.com",
+        "description": "Приложение для владельцев собак",
+        "inLanguage": "ru-RU",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://dogappa.com/?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Dog Appa",
+        "url": "https://dogappa.com",
+        "logo": "https://dogappa.com/assets/images/logo.webp",
+        "email": "hello@dogappa.com",
+        "sameAs": [
+            "https://t.me/dogappa"
+        ],
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "hello@dogappa.com",
+            "contactType": "customer service",
+            "availableLanguage": "Russian"
+        }
+    }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <script src="script.js" defer></script>
 </head>
@@ -24,14 +138,14 @@
                 </svg>
 
                 <ul class="nav-list">
-                    <li><a href="#features" class="nav-link">Возможности</a></li>
+                    <li><a href="#cta" class="nav-link">Запуск</a></li>
                     <li><a href="#partnership" class="nav-link">Сотрудничество</a></li>
-                    <li><a href="#contact" class="nav-link">Контакты</a></li>
+                    <li><a href="https://t.me/dogappa" class="nav-link" target="_blank" rel="noopener">Telegram-канал</a></li>
                 </ul>
             </nav>
 
             <button class="btn btn-primary">
-                <span>Участвовать в запуске</span>
+                <span>Принять участие в запуске</span>
                 <div class="btn-icon">
                     <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M5.26268 0.741103C4.64804 0.878128 4.15689 1.41504 3.96158 2.16168C3.59969 3.53752 4.1253 5.09233 5.17939 5.76067C5.59011 6.02354 6.06403 6.10743 6.49773 5.99837C7.1095 5.84457 7.58629 5.26011 7.78447 4.4156C7.83042 4.21425 7.84478 4.06045 7.84766 3.73607C7.84766 3.28305 7.80457 3.00061 7.67245 2.59233C7.4197 1.80933 6.83665 1.10464 6.23923 0.855756C5.9118 0.718731 5.55278 0.676785 5.26268 0.741103Z" fill="#3F335A"/>
@@ -58,12 +172,12 @@
             </div>
 
             <div class="subscribe-wrapper">
-                <form class="subscribe-form">
+                <form class="subscribe-form subscribe-form-hero">
                     <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12.1719 1.875C13.3281 1.875 14.2329 1.8743 14.959 1.93359C15.6924 1.99352 16.2992 2.11802 16.8477 2.39746C17.7491 2.85686 18.4821 3.58974 18.9414 4.49121C19.2208 5.03959 19.3444 5.64556 19.4043 6.37891C19.4636 7.10506 19.4639 8.01053 19.4639 9.16699V10.833C19.4639 11.9895 19.4636 12.8949 19.4043 13.6211C19.3444 14.3544 19.2208 14.9604 18.9414 15.5088C18.4821 16.4103 17.7491 17.1431 16.8477 17.6025C16.2992 17.882 15.6924 18.0065 14.959 18.0664C14.2329 18.1257 13.3281 18.125 12.1719 18.125H8.83887C7.6824 18.125 6.77694 18.1257 6.05078 18.0664C5.31741 18.0065 4.71148 17.882 4.16309 17.6025C3.26159 17.1432 2.52871 16.4103 2.06934 15.5088C1.78991 14.9604 1.6654 14.3545 1.60547 13.6211C1.54614 12.8949 1.54688 11.9895 1.54688 10.833V9.16699C1.54688 8.01053 1.54614 7.10506 1.60547 6.37891C1.6654 5.64554 1.78991 5.03961 2.06934 4.49121C2.52871 3.58972 3.26159 2.85683 4.16309 2.39746C4.71148 2.11804 5.31741 1.99352 6.05078 1.93359C6.77694 1.87426 7.6824 1.875 8.83887 1.875H12.1719ZM8.83887 3.125C7.66178 3.125 6.81579 3.12548 6.15234 3.17969C5.49644 3.23331 5.07325 3.33609 4.73047 3.51074C4.06409 3.85029 3.52216 4.39222 3.18262 5.05859C3.00796 5.40138 2.90518 5.82456 2.85156 6.48047C2.79736 7.14391 2.79688 7.9899 2.79688 9.16699V10.833C2.79688 12.0101 2.79736 12.8561 2.85156 13.5195C2.90518 14.1754 3.00796 14.5986 3.18262 14.9414C3.52216 15.6078 4.06409 16.1497 4.73047 16.4893C5.07325 16.6639 5.49644 16.7667 6.15234 16.8203C6.81579 16.8745 7.66178 16.875 8.83887 16.875H12.1719C13.3488 16.875 14.194 16.8745 14.8574 16.8203C15.5133 16.7667 15.9365 16.6638 16.2793 16.4893C16.9456 16.1498 17.4876 15.6077 17.8271 14.9414C18.0018 14.5986 18.1056 14.1755 18.1592 13.5195C18.2134 12.8561 18.2139 12.0101 18.2139 10.833V9.16699C18.2139 7.9899 18.2134 7.14391 18.1592 6.48047C18.1056 5.82455 18.0018 5.40138 17.8271 5.05859C17.4876 4.39232 16.9456 3.85024 16.2793 3.51074C15.9365 3.3362 15.5133 3.23327 14.8574 3.17969C14.194 3.1255 13.3488 3.125 12.1719 3.125H8.83887ZM15.1611 6.14551C15.4483 5.95423 15.8369 6.03221 16.0283 6.31934C16.2196 6.60652 16.1416 6.9951 15.8545 7.18652L15.0215 7.74121C13.7141 8.61278 12.9534 9.12809 12.1309 9.37598C11.0725 9.69484 9.94308 9.69484 8.88477 9.37598C8.06226 9.12809 7.3015 8.61278 5.99414 7.74121L5.16113 7.18652C4.874 6.9951 4.79603 6.60652 4.9873 6.31934C5.17873 6.03221 5.56731 5.95423 5.85449 6.14551L6.6875 6.70117C8.06273 7.61799 8.64432 7.9974 9.24609 8.17871C10.0691 8.42661 10.9466 8.42661 11.7695 8.17871C12.3713 7.9974 12.9529 7.61799 14.3281 6.70117L15.1611 6.14551Z" fill="#808794"/>
                     </svg>
-                    <input type="text" id="contact-hero" name="contact" class="subscribe-input" placeholder="Почта, телеграм или телефон" required>
-                    <button type="submit" class="btn btn-dark">
+                    <input type="text" id="contact-hero" name="contact" class="subscribe-input" placeholder="Почта или телеграм" required>
+                    <button type="submit" class="btn btn-primary">
                         <span class="btn-text-desktop">Участвовать в запуске</span>
                         <span class="btn-text-mobile">Участвовать</span>
                     </button>
@@ -80,24 +194,23 @@
                             <source media="(max-width: 992px)" srcset="./assets/images/feature1_mob.webp">
                             <img class="feature-visual" src="./assets/images/feature1.webp" alt="Совместные прогулки">
                         </picture>
-                        <h3 class="feature-title">Совместные прогулки</h3>
-                        <p class="feature-text">Укажите время и место – к вам смогут присоединиться другие</p>
+                        <div class="feature-content-text">
+                            <h3 class="feature-title">Совместные прогулки</h3>
+                            <p class="feature-text">Укажите время и место – к вам смогут присоединиться другие</p>
+                        </div>
                     </div>
                 </article>
 
                 <article class="feature-card feature-ai">
-                    <div class="feature-visual">
-                        <svg class="star-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M10 0C10 0 10.5518 5.14994 12.7009 7.29909C14.8501 9.44825 20 10 20 10C20 10 14.8501 10.5518 12.7009 12.7009C10.5518 14.8501 10 20 10 20C10 20 9.44825 14.8501 7.29909 12.7009C5.14994 10.5518 0 10 0 10C0 10 5.14994 9.44825 7.29909 7.29909C9.44825 5.14994 10 0 10 0Z" fill="#645A7A"/>
-                        </svg>
-                        <picture>
+                    <div class="feature-content">
+                                                <picture>
                             <source media="(max-width: 992px)" srcset="./assets/images/feature3_mob.webp">
                             <img class="feature-visual" src="./assets/images/feature3.webp" alt="ИИ кинолог">
                         </picture>
-                    </div>
-                    <div class="feature-content">
+                                                <div class="feature-content-text">
+
                         <h3 class="feature-title">ИИ-кинолог и ветеринар</h3>
-                        <p class="feature-text">Персональные советы по воспитанию и здоровью с учётом особенностей именно вашей собаки</p>
+                        <p class="feature-text">Персональные советы по воспитанию и здоровью с учётом особенностей именно вашей собаки</p>                         
                     </div>
                 </article>
             </div>
@@ -105,40 +218,27 @@
             <div class="features-right">
                 <article class="feature-card feature-places">
                     <div class="feature-content">
-                        <h3 class="feature-title">Карта дог-френдли мест</h3>
-                        <p class="feature-text">Вместе с пользователями формируем карту кафе, магазинов и парков, где рады собакам любого размера</p>
-                    </div>
-                    <picture>
-                        <source media="(max-width: 992px)" srcset="./assets/images/feature2_mob.webp">
-                        <img class="feature-visual" src="./assets/images/feature2.webp" alt="Карта мест">
-                    </picture>
-
-                    <div class="suggest-place-card">
-                        <div class="suggest-place-container">
-                            <div class="suggest-place-text">
-                                <h4 class="suggest-place-title">Предложить место</h4>
-                                <p class="suggest-place-description">Куда можно с питомцами</p>
-                            </div>
-                            <button class="btn-round" aria-label="Добавить место">
-                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M8.62109 3.59375V13.6539" stroke="#3F335A" stroke-width="1.43716" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M3.59375 8.62305H13.6539" stroke="#3F335A" stroke-width="1.43716" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </button>
+                        <div class="feature-content-text features-right-text">
+                            <h3 class="feature-title">Карта дог-френдли мест</h3>
+                            <p class="feature-text">Вместе с пользователями формируем карту кафе, магазинов и парков, где рады собакам любого размера</p>
                         </div>
+                        <picture>
+                            <source media="(max-width: 992px)" srcset="./assets/images/feature2_mob.webp">
+                            <img class="feature-visual" src="./assets/images/feature2.webp" alt="Карта мест">
+                        </picture>
                     </div>
                 </article>
 
                 <article class="feature-card feature-partners">
-                    <div class="feature-visual">
-                        <picture>
+                    <div class="feature-content">
+                                                <picture>
                             <source media="(max-width: 992px)" srcset="./assets/images/feature4_mob.webp">
                             <img class="feature-visual" src="./assets/images/feature4.webp" alt="Скидки от партнеров">
                         </picture>
-                    </div>
-                    <div class="feature-content">
+                        <div class="feature-content-text">
                         <h3 class="feature-title">Скидки от партнеров</h3>
                         <p class="feature-text">Cпециальные предложения на товары и услуги для питомцев</p>
+                        </div>
                     </div>
                 </article>
             </div>
@@ -148,7 +248,7 @@
             <article class="feature-box feature-compatibility">
                 <h3 class="feature-box-title">Заботимся о совместимости</h3>
                 <p class="feature-box-text">Учитываем размер, активность и характер питомцев, чтобы прогулки были комфортными и безопасными</p>
-                <img src="./assets/images/Мокап профиль.webp" alt="Профиль собаки">
+                <img class="dog" src="./assets/images/dogsAvatar.webp" alt="Профиль собаки">
                 <div class="feature-tags">
                     <span class="tag-outline">Очень активный</span>
                     <span class="tag-outline">Комфортно с девочками</span>
@@ -157,21 +257,26 @@
             </article>
 
             <div class="phone-mockup">
-                <img src="./assets/images/iPhone.webp" alt="Приложение Dog Appa">
+                <picture>
+                    <source media="(max-width: 768px)" srcset="./assets/images/iphone_mob.webp">
+                    <img src="./assets/images/iPhone.webp" alt="Приложение Dog Appa">
+                </picture>
             </div>
 
             <article class="feature-box feature-security">
                 <h3 class="feature-box-title">Мы за безопасность</h3>
                 <p class="feature-box-text">Каждый пользователь проходит проверку, чтобы подтвердить, что он действительно владелец собаки</p>
 
-                <svg class="lock-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M2.25 9C2.25 8.40326 2.48705 7.83097 2.90901 7.40901C3.33097 6.98705 3.90326 6.75 4.5 6.75H13.5C14.0967 6.75 14.669 6.98705 15.091 7.40901C15.5129 7.83097 15.75 8.40326 15.75 9V14.25C15.75 14.8467 15.5129 15.419 15.091 15.841C14.669 16.2629 14.0967 16.5 13.5 16.5H4.5C3.90326 16.5 3.33097 16.2629 2.90901 15.841C2.48705 15.419 2.25 14.8467 2.25 14.25V9ZM9.75 10.5C9.75 10.3011 9.67098 10.1103 9.53033 9.96967C9.38968 9.82902 9.19891 9.75 9 9.75C8.80109 9.75 8.61032 9.82902 8.46967 9.96967C8.32902 10.1103 8.25 10.3011 8.25 10.5V12.75C8.25 12.9489 8.32902 13.1397 8.46967 13.2803C8.61032 13.421 8.80109 13.5 9 13.5C9.19891 13.5 9.38968 13.421 9.53033 13.2803C9.67098 13.1397 9.75 12.9489 9.75 12.75V10.5Z" fill="#3F335A"/>
-                    <path d="M6 7.5V5.25C6 4.45435 6.31607 3.69129 6.87868 3.12868C7.44129 2.56607 8.20435 2.25 9 2.25C9.79565 2.25 10.5587 2.56607 11.1213 3.12868C11.6839 3.69129 12 4.45435 12 5.25V7.5" stroke="#3F335A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <div class="lock-icon-wrapper">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M2.25 9C2.25 8.40326 2.48705 7.83097 2.90901 7.40901C3.33097 6.98705 3.90326 6.75 4.5 6.75H13.5C14.0967 6.75 14.669 6.98705 15.091 7.40901C15.5129 7.83097 15.75 8.40326 15.75 9V14.25C15.75 14.8467 15.5129 15.419 15.091 15.841C14.669 16.2629 14.0967 16.5 13.5 16.5H4.5C3.90326 16.5 3.33097 16.2629 2.90901 15.841C2.48705 15.419 2.25 14.8467 2.25 14.25V9ZM9.75 10.5C9.75 10.3011 9.67098 10.1103 9.53033 9.96967C9.38968 9.82902 9.19891 9.75 9 9.75C8.80109 9.75 8.61032 9.82902 8.46967 9.96967C8.32902 10.1103 8.25 10.3011 8.25 10.5V12.75C8.25 12.9489 8.32902 13.1397 8.46967 13.2803C8.61032 13.421 8.80109 13.5 9 13.5C9.19891 13.5 9.38968 13.421 9.53033 13.2803C9.67098 13.1397 9.75 12.9489 9.75 12.75V10.5Z" fill="#3F335A"/>
+                        <path d="M6 7.5V5.25C6 4.45435 6.31607 3.69129 6.87868 3.12868C7.44129 2.56607 8.20435 2.25 9 2.25C9.79565 2.25 10.5587 2.56607 11.1213 3.12868C11.6839 3.69129 12 4.45435 12 5.25V7.5" stroke="#3F335A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
             </article>
         </section>
 
-        <section class="cta-section">
+        <section class="cta-section" id="cta">
             <div class="cta-content">
                 <h2 class="cta-title">Набираем первых пользователей</h2>
                 <p class="cta-text">Ваша помощь особенно важна на старте! Присоединяйтесь к запуску – для первых пользователей год подписки в подарок</p>
@@ -182,7 +287,7 @@
                     <svg class="input-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12.1719 1.875C13.3281 1.875 14.2329 1.8743 14.959 1.93359C15.6924 1.99352 16.2992 2.11802 16.8477 2.39746C17.7491 2.85686 18.4821 3.58974 18.9414 4.49121C19.2208 5.03959 19.3444 5.64556 19.4043 6.37891C19.4636 7.10506 19.4639 8.01053 19.4639 9.16699V10.833C19.4639 11.9895 19.4636 12.8949 19.4043 13.6211C19.3444 14.3544 19.2208 14.9604 18.9414 15.5088C18.4821 16.4103 17.7491 17.1431 16.8477 17.6025C16.2992 17.882 15.6924 18.0065 14.959 18.0664C14.2329 18.1257 13.3281 18.125 12.1719 18.125H8.83887C7.6824 18.125 6.77694 18.1257 6.05078 18.0664C5.31741 18.0065 4.71148 17.882 4.16309 17.6025C3.26159 17.1432 2.52871 16.4103 2.06934 15.5088C1.78991 14.9604 1.6654 14.3545 1.60547 13.6211C1.54614 12.8949 1.54688 11.9895 1.54688 10.833V9.16699C1.54688 8.01053 1.54614 7.10506 1.60547 6.37891C1.6654 5.64554 1.78991 5.03961 2.06934 4.49121C2.52871 3.58972 3.26159 2.85683 4.16309 2.39746C4.71148 2.11804 5.31741 1.99352 6.05078 1.93359C6.77694 1.87426 7.6824 1.875 8.83887 1.875H12.1719ZM8.83887 3.125C7.66178 3.125 6.81579 3.12548 6.15234 3.17969C5.49644 3.23331 5.07325 3.33609 4.73047 3.51074C4.06409 3.85029 3.52216 4.39222 3.18262 5.05859C3.00796 5.40138 2.90518 5.82456 2.85156 6.48047C2.79736 7.14391 2.79688 7.9899 2.79688 9.16699V10.833C2.79688 12.0101 2.79736 12.8561 2.85156 13.5195C2.90518 14.1754 3.00796 14.5986 3.18262 14.9414C3.52216 15.6078 4.06409 16.1497 4.73047 16.4893C5.07325 16.6639 5.49644 16.7667 6.15234 16.8203C6.81579 16.8745 7.66178 16.875 8.83887 16.875H12.1719C13.3488 16.875 14.194 16.8745 14.8574 16.8203C15.5133 16.7667 15.9365 16.6638 16.2793 16.4893C16.9456 16.1498 17.4876 15.6077 17.8271 14.9414C18.0018 14.5986 18.1056 14.1755 18.1592 13.5195C18.2134 12.8561 18.2139 12.0101 18.2139 10.833V9.16699C18.2139 7.9899 18.2134 7.14391 18.1592 6.48047C18.1056 5.82455 18.0018 5.40138 17.8271 5.05859C17.4876 4.39232 16.9456 3.85024 16.2793 3.51074C15.9365 3.3362 15.5133 3.23327 14.8574 3.17969C14.194 3.1255 13.3488 3.125 12.1719 3.125H8.83887ZM15.1611 6.14551C15.4483 5.95423 15.8369 6.03221 16.0283 6.31934C16.2196 6.60652 16.1416 6.9951 15.8545 7.18652L15.0215 7.74121C13.7141 8.61278 12.9534 9.12809 12.1309 9.37598C11.0725 9.69484 9.94308 9.69484 8.88477 9.37598C8.06226 9.12809 7.3015 8.61278 5.99414 7.74121L5.16113 7.18652C4.874 6.9951 4.79603 6.60652 4.9873 6.31934C5.17873 6.03221 5.56731 5.95423 5.85449 6.14551L6.6875 6.70117C8.06273 7.61799 8.64432 7.9974 9.24609 8.17871C10.0691 8.42661 10.9466 8.42661 11.7695 8.17871C12.3713 7.9974 12.9529 7.61799 14.3281 6.70117L15.1611 6.14551Z" fill="#808794"/>
                     </svg>
-                    <input type="text" id="contact-cta" name="contact" class="subscribe-input" placeholder="Почта, телеграм или телефон" required>
+                    <input type="text" id="contact-cta" name="contact" class="subscribe-input" placeholder="Почта или телеграм" required>
                     <button type="submit" class="btn btn-primary">
                         <span class="btn-text-desktop">Участвовать в запуске</span>
                         <span class="btn-text-mobile">Участвовать</span>
@@ -206,11 +311,11 @@
             <div class="footer-left">
                 <div class="footer-about">
                     <h3 class="footer-logo">Dog Appa</h3>
-                    <p class="footer-description">Поиск компании для прогулок и карта дог-френдли мест</p>
+                    <p class="footer-description">Совместные прогулки и карта дог-френдли мест</p>
                 </div>
 
                 <button class="btn btn-primary">
-                    <span>Участвовать в запуске</span>
+                    <span>Принять участие в запуске</span>
                     <div class="btn-icon">
                         <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M5.26268 0.741103C4.64804 0.878128 4.15689 1.41504 3.96158 2.16168C3.59969 3.53752 4.1253 5.09233 5.17939 5.76067C5.59011 6.02354 6.06403 6.10743 6.49773 5.99837C7.1095 5.84457 7.58629 5.26011 7.78447 4.4156C7.83042 4.21425 7.84478 4.06045 7.84766 3.73607C7.84766 3.28305 7.80457 3.00061 7.67245 2.59233C7.4197 1.80933 6.83665 1.10464 6.23923 0.855756C5.9118 0.718731 5.55278 0.676785 5.26268 0.741103Z" fill="#3F335A"/>
@@ -235,7 +340,7 @@
 
             <div class="footer-right">
                 <div class="footer-qr">
-                    <img src="./assets/images1/qr.png" alt="QR код Telegram канала">
+                    <img src="./assets/images/qr.png" alt="QR код Telegram канала">
                 </div>
             </div>
         </footer>
@@ -267,7 +372,7 @@
 
                 <div class="modal-block">
                     <h3 class="modal-block-title">1. Кто мы</h3>
-                    <p class="modal-block-text">Настоящая политика действует в отношении сайта dogappa.ru (далее — «Сайт»), владельцем которого является физическое лицо (контакт: hello@dogappa.ru).</p>
+                    <p class="modal-block-text">Настоящая политика действует в отношении сайта dogappa.com (далее — «Сайт»), владельцем которого является физическое лицо (контакт: hello@dogappa.com).</p>
                 </div>
 
                 <div class="modal-block">
@@ -287,7 +392,7 @@
 
                 <div class="modal-block">
                     <h3 class="modal-block-title">5. Ваши права</h3>
-                    <p class="modal-block-text">Вы можете в любой момент запросить:<br/>копию ваших данных;<br/>изменение или удаление ваших данных;<br/>разъяснение по вопросам конфиденциальности.<br/>Для этого просто напишите нам на hello@dogappa.ru.</p>
+                    <p class="modal-block-text">Вы можете в любой момент запросить:<br/>копию ваших данных;<br/>изменение или удаление ваших данных;<br/>разъяснение по вопросам конфиденциальности.<br/>Для этого просто напишите нам на hello@dogappa.com.</p>
                 </div>
 
                 <div class="modal-block">
@@ -297,7 +402,7 @@
 
                 <div class="modal-block">
                     <h3 class="modal-block-title">Согласие на обработку персональных данных</h3>
-                    <p class="modal-block-text">Отправляя свои данные на сайте dogappa.ru, вы подтверждаете согласие на их обработку в соответствии с Политикой конфиденциальности. Мы используем данные только для связи с вами и уведомления о запуске приложения Dog Appa.</p>
+                    <p class="modal-block-text">Отправляя свои данные на сайте dogappa.com, вы подтверждаете согласие на их обработку в соответствии с Политикой конфиденциальности. Мы используем данные только для связи с вами и уведомления о запуске приложения Dog Appa.</p>
                 </div>
             </div>
         </div>
