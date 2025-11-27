@@ -43,11 +43,6 @@ services:
 
   landing:
     image: ghcr.io/mohctpuk/dog-landing:latest
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.landing.rule=PathPrefix(`/`)"
-      - "traefik.http.routers.landing.entrypoints=web"
-      - "traefik.http.services.landing.loadbalancer.server.port=80"
     networks:
       - infra_traefik
 
