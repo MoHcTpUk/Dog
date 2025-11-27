@@ -1,5 +1,6 @@
 import React from "react";
 import classNames from "classnames";
+import { IonButton } from "@ionic/react";
 
 export interface ButtonProps {
   children: React.ReactNode;
@@ -156,13 +157,29 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   return (
-    <button
+    <IonButton
       type={type}
       disabled={disabled || loading}
       onClick={handleClick}
       className={classNames(getButtonClasses(), className)}
+      style={{
+        "--background": "transparent",
+        "--background-activated": "transparent",
+        "--background-focused": "transparent",
+        "--background-hover": "transparent",
+        "--color": "inherit",
+        "--border-radius": "0",
+        "--box-shadow": "none",
+        "--ripple-color": "transparent",
+        "--padding-start": "0",
+        "--padding-end": "0",
+        margin: "0",
+        height: "auto",
+        minHeight: "auto",
+      } as React.CSSProperties}
+      fill="clear"
     >
       {renderContent()}
-    </button>
+    </IonButton>
   );
 };

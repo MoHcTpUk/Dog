@@ -134,12 +134,13 @@ export const OwnerInfoStep: React.FC<OwnerInfoStepProps> = ({
             <div className="InputCover self-stretch flex flex-col justify-start items-start gap-5 w-[174px]">
               <div className="Pictures self-stretch inline-flex justify-start items-start gap-1">
                 {!data.owner.photo ? (
-                  <div
-                    className="UploadPicture w-full aspect-square px-5 py-6 bg-white rounded-3xl inline-flex flex-col justify-center items-center gap-5 overflow-hidden cursor-pointer"
+                  <Button
+                    variant="secondary"
                     onClick={handleImageCapture}
+                    className="UploadPicture w-full aspect-square px-5 py-6 bg-white rounded-3xl inline-flex flex-col justify-center items-center gap-5 overflow-hidden"
                   >
                     <CameraIcon />
-                  </div>
+                  </Button>
                 ) : (
                   <div className="Picture w-full aspect-square relative rounded-3xl overflow-hidden">
                     <img
@@ -147,12 +148,15 @@ export const OwnerInfoStep: React.FC<OwnerInfoStepProps> = ({
                       src={data.owner.photo}
                       alt="Owner photo"
                     />
-                    <div
-                      className="BtnRound p-2 right-2 top-2 absolute bg-white/60 rounded-full inline-flex flex-col justify-start items-start gap-2.5 overflow-hidden cursor-pointer"
+                    <Button
+                      variant="secondary"
+                      shape="round"
+                      size="small"
                       onClick={handleDeletePhoto}
+                      className="p-2 right-2 top-2 absolute bg-white/60 rounded-full inline-flex flex-col justify-start items-start gap-2.5 overflow-hidden"
                     >
                       <TrashIcon />
-                    </div>
+                    </Button>
                   </div>
                 )}
               </div>

@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@shared/ui";
+import { Button, Text } from "@shared/ui";
 
 interface VerificationViewProps {
   onVerify: () => void;
@@ -21,12 +21,12 @@ export const VerificationView: React.FC<VerificationViewProps> = ({
           </div>
 
           <div className="space-y-4">
-            <h1 className="text-2xl font-bold text-text-primary">
+            <Text variant="bold-24" tag="h1" className="text-center">
               {t("We care about safety")}
-            </h1>
-            <p className="text-text-secondary">
+            </Text>
+            <Text variant="regular-16" className="text-center" color="secondary">
               {t("Complete verification to access all features")}
-            </p>
+            </Text>
           </div>
         </div>
       </div>

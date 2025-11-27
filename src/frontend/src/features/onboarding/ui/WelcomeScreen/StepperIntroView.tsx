@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@shared/ui";
+import { Button, Text } from "@shared/ui";
 
 interface StepperIntroViewProps {
   onNext: () => void;
@@ -21,12 +21,12 @@ export const StepperIntroView: React.FC<StepperIntroViewProps> = ({
           </div>
 
           <div className="space-y-4">
-            <h1 className="text-2xl font-bold text-text-primary">
+            <Text variant="bold-24" tag="h1" className="text-center">
               {t("Tell us about your dog")}
-            </h1>
-            <p className="text-text-secondary">
+            </Text>
+            <Text variant="regular-16" className="text-center" color="secondary">
               {t("This will help find suitable friends for walks")}
-            </p>
+            </Text>
           </div>
         </div>
       </div>

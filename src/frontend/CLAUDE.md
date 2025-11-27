@@ -54,8 +54,10 @@ The project follows FSD methodology with these layers:
 2. **SECOND: Use Ionic components** when shared components don't exist (IonModal, IonButton, IonInput, IonPopover, etc.)
 3. **THIRD: Create custom components** only when neither shared nor Ionic components provide the needed functionality
 - **ALWAYS use Text component from @shared/ui** for all text elements instead of div, span, p, or h tags with manual styling
+- **ALWAYS use native Ionic components** for mobile app development to ensure correct native behavior
 - When using Ionic components, overlay custom styling/behavior rather than recreating from scratch
 - Examples: Use IonModal with custom content instead of building custom modal, use IonInput with custom wrapper instead of pure HTML input
+- **ALL shared UI components MUST be built on top of Ionic components** (Button wraps IonButton, Input wraps IonInput, etc.)
 - **Data Fetching:** TanStack React Query
 - **Styling:** Tailwind CSS + Ionic CSS variables
 - **Internationalization:** i18next with English and Russian translations
@@ -183,13 +185,15 @@ Plop.js templates support FSD architecture:
 **IONIC COMPONENT HIERARCHY - REPLACE HTML WITH IONIC:**
 - ✅ **BUTTONS:** Use `IonButton` instead of `<button>` for native styling and haptics
 - ✅ **INPUTS:** Use `IonInput`, `IonTextarea` instead of `<input>`, `<textarea>`
-- ✅ **CONTAINERS:** Use `IonCard`, `IonItem`, `IonGrid` instead of generic `<div>`
+- ✅ **CONTAINERS:** Use `IonCard`, `IonItem`, `IonGrid` instead of generic `<div>` where needed for native behavior
 - ✅ **LISTS:** Use `IonList`, `IonItem`, `IonLabel` instead of `<ul>`, `<li>`
 - ✅ **MODALS:** Use `IonModal`, `IonPopover` instead of custom overlay solutions
 - ✅ **LOADING:** Use `IonLoading`, `IonSpinner` instead of custom loading indicators
 - ✅ **ICONS:** Use `IonIcon` with ionicons library instead of custom icon solutions
 - ✅ **TABS:** Use `IonTabs`, `IonTabBar`, `IonTabButton` for tab navigation
-- ❌ **AVOID:** Generic HTML elements when Ionic equivalents exist
+- ⚠️ **DIV USAGE:** Simple layout divs are acceptable when they don't interfere with native behavior (keyboard, scrolling, touch)
+- ❌ **AVOID:** Generic HTML buttons, inputs, and interactive elements - ALWAYS use Ionic equivalents
+- ❌ **NEVER USE:** HTML `<button>`, `<input>`, `<textarea>`, `<select>` directly - wrap in Ionic components
 
 **MANDATORY IONIC INTEGRATION RULES:**
 - 🔴 **ALWAYS USE:** Capacitor Keyboard plugin with `KeyboardResize.Ionic` for keyboard handling
@@ -216,14 +220,22 @@ Plop.js templates support FSD architecture:
 - ❌ **NEVER NEST:** `IonContent` inside another `IonContent` (causes scroll conflicts)
 - ✅ **RULE:** Only the top-level page component should have `IonPage` + `IonContent`
 - ✅ **RULE:** Child components should return plain divs or Ionic components (no IonPage/IonContent)
+- ✅ **RULE:** Feature components (like steppers, forms) should NOT include IonPage/IonContent
 - ❌ **WRONG:** Page → Component → IonPage (nested IonPage)
-- ✅ **CORRECT:** Page (IonPage + IonContent) → Component (div/Ionic components)
+- ❌ **WRONG:** Page (IonPage + IonContent) → Feature (IonPage + IonContent) - double nesting!
+- ✅ **CORRECT:** Page (IonPage + IonContent) → Feature Component (Fragment or div)
+- ✅ **CORRECT:** Page (IonPage + IonContent) → Stepper/Form/Modal (plain React elements)
 
 **CODE QUALITY RULES:**
 - ❌ **NEVER USE:** `console.log()` in production code (remove all debug statements)
 - ❌ **NEVER USE:** `any` types (always specify proper TypeScript types)
 - ❌ **NEVER USE:** Direct DOM manipulation (use React refs and proper patterns)
 - ❌ **NEVER USE:** `!important` in CSS/Tailwind (breaks maintainability and specificity)
+- ❌ **NEVER USE:** `<h1>`, `<h2>`, `<p>`, `<span>` tags - ALWAYS use `Text` component from @shared/ui
+- ❌ **NEVER USE:** Plain `<img>` for user content - consider Ionic components or proper handling
+- ❌ **NEVER USE:** `div` with `onClick` for interactive elements - ALWAYS use Button component
+- ✅ **ALWAYS USE:** Text component for all text elements with proper variant and tag prop
+- ✅ **ALWAYS USE:** Button component for all clickable elements (even icon-only buttons)
 - ✅ **ALWAYS USE:** Proper React hooks and patterns
 - ✅ **ALWAYS USE:** Proper error handling (try/catch, error boundaries)
 - ✅ **ALWAYS USE:** Semantic HTML and accessibility best practices
