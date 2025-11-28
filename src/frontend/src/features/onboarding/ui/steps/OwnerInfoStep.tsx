@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { IonImg } from "@ionic/react";
 import { Input, BottomModal, DatePicker, Text, Button, Icon } from "@shared/ui";
-import { CameraIcon } from "@shared/ui/icons";
 import { DogProfileData, StepErrors } from "../../model/types";
 
 interface OwnerInfoStepProps {
@@ -140,7 +139,7 @@ export const OwnerInfoStep: React.FC<OwnerInfoStepProps> = ({
                     onClick={handleImageCapture}
                     className="UploadPicture w-full aspect-square px-5 py-6 bg-white rounded-3xl inline-flex flex-col justify-center items-center gap-5 overflow-hidden"
                   >
-                    <CameraIcon />
+                    <Icon name="camera" size={24} />
                   </Button>
                 ) : (
                   <div className="Picture w-full aspect-square relative rounded-3xl overflow-hidden">

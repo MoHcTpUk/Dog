@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { useTranslation } from "react-i18next";
-import { CameraIcon, MenuDotsIcon, PawIcon, TrashIcon } from "../icons";
+import { Icon } from "../Icon";
 import { BottomDrawer } from "../BottomDrawer";
 import { Text } from "../Text";
 
@@ -32,7 +32,7 @@ const ImageActionDrawer: React.FC<ImageActionDrawerProps> = ({
         className="self-stretch py-3.5 inline-flex justify-start items-center gap-5 cursor-pointer"
         onClick={onSetAsMain}
       >
-        <PawIcon />
+        <Icon name="paw-filled" size={24} />
         <div className="flex-1 justify-start text-gray-700 text-base font-medium font-['Golos_Text']">
           {t("Сделать главным фото профиля")}
         </div>
@@ -41,7 +41,7 @@ const ImageActionDrawer: React.FC<ImageActionDrawerProps> = ({
         className="self-stretch py-3.5 inline-flex justify-start items-center gap-5 cursor-pointer"
         onClick={onDelete}
       >
-        <TrashIcon />
+        <Icon name="trash" size={24} />
         <div className="flex-1 justify-start text-rose-500 text-base font-medium font-['Golos_Text']">
           {t("Удалить фото")}
         </div>
@@ -167,7 +167,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
           className="UploadPicture w-full h-80 px-5 py-6 bg-white rounded-3xl flex flex-col justify-center items-center gap-5 overflow-hidden cursor-pointer"
           onClick={handleImageCapture}
         >
-          <CameraIcon />
+          <Icon name="camera" size={24} />
         </div>
       ) : (
         <div className="Pictures self-stretch rounded-3xl grid grid-cols-2 gap-2">
@@ -176,7 +176,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
               className="UploadPicture w-full aspect-square px-5 py-6 bg-white rounded-3xl inline-flex flex-col justify-center items-center gap-5 overflow-hidden cursor-pointer"
               onClick={handleImageCapture}
             >
-              <CameraIcon />
+              <Icon name="camera" size={24} />
             </div>
           )}
 
@@ -194,7 +194,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                 className="BtnRound p-2 right-2 top-2 absolute bg-white/60 rounded-full inline-flex flex-col justify-start items-start gap-2.5 overflow-hidden cursor-pointer"
                 onClick={() => handleImageMenu(index)}
               >
-                <MenuDotsIcon />
+                <Icon name="menu-dots" size={16} />
               </div>
             </div>
           ))}

@@ -34,6 +34,9 @@ import WifiIcon from '@shared/assets/icons/wifi.svg?react';
 import SettingsIcon from '@shared/assets/icons/settings.svg?react';
 import UpdateIcon from '@shared/assets/icons/update.svg?react';
 import GeoIcon from '@shared/assets/icons/geo.svg?react';
+import CameraIcon from '@shared/assets/icons/camera.svg?react';
+import MenuDotsIcon from '@shared/assets/icons/menu-dots.svg?react';
+import DrawerHandleIcon from '@shared/assets/icons/drawer-handle.svg?react';
 
 export type IconName =
   | 'plus'
@@ -70,7 +73,10 @@ export type IconName =
   | 'wifi'
   | 'settings'
   | 'update'
-  | 'geo';
+  | 'geo'
+  | 'camera'
+  | 'menu-dots'
+  | 'drawer-handle';
 
 export interface IconProps {
   name: IconName;
@@ -115,6 +121,9 @@ const iconMap: Record<IconName, React.FC<React.SVGProps<SVGSVGElement>>> = {
   settings: SettingsIcon,
   update: UpdateIcon,
   geo: GeoIcon,
+  camera: CameraIcon,
+  'menu-dots': MenuDotsIcon,
+  'drawer-handle': DrawerHandleIcon,
 };
 
 export const Icon: React.FC<IconProps> = ({

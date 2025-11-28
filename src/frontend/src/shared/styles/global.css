@@ -308,7 +308,7 @@ textarea {
 /* Ionic component enhancements */
 ion-input,
 ion-textarea {
-  --highlight-color-focused: var(--ion-color-primary);
+  --highlight-color-focused: transparent;
   --padding-bottom: 0;
   --padding-top: 0;
 }

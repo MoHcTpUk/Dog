@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { DrawerHandleIcon } from '../icons';
+import { Icon } from '../Icon';
 
 export interface BottomDrawerProps {
   isOpen: boolean;
@@ -50,7 +50,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
       >
         <div className="w-full px-5 pt-2.5 pb-10 bg-zinc-100 rounded-tl-2xl rounded-tr-2xl flex flex-col justify-end items-center gap-6 overflow-hidden">
           <div className="self-stretch flex flex-col justify-start items-center gap-7">
-            <DrawerHandleIcon />
+            <Icon name="drawer-handle" size={58} />
             <div className="self-stretch flex flex-col justify-start items-start">
               {children}
             </div>

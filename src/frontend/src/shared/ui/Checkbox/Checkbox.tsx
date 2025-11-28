@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckIcon } from "../icons";
+import { Icon } from "../Icon";
 import classNames from "classnames";
 
 export interface CheckboxProps {
@@ -65,7 +65,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
         </div>
         {checked ? (
           <div data-state="on" className="w-6 h-6 flex justify-center items-center gap-2.5">
-            <CheckIcon />
+            <Icon name="check" size={24} />
           </div>
         ) : (
           <div data-state="off" className="p-0.5 flex justify-start items-center gap-2.5">
