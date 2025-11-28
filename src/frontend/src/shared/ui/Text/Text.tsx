@@ -1,19 +1,20 @@
 import React from 'react';
 import classNames from 'classnames';
 
-export type TextVariant = 
+export type TextVariant =
   | 'extra-bold-28'
-  | 'bold-24' 
+  | 'bold-24'
   | 'semibold-18'
   | 'medium-16'
   | 'regular-16'
+  | 'regular-14'
   | 'medium-14'
   | 'medium-small-12';
 
 export type TextTag = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'div';
 
-export type TextColor = 
-  | 'primary' 
+export type TextColor =
+  | 'primary'
   | 'secondary'
   | 'muted'
   | 'on-primary'
@@ -34,18 +35,19 @@ export interface TextProps {
 }
 
 const typographyVariantClasses: Record<TextVariant, string> = {
-  'extra-bold-28': 'text-[28px] font-extrabold leading-[34px]',
-  'bold-24': 'text-2xl font-bold leading-[29px]',
-  'semibold-18': 'text-lg font-semibold leading-[22px]',
-  'medium-16': 'text-base font-medium leading-5',
-  'regular-16': 'text-base font-normal leading-[21px]',
-  'medium-14': 'text-sm font-medium leading-[17px]',
-  'medium-small-12': 'text-xs font-medium leading-[15px]',
+  'extra-bold-28': 'text-3xl font-extrabold leading-6',
+  'bold-24': 'text-2xl font-bold leading-6',
+  'semibold-18': 'text-lg font-semibold',
+  'medium-16': 'text-base font-medium',
+  'regular-16': 'text-base font-normal leading-5',
+  'regular-14': 'text-sm font-normal leading-4',
+  'medium-14': 'text-sm font-medium',
+  'medium-small-12': 'text-xs font-medium',
 };
 
 const colorClasses: Record<TextColor, string> = {
   primary: 'text-text-primary',
-  secondary: 'text-text-secondary', 
+  secondary: 'text-text-secondary',
   muted: 'text-text-muted',
   'on-primary': 'text-text-on-primary',
   'on-secondary': 'text-text-on-secondary',
@@ -65,8 +67,7 @@ export const Text: React.FC<TextProps> = ({
   className = '',
 }) => {
   const classes = classNames(
-    'font-sans',
-    'm-0', // Reset default margins
+    "font-['Golos_Text']",
     typographyVariantClasses[variant],
     colorClasses[color],
     className

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { IonToast } from "@ionic/react";
+import { IonToast, IonImg } from "@ionic/react";
 import { useIonRouter } from "@ionic/react";
 import { Button } from "@shared/ui";
 import { useDogProfileStepper } from "../../model/useDogProfileStepper";
@@ -125,19 +125,15 @@ export const DogProfileStepper: React.FC<DogProfileStepperProps> = ({
           />
 
           {/* Dog Image */}
-          {getStepImage(currentStep) &&
-            (currentStep === 1 ||
-              currentStep === 2 ||
-              currentStep === 3 ||
-              currentStep === 8) && (
-              <div className="w-full h-[350px] relative overflow-hidden rounded-[24px]">
-                <img
-                  src={getStepImage(currentStep)!}
-                  alt={`Step ${currentStep}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
+          {getStepImage(currentStep) && (
+            <div className="w-full h-[350px] overflow-hidden rounded-[24px]">
+              <IonImg
+                src={getStepImage(currentStep)!}
+                alt={`Step ${currentStep}`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
         </div>
 
         {/* Step Content */}
@@ -150,18 +146,18 @@ export const DogProfileStepper: React.FC<DogProfileStepperProps> = ({
           <div className="px-5 pb-10 safe-area-bottom">
             <div className="flex gap-[10px]">
               <Button
-                variant="outline"
-                size="large"
+                variant="secondary-white"
+                size="L"
                 fullWidth
                 onClick={handleStepBack}
-                className="text-[#3F335A] bg-white hover:bg-gray-50"
+                className="text-[#3F335A]"
               >
                 {t("Back")}
               </Button>
 
               <Button
                 variant="primary"
-                size="large"
+                size="L"
                 fullWidth
                 onClick={handleNext}
                 className="bg-[#3F335A] hover:bg-[#342B47]"

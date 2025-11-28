@@ -25,11 +25,9 @@ export const DogBirthDateStep: React.FC<DogBirthDateStepProps> = ({
 
   return (
     <div className="self-stretch relative inline-flex flex-col justify-start items-start gap-12 w-full">
-      <div>
-        <Text variant="bold-24" tag="h1" className="mb-2 text-start">
-          {t("When was {{name}} born?", { name: data.name || t("your dog") })}
-        </Text>
-      </div>
+      <Text variant="bold-24" tag="h1" className="mb-2 text-start">
+        {t("When was {{name}} born?", { name: data.name || t("your dog") })}
+      </Text>
 
       <div className="self-stretch h-72 relative flex flex-col justify-start items-center overflow-hidden">
         <DatePicker

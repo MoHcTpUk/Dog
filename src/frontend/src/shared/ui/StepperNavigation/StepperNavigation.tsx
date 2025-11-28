@@ -25,18 +25,18 @@ export const StepperNavigation: React.FC<StepperNavigationProps> = ({
       style={{ padding: "0px 16px 40px" }}
     >
       <Button
-        variant="outline"
-        size="large"
+        variant="secondary-white"
+        size="L"
         fullWidth
         onClick={onBack}
-        className="text-[#3F335A] bg-white hover:bg-gray-50"
+        className="text-[#3F335A]"
       >
         {backButtonText || t("Back")}
       </Button>
 
       <Button
         variant="primary"
-        size="large"
+        size="L"
         fullWidth
         onClick={onNext}
         className="bg-[#3F335A] hover:bg-[#342B47]"

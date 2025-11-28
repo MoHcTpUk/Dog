@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import classNames from "classnames";
 import { IonInput } from "@ionic/react";
+import { Text } from "@shared/ui/Text/Text";
 
 export interface InputProps {
   label?: string;
@@ -142,7 +143,7 @@ export const Input: React.FC<InputProps> = ({
       {label && (
         <label className="block text-sm font-medium text-text-primary mb-2 font-sans">
           {label}
-          {required && <span className="text-error ml-1">*</span>}
+          {required && <Text className="text-error ml-1">*</Text>}
         </label>
       )}
 
@@ -195,17 +196,17 @@ export const Input: React.FC<InputProps> = ({
 
         {/* Error message */}
         {error && errorMessage && (
-          <span className="text-error font-normal text-error-text leading-[18px] font-sans">
+          <Text className="text-error font-normal text-error-text leading-[18px] font-sans">
             {errorMessage}
-          </span>
+          </Text>
         )}
       </div>
 
       {/* Helper text (only show if no error) */}
       {helperText && !error && (
-        <span className="text-sm text-text-muted font-normal mt-2 font-sans">
+        <Text className="text-sm text-text-muted font-normal mt-2 font-sans">
           {helperText}
-        </span>
+        </Text>
       )}
     </div>
   );

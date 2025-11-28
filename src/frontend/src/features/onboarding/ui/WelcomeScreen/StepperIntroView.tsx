@@ -1,6 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Button, Text } from "@shared/ui";
+import { OnboardingLayout } from "../layouts/OnboardingLayout";
+import startPageDog from "@shared/assets/images/welcome/startPageDog.webp";
 
 interface StepperIntroViewProps {
   onNext: () => void;
@@ -13,43 +14,15 @@ export const StepperIntroView: React.FC<StepperIntroViewProps> = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-6 text-center flex-1 flex flex-col justify-center">
-        <div className="space-y-6">
-          <div className="w-24 h-24 mx-auto bg-primary/20 rounded-full flex items-center justify-center">
-            <div className="text-4xl">🐕</div>
-          </div>
-
-          <div className="space-y-4">
-            <Text variant="bold-24" tag="h1" className="text-center">
-              {t("Tell us about your dog")}
-            </Text>
-            <Text variant="regular-16" className="text-center" color="secondary">
-              {t("This will help find suitable friends for walks")}
-            </Text>
-          </div>
-        </div>
-      </div>
-
-      <div className="p-6 space-y-4">
-        <Button
-          variant="primary"
-          size="large"
-          fullWidth
-          onClick={onNext}
-        >
-{t("Create Profile")}
-        </Button>
-
-        <Button
-          variant="outline"
-          size="large"
-          fullWidth
-          onClick={onSkip}
-        >
-{t("Fill Later")}
-        </Button>
-      </div>
-    </div>
+    <OnboardingLayout
+      image={startPageDog}
+      imageAlt="Dog"
+      title={t("Tell us about dog")}
+      subtitle={t("This will help find suitable friends for walks")}
+      primaryButtonText={t("Create Profile")}
+      secondaryButtonText={t("Fill Later")}
+      onPrimaryClick={onNext}
+      onSecondaryClick={onSkip}
+    />
   );
 };

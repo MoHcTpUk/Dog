@@ -1,8 +1,9 @@
 import React, { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
-import { Input, BottomModal, DatePicker, Text, Button } from "@shared/ui";
-import { CameraIcon, TrashIcon } from "@shared/ui/icons";
+import { IonImg } from "@ionic/react";
+import { Input, BottomModal, DatePicker, Text, Button, Icon } from "@shared/ui";
+import { CameraIcon } from "@shared/ui/icons";
 import { DogProfileData, StepErrors } from "../../model/types";
 
 interface OwnerInfoStepProps {
@@ -143,19 +144,17 @@ export const OwnerInfoStep: React.FC<OwnerInfoStepProps> = ({
                   </Button>
                 ) : (
                   <div className="Picture w-full aspect-square relative rounded-3xl overflow-hidden">
-                    <img
+                    <IonImg
                       className="w-full h-full absolute rounded-3xl object-cover"
                       src={data.owner.photo}
                       alt="Owner photo"
                     />
                     <Button
-                      variant="secondary"
-                      shape="round"
-                      size="small"
+                      variant="secondary-white"
                       onClick={handleDeletePhoto}
                       className="p-2 right-2 top-2 absolute bg-white/60 rounded-full inline-flex flex-col justify-start items-start gap-2.5 overflow-hidden"
                     >
-                      <TrashIcon />
+                      <Icon name="trash" size={24} />
                     </Button>
                   </div>
                 )}

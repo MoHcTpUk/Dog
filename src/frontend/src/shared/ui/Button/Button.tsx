@@ -1,17 +1,23 @@
 import React from "react";
 import classNames from "classnames";
 import { IonButton } from "@ionic/react";
+import { Text } from "../Text";
 
 export interface ButtonProps {
   children: React.ReactNode;
-  variant?: "primary" | "secondary" | "outline" | "disabled";
-  shape?: "default" | "round";
-  size?: "small" | "medium" | "large";
+  variant?:
+    | "primary"
+    | "secondary-white"
+    | "secondary-gray"
+    | "secondary"
+    | "secondary-pink";
+  size?: "M" | "L";
   fullWidth?: boolean;
   disabled?: boolean;
   loading?: boolean;
   icon?: React.ReactNode;
   iconPosition?: "left" | "right";
+  shadow?: boolean;
   onClick?: () => void;
   type?: "button" | "submit" | "reset";
   className?: string;
@@ -19,99 +25,82 @@ export interface ButtonProps {
 
 export const Button: React.FC<ButtonProps> = ({
   children,
-  variant = "primary",
-  shape = "default",
-  size = "medium",
+  variant = "secondary-white",
+  size = "M",
   fullWidth = false,
   disabled = false,
   loading = false,
   icon,
   iconPosition = "left",
+  shadow = false,
   onClick,
   type = "button",
   className,
 }) => {
   const getButtonClasses = () => {
     const baseClasses = [
+      "rounded-[59px]",
       "inline-flex",
-      "items-center",
       "justify-center",
+      "items-center",
+      "text-base",
       "font-medium",
-      "transition-all",
-      "duration-200",
-      "font-sans",
     ];
 
-    // Shape-specific styles
-    if (shape === "round") {
-      baseClasses.push("rounded-full");
-      // Round buttons are typically icon-only with specific padding
-      if (size === "small") {
-        baseClasses.push("p-2"); // 8px padding
-      } else if (size === "large") {
-        baseClasses.push("p-3"); // 12px padding
+    // Gap between icon and text
+    if (icon && children) {
+      baseClasses.push("gap-[2px]");
+    }
+
+    // Size-specific padding
+    if (size === "L") {
+      baseClasses.push("py-[17.5px]");
+    } else {
+      baseClasses.push("py-3");
+    }
+
+    // Horizontal padding based on icon position
+    if (icon && children && size === "M") {
+      if (iconPosition === "left") {
+        baseClasses.push("pl-5", "pr-5");
       } else {
-        baseClasses.push("p-2"); // default 8px padding
+        baseClasses.push("pl-[15px]", "pr-[5px]");
       }
     } else {
-      // Default rectangular buttons
-      baseClasses.push("rounded-[59px]");
-      if (size === "small") {
-        baseClasses.push("h-12", "px-5", "py-3", "text-base");
-      } else if (size === "large") {
-        baseClasses.push("px-6", "py-5", "text-base");
-      } else {
-        baseClasses.push("h-12", "px-6", "py-3", "text-base");
-      }
+      baseClasses.push("px-[30px]");
     }
 
     // Width
     if (fullWidth) {
-      baseClasses.push("w-full");
+      baseClasses.push("self-stretch");
     }
 
-    // Variant-specific styles using Tailwind theme classes
-    if (disabled || variant === "disabled") {
-      baseClasses.push(
-        "bg-background-secondary",
-        "text-text-muted",
-        "cursor-not-allowed"
-      );
+    // Variant-specific styles
+    if (disabled) {
+      baseClasses.push("bg-zinc-100", "text-gray-700", "cursor-not-allowed");
     } else {
       switch (variant) {
         case "primary":
-          baseClasses.push(
-            "bg-primary",
-            "text-text-on-primary",
-            "hover:bg-primary-light"
-          );
+          baseClasses.push("bg-primary", "text-white");
+          break;
+        case "secondary-white":
+          baseClasses.push("bg-white", "text-gray-700");
+          if (shadow) {
+            baseClasses.push("shadow-[0px_5px_9px_0px_rgba(66,58,58,0.06)]");
+          }
+          break;
+        case "secondary-gray":
+          baseClasses.push("bg-zinc-100", "text-gray-700");
           break;
         case "secondary":
-          baseClasses.push(
-            "bg-surface",
-            "text-text-primary",
-            "hover:shadow-[0px_7px_12px_0px_var(--color-border)]"
-          );
+          baseClasses.push("bg-white", "text-gray-700");
           break;
-        case "outline":
-          baseClasses.push(
-            "bg-surface",
-            "text-text-primary",
-            "hover:shadow-[0px_7px_12px_0px_var(--color-border)]"
-          );
+        case "secondary-pink":
+          baseClasses.push("bg-pink-300", "text-gray-700");
           break;
         default:
-          baseClasses.push(
-            "bg-primary",
-            "text-text-on-primary",
-            "hover:bg-primary-light"
-          );
+          baseClasses.push("bg-white", "text-gray-700");
       }
-    }
-
-    // Gap for icon + text
-    if (icon && children && shape !== "round") {
-      baseClasses.push("gap-2.5");
     }
 
     return classNames(baseClasses);
@@ -124,18 +113,15 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const renderContent = () => {
+    const textColor = variant === "primary" ? "white" : undefined;
+
     if (loading) {
       return (
-        <div className="flex items-center gap-2">
+        <>
           <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent"></div>
-          {shape !== "round" && <span>Loading...</span>}
-        </div>
+          Loading...
+        </>
       );
-    }
-
-    if (shape === "round") {
-      // Round buttons typically only show icon
-      return icon || children;
     }
 
     // Default buttons with optional icon
@@ -143,17 +129,27 @@ export const Button: React.FC<ButtonProps> = ({
       return iconPosition === "left" ? (
         <>
           {icon}
-          <span>{children}</span>
+          <Text variant="medium-16" color={textColor} className="px-[5px]">
+            {children}
+          </Text>
         </>
       ) : (
         <>
-          <span>{children}</span>
+          <Text variant="medium-16" color={textColor} className="px-[5px]">
+            {children}
+          </Text>
           {icon}
         </>
       );
     }
 
-    return icon || <span>{children}</span>;
+    return (
+      icon || (
+        <Text variant="medium-16" color={textColor} className="px-[5px]">
+          {children}
+        </Text>
+      )
+    );
   };
 
   return (
@@ -162,21 +158,26 @@ export const Button: React.FC<ButtonProps> = ({
       disabled={disabled || loading}
       onClick={handleClick}
       className={classNames(getButtonClasses(), className)}
-      style={{
-        "--background": "transparent",
-        "--background-activated": "transparent",
-        "--background-focused": "transparent",
-        "--background-hover": "transparent",
-        "--color": "inherit",
-        "--border-radius": "0",
-        "--box-shadow": "none",
-        "--ripple-color": "transparent",
-        "--padding-start": "0",
-        "--padding-end": "0",
-        margin: "0",
-        height: "auto",
-        minHeight: "auto",
-      } as React.CSSProperties}
+      style={
+        {
+          "--background": "transparent",
+          "--background-activated": "transparent",
+          "--background-focused": "transparent",
+          "--background-hover": "transparent",
+          "--color": "inherit",
+          "--border-radius": "59px",
+          "--box-shadow": "none",
+          "--ripple-color": "transparent",
+          "--padding-start": "0",
+          "--padding-end": "0",
+          "--padding-top": "0",
+          "--padding-bottom": "0",
+          margin: "0",
+          height: "auto",
+          minHeight: "0",
+          contain: "none",
+        } as React.CSSProperties
+      }
       fill="clear"
     >
       {renderContent()}

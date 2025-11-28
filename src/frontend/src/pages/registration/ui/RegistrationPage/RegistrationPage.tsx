@@ -79,7 +79,7 @@ export const RegistrationPage: React.FC = () => {
               <div className="self-stretch flex flex-col justify-start items-start gap-2.5">
                 <Button
                   variant="primary"
-                  size="large"
+                  size="L"
                   fullWidth
                   className="bg-gray-700 text-white"
                   onClick={handleSubmit(onSubmit)}
@@ -88,7 +88,7 @@ export const RegistrationPage: React.FC = () => {
                 </Button>
                 <Button
                   variant="secondary"
-                  size="large"
+                  size="L"
                   fullWidth
                   className="bg-white text-gray-700"
                 >
@@ -98,22 +98,20 @@ export const RegistrationPage: React.FC = () => {
             </div>
 
             {/* Terms and privacy policy */}
-            <Text
-              variant="medium-small-12"
-              color="secondary"
-              className="self-stretch text-center"
-            >
-              <span className="text-slate-500 leading-none">
+            <div className="self-stretch text-center">
+              <Text variant="medium-small-12" className="text-slate-500 leading-none">
                 {t("By continuing, you agree to the ")}
-              </span>
-              <span className="text-gray-700 leading-none">
+              </Text>
+              <Text variant="medium-small-12" className="text-gray-700 leading-none">
                 {t("terms of use")}
-              </span>
-              <span className="text-slate-500 leading-none">{t(" and ")}</span>
-              <span className="text-gray-700 leading-none">
+              </Text>
+              <Text variant="medium-small-12" className="text-slate-500 leading-none">
+                {t(" and ")}
+              </Text>
+              <Text variant="medium-small-12" className="text-gray-700 leading-none">
                 {t("privacy policy")}
-              </span>
-            </Text>
+              </Text>
+            </div>
           </div>
         </div>
       </IonContent>

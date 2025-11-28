@@ -185,15 +185,20 @@ Plop.js templates support FSD architecture:
 **IONIC COMPONENT HIERARCHY - REPLACE HTML WITH IONIC:**
 - ✅ **BUTTONS:** Use `IonButton` instead of `<button>` for native styling and haptics
 - ✅ **INPUTS:** Use `IonInput`, `IonTextarea` instead of `<input>`, `<textarea>`
+  - Use `type="tel"` for phone/code inputs (opens numeric keyboard)
+  - Use `type="email"` for email inputs (opens email keyboard)
+- ✅ **IMAGES:** Use `IonImg` instead of `<img>` for lazy loading and better performance
+- ✅ **ICONS:** Use `IonIcon` from `ionicons/icons` - NEVER use emoji (🐕, 🛡️, etc.)
+- ✅ **PROGRESS:** Use `IonProgressBar` instead of custom SVG progress indicators
 - ✅ **CONTAINERS:** Use `IonCard`, `IonItem`, `IonGrid` instead of generic `<div>` where needed for native behavior
 - ✅ **LISTS:** Use `IonList`, `IonItem`, `IonLabel` instead of `<ul>`, `<li>`
 - ✅ **MODALS:** Use `IonModal`, `IonPopover` instead of custom overlay solutions
 - ✅ **LOADING:** Use `IonLoading`, `IonSpinner` instead of custom loading indicators
-- ✅ **ICONS:** Use `IonIcon` with ionicons library instead of custom icon solutions
 - ✅ **TABS:** Use `IonTabs`, `IonTabBar`, `IonTabButton` for tab navigation
 - ⚠️ **DIV USAGE:** Simple layout divs are acceptable when they don't interfere with native behavior (keyboard, scrolling, touch)
-- ❌ **AVOID:** Generic HTML buttons, inputs, and interactive elements - ALWAYS use Ionic equivalents
-- ❌ **NEVER USE:** HTML `<button>`, `<input>`, `<textarea>`, `<select>` directly - wrap in Ionic components
+- ❌ **NEVER USE:** HTML `<button>`, `<input>`, `<textarea>`, `<select>`, `<img>` directly
+- ❌ **NEVER USE:** Emoji icons - always use IonIcon with proper ionicons
+- ❌ **NEVER USE:** Custom SVG for standard UI elements (progress bars, icons) - use Ionic components
 
 **MANDATORY IONIC INTEGRATION RULES:**
 - 🔴 **ALWAYS USE:** Capacitor Keyboard plugin with `KeyboardResize.Ionic` for keyboard handling
@@ -232,17 +237,107 @@ Plop.js templates support FSD architecture:
 - ❌ **NEVER USE:** Direct DOM manipulation (use React refs and proper patterns)
 - ❌ **NEVER USE:** `!important` in CSS/Tailwind (breaks maintainability and specificity)
 - ❌ **NEVER USE:** `<h1>`, `<h2>`, `<p>`, `<span>` tags - ALWAYS use `Text` component from @shared/ui
-- ❌ **NEVER USE:** Plain `<img>` for user content - consider Ionic components or proper handling
+- ❌ **NEVER USE:** `<img>` - ALWAYS use `IonImg` for better mobile performance
 - ❌ **NEVER USE:** `div` with `onClick` for interactive elements - ALWAYS use Button component
+- ❌ **NEVER USE:** Emoji for icons - ALWAYS use IonIcon from ionicons library
+- ❌ **NEVER USE:** Custom SVG for standard UI (progress, icons) - use Ionic components
 - ✅ **ALWAYS USE:** Text component for all text elements with proper variant and tag prop
 - ✅ **ALWAYS USE:** Button component for all clickable elements (even icon-only buttons)
+- ✅ **ALWAYS USE:** IonImg for all images (lazy loading, mobile optimized)
+- ✅ **ALWAYS USE:** IonIcon for all icons (from ionicons library)
+- ✅ **ALWAYS USE:** IonProgressBar for progress indicators
 - ✅ **ALWAYS USE:** Proper React hooks and patterns
 - ✅ **ALWAYS USE:** Proper error handling (try/catch, error boundaries)
 - ✅ **ALWAYS USE:** Semantic HTML and accessibility best practices
 - ✅ **CSS PRIORITY:** Use proper CSS specificity and Tailwind utilities instead of `!important`
+
+**MOBILE-SPECIFIC BEST PRACTICES:**
+- ✅ **INPUT TYPES:** Use correct `type` attribute for proper keyboard on mobile
+  - `type="tel"` for phone numbers and numeric codes (opens numeric keyboard)
+  - `type="email"` for email addresses (opens email keyboard with @ symbol)
+  - `type="number"` for numeric inputs
+- ✅ **TOUCH OPTIMIZATION:** Use `touchAction: "manipulation"` to prevent double-tap zoom
+- ✅ **SCROLL INTO VIEW:** Auto-scroll inputs into view on focus for better UX (already in Input component)
+- ✅ **SAFE AREAS:** Always respect safe areas on devices with notches/home indicators
+- ✅ **LAYOUT SIMPLICITY:** Keep component nesting minimal - avoid unnecessary wrapper divs
+- ✅ **PERFORMANCE:** Use IonImg for lazy loading, IonVirtualScroll for long lists
 
 **TYPESCRIPT RULES:**
 - Define proper interfaces instead of `any`
 - Use union types for restricted values
 - Proper error handling with typed errors
 - No implicit any, enable strict mode compliance
+
+## Code Adaptation Workflow
+
+**WHEN ADAPTING EXTERNAL CODE:**
+When user provides original code to adapt, follow this strict process:
+
+0. **CHECK FIRST - CRITICAL:**
+   - 🔴 **ALWAYS CHECK:** If this functionality already exists in the project
+   - 🔴 **SEARCH BEFORE CODING:** Look for similar components/features already implemented
+   - 🔴 **READ EXISTING CODE:** Check if component can be reused or extended
+   - ❌ **NEVER DUPLICATE:** Don't create new code if similar already exists
+   - ✅ **EXTEND, DON'T RECREATE:** Modify existing components instead of creating new ones
+
+1. **ANALYZE STYLES CAREFULLY:**
+   - ✅ Study ALL spacing (paddings, margins, gaps)
+   - ✅ Note exact font sizes, line heights, weights
+   - ✅ Record border radius, shadows, opacity values
+   - ✅ Capture color values and their usage
+   - ✅ Document responsive breakpoints and behavior
+   - ✅ Identify animation/transition properties
+
+2. **USE PROJECT STANDARDS:**
+   - ✅ Replace with `@shared/ui` components (Text, Button, Input, etc.)
+   - ✅ Use Tailwind CSS variables for colors (text-primary, bg-secondary, etc.)
+   - ✅ Use Tailwind spacing utilities matching original values (p-4, gap-6, etc.)
+   - ✅ Use project's font size system (text-sm, text-base, text-lg, etc.)
+   - ✅ Replace HTML tags with Ionic components (IonImg, IonIcon, etc.)
+   - ✅ Use i18n with `t()` for all text
+   - ✅ Apply FSD architecture (proper layer placement)
+
+3. **WRITE CLEAN, SIMPLE CODE:**
+   - ✅ Write SIMPLIFIED code that matches visual result
+   - ✅ Remove unnecessary wrappers and complexity
+   - ✅ Use clean, minimal structure
+   - ❌ **NEVER USE WORKAROUNDS (костыли)** - write proper solutions
+   - ❌ **NEVER DUPLICATE CODE** - reuse existing components/functions
+   - ❌ **NEVER OVER-ENGINEER** - keep it simple and maintainable
+   - ✅ Use proper React patterns (hooks, composition)
+   - ✅ Keep component hierarchy flat when possible
+
+4. **PRESERVE ORIGINAL DESIGN:**
+   - ✅ Maintain EXACT spacing proportions from original
+   - ✅ Keep same visual hierarchy and layout structure
+   - ✅ Preserve responsive behavior patterns
+   - ✅ Match animation timing and easing
+   - ❌ NEVER change spacing arbitrarily
+   - ❌ NEVER simplify visual result (but DO simplify code)
+
+5. **MANDATORY ADAPTATIONS:**
+   - Replace all text tags (h1, p, span) with `Text` component
+   - Replace buttons with `Button` from @shared/ui
+   - Replace inputs with `Input` from @shared/ui
+   - Replace images with `IonImg`
+   - Replace icons with `IonIcon` (never emoji)
+   - Use Tailwind classes instead of inline styles
+   - Add proper TypeScript types
+   - Add i18n keys for all text
+
+**EXAMPLE ADAPTATION:**
+Original:
+```jsx
+<div style={{padding: '24px', gap: '16px'}}>
+  <h2 style={{fontSize: '24px', fontWeight: 'bold'}}>Title</h2>
+  <button style={{padding: '12px 24px'}}>Click</button>
+</div>
+```
+
+Adapted:
+```tsx
+<div className="p-6 flex flex-col gap-4">
+  <Text variant="h2" className="text-2xl font-bold">{t("Title")}</Text>
+  <Button className="px-6 py-3">{t("Click")}</Button>
+</div>
+```

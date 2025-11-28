@@ -47,7 +47,10 @@ export type { SliderProps } from "./Slider";
 export { RadioButton } from "./RadioButton";
 export type { RadioButtonProps } from "./RadioButton";
 
-export { CheckIcon, CameraIcon, MenuDotsIcon, PawIcon, TrashIcon, DrawerHandleIcon } from "./icons";
+export { CameraIcon, MenuDotsIcon, PawIcon, DrawerHandleIcon } from "./icons";
+
+export { Icon } from "./Icon";
+export type { IconProps, IconName } from "./Icon";
 
 export { Text } from "./Text";
 export type { TextProps, TextVariant, TextTag } from "./Text";

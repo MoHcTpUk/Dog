@@ -18,11 +18,9 @@ export const DogNameStep: React.FC<DogNameStepProps> = ({
 
   return (
     <div className="space-y-6">
-      <div>
-        <Text variant="bold-24" tag="h1" className="mb-2 text-start">
-          {t("What is your pet's name?")}
-        </Text>
-      </div>
+      <Text variant="bold-24" tag="h1" className="mb-2 text-start">
+        {t("What is your pet's name?")}
+      </Text>
 
       <Input
         placeholder={t("Pet name")}

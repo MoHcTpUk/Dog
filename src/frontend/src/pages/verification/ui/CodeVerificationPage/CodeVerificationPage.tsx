@@ -119,26 +119,20 @@ export const CodeVerificationPage: React.FC = () => {
 
             {/* Resend code timer/button - at bottom but visible above keyboard */}
             <div className="self-stretch flex flex-col justify-start items-start gap-3.5">
-              <Text
-                variant="medium-small-12"
-                color="secondary"
-                className="self-stretch text-center"
-              >
-                {canResend ? (
-                  <Button
-                    variant="outline"
-                    size="medium"
-                    onClick={handleResendCode}
-                    className="mx-auto"
-                  >
-                    {t("New code")}
-                  </Button>
-                ) : (
-                  <span className="text-slate-500 leading-none">
-                    {t("Get new code available in ")} {formatTime(timeLeft)}
-                  </span>
-                )}
-              </Text>
+              {canResend ? (
+                <Button
+                  variant="secondary-white"
+                  size="M"
+                  onClick={handleResendCode}
+                  className="mx-auto"
+                >
+                  {t("New code")}
+                </Button>
+              ) : (
+                <Text variant="medium-small-12" className="text-slate-500 leading-none self-stretch text-center">
+                  {t("Get new code available in ")} {formatTime(timeLeft)}
+                </Text>
+              )}
             </div>
           </div>
         </div>

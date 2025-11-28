@@ -45,11 +45,9 @@ export const DogBreedStep: React.FC<DogBreedStepProps> = ({
 
   return (
     <div className="space-y-6">
-      <div>
-        <Text variant="bold-24" tag="h1" className="mb-2 text-start">
-          {t("Breed")}
-        </Text>
-      </div>
+      <Text variant="bold-24" tag="h1" className="mb-2 text-start">
+        {t("Breed")}
+      </Text>
 
       <Input
         placeholder={t("Start typing breed")}

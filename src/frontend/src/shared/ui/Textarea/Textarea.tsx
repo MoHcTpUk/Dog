@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import classNames from "classnames";
 import { IonTextarea } from "@ionic/react";
+import { Text } from "@shared/ui/Text/Text";
 
 export interface TextareaProps {
   label?: string;
@@ -111,7 +112,7 @@ export const Textarea: React.FC<TextareaProps> = ({
       {label && (
         <label className="block text-sm font-medium text-text-primary mb-2 font-sans">
           {label}
-          {required && <span className="text-error ml-1">*</span>}
+          {required && <Text className="text-error ml-1">*</Text>}
         </label>
       )}
 
@@ -159,9 +160,9 @@ export const Textarea: React.FC<TextareaProps> = ({
 
         {/* Error message */}
         {error && errorMessage && (
-          <span className="text-error font-normal text-error-text leading-[18px] font-sans">
+          <Text className="text-error font-normal text-error-text leading-[18px] font-sans">
             {errorMessage}
-          </span>
+          </Text>
         )}
       </div>
 
@@ -169,17 +170,17 @@ export const Textarea: React.FC<TextareaProps> = ({
         <div>
           {/* Helper text (only show if no error) */}
           {helperText && !error && (
-            <span className="text-sm text-text-muted font-normal font-sans">
+            <Text className="text-sm text-text-muted font-normal font-sans">
               {helperText}
-            </span>
+            </Text>
           )}
         </div>
 
         {/* Character count */}
         {showCharCount && maxLength && (
-          <span className="text-sm text-text-muted font-normal flex-shrink-0 ml-4 font-sans">
+          <Text className="text-sm text-text-muted font-normal flex-shrink-0 ml-4 font-sans">
             {value.length}/{maxLength}
-          </span>
+          </Text>
         )}
       </div>
     </div>

@@ -167,7 +167,7 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
         {/* Action Buttons */}
         <div className="flex space-x-4">
           <Button
-            variant="outline"
+            variant="secondary-white"
             fullWidth
             onClick={onCancel}
             disabled={isLoading}
