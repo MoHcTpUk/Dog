@@ -1,7 +1,3 @@
-# DogApp
-
-A microservices-based dog activity tracking application with frontend, backend services, and landing page.
-
 ## Quick Start
 
 ### Frontend Development
@@ -71,12 +67,14 @@ The deployment process follows this order:
 - **Portainer**: http://localhost:9000/
   - Web UI: port 9000
 
-### Additional Services (when active)
 - **PostgreSQL**: port 4321 (-> 5432 inside container)
+
 - **NATS**: 
   - Client: port 4222
   - Monitoring: port 8222
+
 - **MinIO**: 
   - API: port 9009 (-> 9000 inside container)
   - Web Console: port 9001
+
 - **Keycloak**: port 8085 (-> 8080 inside container)
