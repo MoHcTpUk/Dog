@@ -1,0 +1,15 @@
+services:
+  traefik:
+    ports:
+      - target: 80
+        published: 8000
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 8443
+        protocol: tcp
+        mode: host
+      - target: 8080
+        published: 9002
+        protocol: tcp
+        mode: host

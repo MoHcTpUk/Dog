@@ -21,10 +21,15 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
+        # HTTP router for ACME challenge (no redirect)
+        - "traefik.http.routers.landing-acme.rule=Host(`dogappa.com`) && PathPrefix(`/.well-known/acme-challenge/`)"
+        - "traefik.http.routers.landing-acme.entrypoints=web"
+        - "traefik.http.routers.landing-acme.priority=100"
         # HTTP router (redirect to HTTPS)
         - "traefik.http.routers.landing-http.rule=Host(`dogappa.com`)"
         - "traefik.http.routers.landing-http.entrypoints=web"
         - "traefik.http.routers.landing-http.middlewares=landing-redirect"
+        - "traefik.http.routers.landing-http.priority=1"
         # HTTPS router with automatic SSL certificate and HTTP/3
         - "traefik.http.routers.landing.rule=Host(`dogappa.com`)"
         - "traefik.http.routers.landing.entrypoints=websecure"

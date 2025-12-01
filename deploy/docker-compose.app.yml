@@ -52,18 +52,18 @@ services:
     networks:
       - infra_traefik
 
-  # postgres:
-  #   image: postgres:latest
-  #   environment:
-  #     POSTGRES_USER: user
-  #     POSTGRES_PASSWORD: password
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql
-  #     - ./keycloak/init-keycloak.sql:/docker-entrypoint-initdb.d/init-keycloak.sql
-  #   ports:
-  #     - "4321:5432"
-  #   networks:
-  #     - infra_traefik
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./keycloak/init-keycloak.sql:/docker-entrypoint-initdb.d/init-keycloak.sql
+    ports:
+      - "4321:5432"
+    networks:
+      - infra_traefik
 
   # nats:
   #   image: nats:latest
@@ -113,8 +113,8 @@ services:
   #   networks:
   #     - infra_traefik
 
-# volumes:
-#   postgres_data:
+volumes:
+  postgres_data:
 #   nats_data:
 #   minio_data:
 
