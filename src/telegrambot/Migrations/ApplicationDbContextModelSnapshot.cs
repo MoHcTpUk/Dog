@@ -22,7 +22,7 @@ namespace InviteTelegramBot.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("InviteTelegramBot.Models.TelegramUser", b =>
+            modelBuilder.Entity("TelegramBot.Models.TelegramUser", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
