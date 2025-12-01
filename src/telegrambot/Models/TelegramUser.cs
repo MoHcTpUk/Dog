@@ -57,7 +57,6 @@ public class TelegramUser
     /// <summary>
     /// Может ли бот подключиться к бизнес-аккаунту пользователя
     /// </summary>
-    [Column("can_connect_to_business")]
     public bool CanConnectToBusiness { get; set; }
 
     /// <summary>
@@ -67,17 +66,14 @@ public class TelegramUser
 
     /// <summary>
     /// </summary>
-    [Column("can_read_all_group_messages")]
     public bool CanReadAllGroupMessages { get; set; }
 
     /// <summary>
     /// </summary>
-    [Column("has_main_web_app")]
     public bool HasMainWebApp { get; set; }
 
     /// <summary>
     /// </summary>
-    [Column("supports_inline_queries")]
     public bool SupportsInlineQueries { get; set; }
     
     /// <summary>

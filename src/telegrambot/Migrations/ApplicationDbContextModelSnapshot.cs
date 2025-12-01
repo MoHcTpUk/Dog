@@ -34,15 +34,13 @@ namespace InviteTelegramBot.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<bool>("CanConnectToBusiness")
-                        .HasColumnType("boolean")
-                        .HasColumnName("can_connect_to_business");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("CanJoinGroups")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("CanReadAllGroupMessages")
-                        .HasColumnType("boolean")
-                        .HasColumnName("can_read_all_group_messages");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -56,8 +54,7 @@ namespace InviteTelegramBot.Migrations
                         .HasColumnType("integer");
 
                     b.Property<bool>("HasMainWebApp")
-                        .HasColumnType("boolean")
-                        .HasColumnName("has_main_web_app");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsBot")
                         .HasColumnType("boolean");
@@ -72,8 +69,7 @@ namespace InviteTelegramBot.Migrations
                         .HasColumnType("text");
 
                     b.Property<bool>("SupportsInlineQueries")
-                        .HasColumnType("boolean")
-                        .HasColumnName("supports_inline_queries");
+                        .HasColumnType("boolean");
 
                     b.Property<long>("TelegramId")
                         .HasColumnType("bigint");
