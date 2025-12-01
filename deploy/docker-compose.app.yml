@@ -61,7 +61,9 @@ services:
       - postgres_data:/var/lib/postgresql
       - ./keycloak/init-keycloak.sql:/docker-entrypoint-initdb.d/01-init-keycloak.sql
     ports:
-      - "4321:5432"
+      - target: 5432
+        published: 4321
+        mode: host
     networks:
       - infra_traefik
 
