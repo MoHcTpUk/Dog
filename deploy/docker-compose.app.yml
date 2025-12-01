@@ -60,7 +60,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
       - ./keycloak/init-keycloak.sql:/docker-entrypoint-initdb.d/01-init-keycloak.sql
-      - ./telegram-bot/init-telegram-bot-db.sql:/docker-entrypoint-initdb.d/02-init-telegram-bot-db.sql
     ports:
       - "4321:5432"
     networks:
@@ -68,9 +67,6 @@ services:
 
   telegram-bot:
     image: ghcr.io/mohctpuk/dog-telegram-bot:latest
-    environment:
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - DB_CONNECTION_STRING=Host=postgres;Port=5432;Database=telegrambot;Username=user;Password=password
     depends_on:
       - postgres
     networks:

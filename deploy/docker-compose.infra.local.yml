@@ -1,5 +1,7 @@
 services:
   traefik:
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
       - target: 80
         published: 8000

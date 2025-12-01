@@ -12,7 +12,6 @@ services:
       - "--certificatesResolvers.letsencrypt.acme.email=oleg.shmatkoff@gmail.com"
       - "--certificatesResolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
     volumes:
-      - ./traefik/acme.json:/letsencrypt/acme.json
       - /var/run/docker.sock:/var/run/docker.sock:ro
     deploy:
       placement:

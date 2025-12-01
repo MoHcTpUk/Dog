@@ -12,8 +12,8 @@ fi
 
 docker buildx build \
   --platform $PLATFORM \
-  -f build/backend/TelegramBot.Dockerfile \
+  -f ../build/telegrambot/TelegramBot.Dockerfile \
   -t ghcr.io/mohctpuk/dog-telegram-bot:latest \
   --load \
-  .
+  ../src/telegrambot
 
