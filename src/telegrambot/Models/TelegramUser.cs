@@ -81,6 +81,11 @@ public class TelegramUser
     public bool SupportsInlineQueries { get; set; }
     
     /// <summary>
+    /// ID топика в группе для сообщений этого пользователя
+    /// </summary>
+    public int? ForumTopicId { get; set; }
+    
+    /// <summary>
     /// Дата создания записи
     /// </summary>
     public DateTime CreatedAt { get; set; }

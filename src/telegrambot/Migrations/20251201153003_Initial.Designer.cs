@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InviteTelegramBot.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251201135148_Initial")]
+    [Migration("20251201153003_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -54,6 +54,9 @@ namespace InviteTelegramBot.Migrations
 
                     b.Property<string>("FirstName")
                         .HasColumnType("text");
+
+                    b.Property<int?>("ForumTopicId")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("HasMainWebApp")
                         .HasColumnType("boolean")

@@ -31,6 +31,7 @@ namespace InviteTelegramBot.Migrations
                     can_read_all_group_messages = table.Column<bool>(type: "boolean", nullable: false),
                     has_main_web_app = table.Column<bool>(type: "boolean", nullable: false),
                     supports_inline_queries = table.Column<bool>(type: "boolean", nullable: false),
+                    ForumTopicId = table.Column<int>(type: "integer", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },

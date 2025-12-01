@@ -22,7 +22,7 @@ namespace InviteTelegramBot.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("TelegramBot.Models.TelegramUser", b =>
+            modelBuilder.Entity("InviteTelegramBot.Models.TelegramUser", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -51,6 +51,9 @@ namespace InviteTelegramBot.Migrations
 
                     b.Property<string>("FirstName")
                         .HasColumnType("text");
+
+                    b.Property<int?>("ForumTopicId")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("HasMainWebApp")
                         .HasColumnType("boolean")

@@ -13,12 +13,14 @@ namespace InviteTelegramBot;
 
 class Program
 {
-    // Настройки подключения к БД и Telegram
     private static readonly string BotToken = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN") 
         ?? "8424101909:AAGZr21FDh69fk6ZdDQZqA4bpwOI0ZBjoqQ";
     
     private static readonly string DbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") 
         ?? "Host=localhost;Port=4321;Database=telegrambot;Username=user;Password=password";
+
+    private static readonly string ForumGroupIdStr = Environment.GetEnvironmentVariable("FORUM_GROUP_ID") ?? "-1003237672235";
+    private static readonly long? ForumGroupId = string.IsNullOrEmpty(ForumGroupIdStr) ? null : long.Parse(ForumGroupIdStr);
 
     private static IServiceProvider? _serviceProvider;
 
@@ -26,37 +28,30 @@ class Program
     {
         Console.WriteLine("Starting Telegram Bot...");
 
-        // Настройка Dependency Injection
         var services = new ServiceCollection();
         ConfigureServices(services);
         _serviceProvider = services.BuildServiceProvider();
 
-        // Применение миграций и инициализация базы данных
         await InitializeDatabaseAsync();
 
-        // Создание бота
         var botClient = new TelegramBotClient(BotToken);
         
-        // Проверка соединения
         var me = await botClient.GetMe();
         Console.WriteLine($"Bot started: @{me.Username}");
 
-        // Настройка обработчика обновлений
         var receiverOptions = new ReceiverOptions
         {
-            AllowedUpdates = [] // Получать все типы обновлений
+            AllowedUpdates = []
         };
 
         using var cts = new CancellationTokenSource();
 
-        // Обработка Ctrl+C для graceful shutdown
         Console.CancelKeyPress += (sender, e) =>
         {
             e.Cancel = true;
             cts.Cancel();
         };
 
-        // Запуск получения обновлений
         botClient.StartReceiving(
             updateHandler: HandleUpdateAsync,
             errorHandler: HandlePollingErrorAsync,
@@ -66,7 +61,6 @@ class Program
 
         Console.WriteLine("Bot is running. Press Ctrl+C to exit.");
         
-        // Ожидание завершения
         try
         {
             await Task.Delay(-1, cts.Token);
@@ -77,24 +71,16 @@ class Program
         }
     }
 
-    /// <summary>
-    /// Настройка служб Dependency Injection
-    /// </summary>
     static void ConfigureServices(IServiceCollection services)
     {
-        // Регистрация DbContext с использованием PostgreSQL
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(DbConnectionString));
     }
 
-    /// <summary>
-    /// Инициализация базы данных - создание БД и применение миграций
-    /// </summary>
     static async Task InitializeDatabaseAsync()
     {
         try
         {
-            // Применение миграций
             using var scope = _serviceProvider!.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
@@ -109,14 +95,10 @@ class Program
         }
     }
 
-    /// <summary>
-    /// Обработчик входящих обновлений
-    /// </summary>
     static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         try
         {
-            // Обрабатываем только текстовые сообщения
             if (update.Type != UpdateType.Message || update.Message?.Text == null)
                 return;
 
@@ -131,10 +113,13 @@ class Program
 
             Console.WriteLine($"Received message from {user.Username ?? user.FirstName}: {messageText}");
 
-            // Обработка команды /start
             if (messageText.StartsWith("/start"))
             {
                 await HandleStartCommandAsync(botClient, chatId, user, cancellationToken);
+            }
+            else
+            {
+                await ForwardMessageToForumAsync(botClient, message, user, cancellationToken);
             }
         }
         catch (Exception ex)
@@ -144,20 +129,14 @@ class Program
         }
     }
 
-    /// <summary>
-    /// Обработчик команды /start
-    /// </summary>
     static async Task HandleStartCommandAsync(ITelegramBotClient botClient, long chatId, User user, CancellationToken cancellationToken)
     {
         try
         {
-            // Сохранение информации о пользователе в БД
-            await SaveUserToDatabaseAsync(user);
+            var (isNewUser, telegramUser) = await SaveUserToDatabaseAsync(botClient, user, cancellationToken);
 
-            // Формирование приветственного сообщения
             var welcomeMessage = BuildWelcomeMessage(user);
 
-            // Отправка приветственного сообщения
             await botClient.SendMessage(
                 chatId: chatId,
                 text: welcomeMessage,
@@ -172,7 +151,6 @@ class Program
             Console.WriteLine($"Error handling /start command: {ex.Message}");
             Console.WriteLine(ex.StackTrace);
             
-            // Отправка сообщения об ошибке пользователю
             await botClient.SendMessage(
                 chatId: chatId,
                 text: "Произошла ошибка при обработке команды. Попробуйте позже.",
@@ -181,23 +159,23 @@ class Program
         }
     }
 
-    /// <summary>
-    /// Сохранение пользователя в базу данных через Entity Framework
-    /// </summary>
-    static async Task SaveUserToDatabaseAsync(User user)
+    static async Task<(bool isNewUser, TelegramUser telegramUser)> SaveUserToDatabaseAsync(
+        ITelegramBotClient botClient, 
+        User user, 
+        CancellationToken cancellationToken)
     {
         using var scope = _serviceProvider!.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        // Поиск существующего пользователя
         var existingUser = await dbContext.TelegramUsers
-            .FirstOrDefaultAsync(u => u.TelegramId == user.Id);
+            .FirstOrDefaultAsync(u => u.TelegramId == user.Id, cancellationToken);
 
         var now = DateTime.UtcNow;
+        bool isNewUser = false;
+        TelegramUser resultUser;
 
         if (existingUser != null)
         {
-            // Обновление существующего пользователя
             existingUser.Username = user.Username;
             existingUser.FirstName = user.FirstName;
             existingUser.LastName = user.LastName;
@@ -214,10 +192,10 @@ class Program
 
             dbContext.TelegramUsers.Update(existingUser);
             Console.WriteLine($"Updated existing user {user.Id}");
+            resultUser = existingUser;
         }
         else
         {
-            // Создание нового пользователя
             var newUser = new TelegramUser
             {
                 TelegramId = user.Id,
@@ -237,16 +215,29 @@ class Program
                 UpdatedAt = now
             };
 
-            await dbContext.TelegramUsers.AddAsync(newUser);
+            await dbContext.TelegramUsers.AddAsync(newUser, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            
+            isNewUser = true;
+            resultUser = newUser;
             Console.WriteLine($"Created new user {user.Id}");
+
+            if (ForumGroupId.HasValue)
+            {
+                var topicId = await CreateForumTopicAsync(botClient, user, cancellationToken);
+                if (topicId.HasValue)
+                {
+                    resultUser.ForumTopicId = topicId.Value;
+                    resultUser.UpdatedAt = DateTime.UtcNow;
+                    dbContext.TelegramUsers.Update(resultUser);
+                }
+            }
         }
 
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return (isNewUser, resultUser);
     }
 
-    /// <summary>
-    /// Формирование приветственного сообщения
-    /// </summary>
     static string BuildWelcomeMessage(User user)
     {
         return """
@@ -258,9 +249,148 @@ class Program
                """;
     }
 
-    /// <summary>
-    /// Обработчик ошибок при получении обновлений
-    /// </summary>
+    static async Task<int?> CreateForumTopicAsync(ITelegramBotClient botClient, User user, CancellationToken cancellationToken)
+    {
+        if (!ForumGroupId.HasValue)
+        {
+            Console.WriteLine("Forum group ID not configured");
+            return null;
+        }
+
+        try
+        {
+            var topicName = BuildTopicName(user);
+            var topic = await botClient.CreateForumTopic(
+                chatId: ForumGroupId.Value,
+                name: topicName,
+                cancellationToken: cancellationToken
+            );
+
+            Console.WriteLine($"Created forum topic {topic.MessageThreadId} for user {user.Id}: {topicName}");
+            
+            var infoMessage = BuildUserInfoMessage(user);
+            await botClient.SendMessage(
+                chatId: ForumGroupId.Value,
+                text: infoMessage,
+                messageThreadId: topic.MessageThreadId,
+                parseMode: ParseMode.Html,
+                cancellationToken: cancellationToken
+            );
+
+            return topic.MessageThreadId;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating forum topic for user {user.Id}: {ex.Message}");
+            Console.WriteLine(ex.StackTrace);
+            return null;
+        }
+    }
+
+    static string BuildTopicName(User user)
+    {
+        var name = new StringBuilder();
+        
+        if (!string.IsNullOrEmpty(user.FirstName))
+            name.Append(user.FirstName);
+        
+        if (!string.IsNullOrEmpty(user.LastName))
+        {
+            if (name.Length > 0)
+                name.Append(" ");
+            name.Append(user.LastName);
+        }
+
+        if (name.Length == 0 && !string.IsNullOrEmpty(user.Username))
+            name.Append($"@{user.Username}");
+
+        if (name.Length == 0)
+            name.Append($"User {user.Id}");
+
+        return name.ToString();
+    }
+
+    static string BuildUserInfoMessage(User user)
+    {
+        var info = new StringBuilder();
+        info.AppendLine("👤 <b>Новый пользователь</b>");
+        info.AppendLine();
+        info.AppendLine($"<b>ID:</b> <code>{user.Id}</code>");
+        
+        if (!string.IsNullOrEmpty(user.Username))
+            info.AppendLine($"<b>Username:</b> @{user.Username}");
+        
+        if (!string.IsNullOrEmpty(user.FirstName))
+            info.AppendLine($"<b>Имя:</b> {user.FirstName}");
+        
+        if (!string.IsNullOrEmpty(user.LastName))
+            info.AppendLine($"<b>Фамилия:</b> {user.LastName}");
+        
+        if (!string.IsNullOrEmpty(user.LanguageCode))
+            info.AppendLine($"<b>Язык:</b> {user.LanguageCode}");
+        
+        if (user.IsPremium)
+            info.AppendLine("⭐️ <b>Premium</b>");
+
+        return info.ToString();
+    }
+
+    static async Task ForwardMessageToForumAsync(ITelegramBotClient botClient, Message message, User user, CancellationToken cancellationToken)
+    {
+        if (!ForumGroupId.HasValue)
+        {
+            Console.WriteLine("Forum group ID not configured, skipping message forwarding");
+            return;
+        }
+
+        try
+        {
+            using var scope = _serviceProvider!.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            
+            var telegramUser = await dbContext.TelegramUsers
+                .FirstOrDefaultAsync(u => u.TelegramId == user.Id, cancellationToken);
+
+            if (telegramUser == null)
+            {
+                Console.WriteLine($"User {user.Id} not found in database");
+                return;
+            }
+
+            if (!telegramUser.ForumTopicId.HasValue)
+            {
+                var topicId = await CreateForumTopicAsync(botClient, user, cancellationToken);
+                if (topicId.HasValue)
+                {
+                    telegramUser.ForumTopicId = topicId.Value;
+                    telegramUser.UpdatedAt = DateTime.UtcNow;
+                    dbContext.TelegramUsers.Update(telegramUser);
+                    await dbContext.SaveChangesAsync(cancellationToken);
+                }
+                else
+                {
+                    Console.WriteLine($"Failed to create topic for user {user.Id}");
+                    return;
+                }
+            }
+
+            await botClient.ForwardMessage(
+                chatId: ForumGroupId.Value,
+                fromChatId: message.Chat.Id,
+                messageId: message.MessageId,
+                messageThreadId: telegramUser.ForumTopicId.Value,
+                cancellationToken: cancellationToken
+            );
+
+            Console.WriteLine($"Forwarded message from user {user.Id} to topic {telegramUser.ForumTopicId.Value}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error forwarding message to forum: {ex.Message}");
+            Console.WriteLine(ex.StackTrace);
+        }
+    }
+
     static Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
     {
         Console.WriteLine($"Polling error: {exception.Message}");
