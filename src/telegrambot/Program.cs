@@ -356,10 +356,12 @@ class Program
     {
         return """
                Отлично! Вы в списке первых пользователей 👏
-
+               
                Бот не будет присылать лишних сообщений: только одно важное перед запуском, чтобы вы ничего не пропустили
-
-               А пока можно заглянуть в наш Telegram-канал: там мы рассказываем про приложение и делимся новостями
+               
+               А пока можно заглянуть в наш канал @dogappa: там мы рассказываем про приложение и делимся новостями
+               
+               Если появятся вопросы или идеи, напишите сюда. Мы на связи!
                """;
     }
 
@@ -480,6 +482,12 @@ class Program
                     telegramUser.UpdatedAt = DateTime.UtcNow;
                     dbContext.TelegramUsers.Update(telegramUser);
                     await dbContext.SaveChangesAsync(cancellationToken);
+
+                    await botClient.SendTextMessageAsync(
+                        chatId: message.Chat.Id,
+                        text: "Спасибо за сообщение! Команда Dog Appa скоро ответит",
+                        cancellationToken: cancellationToken
+                    );
                 }
                 else
                 {
@@ -488,15 +496,63 @@ class Program
                 }
             }
 
-            await botClient.ForwardMessage(
-                chatId: ForumGroupId.Value,
-                fromChatId: message.Chat.Id,
-                messageId: message.MessageId,
-                messageThreadId: telegramUser.ForumTopicId.Value,
-                cancellationToken: cancellationToken
-            );
+            // Пытаемся переслать сообщение в топик
+            try
+            {
+                await botClient.ForwardMessage(
+                    chatId: ForumGroupId.Value,
+                    fromChatId: message.Chat.Id,
+                    messageId: message.MessageId,
+                    messageThreadId: telegramUser.ForumTopicId.Value,
+                    cancellationToken: cancellationToken
+                );
 
-            Console.WriteLine($"Forwarded message from user {user.Id} to topic {telegramUser.ForumTopicId.Value}");
+                Console.WriteLine($"Forwarded message from user {user.Id} to topic {telegramUser.ForumTopicId.Value}");
+            }
+            catch (Exception forwardEx)
+            {
+                // Проверяем, не был ли удален топик
+                if (forwardEx.Message.Contains("thread not found") || 
+                    forwardEx.Message.Contains("TOPIC_DELETED") ||
+                    forwardEx.Message.Contains("message thread not found"))
+                {
+                    Console.WriteLine($"Topic {telegramUser.ForumTopicId.Value} was deleted, creating new topic for user {user.Id}");
+                    
+                    // Создаем новый топик
+                    var newTopicId = await CreateForumTopicAsync(botClient, user, cancellationToken);
+                    if (newTopicId.HasValue)
+                    {
+                        // Обновляем id топика в базе данных
+                        telegramUser.ForumTopicId = newTopicId.Value;
+                        telegramUser.UpdatedAt = DateTime.UtcNow;
+                        dbContext.TelegramUsers.Update(telegramUser);
+                        await dbContext.SaveChangesAsync(cancellationToken);
+
+                        Console.WriteLine($"Created new topic {newTopicId.Value} for user {user.Id}");
+
+                        // Пытаемся переслать сообщение в новый топик
+                        await botClient.ForwardMessage(
+                            chatId: ForumGroupId.Value,
+                            fromChatId: message.Chat.Id,
+                            messageId: message.MessageId,
+                            messageThreadId: newTopicId.Value,
+                            cancellationToken: cancellationToken
+                        );
+
+                        Console.WriteLine($"Forwarded message from user {user.Id} to new topic {newTopicId.Value}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Failed to create new topic for user {user.Id}");
+                        throw;
+                    }
+                }
+                else
+                {
+                    // Если ошибка не связана с удалением топика, пробрасываем её дальше
+                    throw;
+                }
+            }
         }
         catch (Exception ex)
         {
