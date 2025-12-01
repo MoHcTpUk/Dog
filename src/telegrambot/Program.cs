@@ -24,7 +24,9 @@ class Program
 
     private static IServiceProvider? _serviceProvider;
 
-    static async Task Main(string[] args)
+    private static readonly int BroadcastTopic = 37;
+    
+    static async Task Main()
     {
         Console.WriteLine("Starting Telegram Bot...");
 
@@ -110,8 +112,15 @@ class Program
 
             var chatId = message.Chat.Id;
             var messageText = message.Text;
+            var topicId = message.MessageThreadId ?? 0;
+            
+            Console.WriteLine($"Received message from {user.Username ?? user.FirstName}: {messageText} in chat {chatId}, topic {topicId}");
 
-            Console.WriteLine($"Received message from {user.Username ?? user.FirstName}: {messageText}");
+            if (chatId == ForumGroupId)
+            {
+                await HandleForumMessageAsync(botClient, message, cancellationToken);
+                return;
+            }
 
             if (messageText.StartsWith("/start"))
             {
@@ -156,6 +165,111 @@ class Program
                 text: "Произошла ошибка при обработке команды. Попробуйте позже.",
                 cancellationToken: cancellationToken
             );
+        }
+    }
+
+    static async Task HandleForumMessageAsync(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (!message.MessageThreadId.HasValue)
+            {
+                Console.WriteLine("Message in forum group but not in a topic, ignoring");
+                return;
+            }
+
+            var topicId = message.MessageThreadId.Value;
+
+            using var scope = _serviceProvider!.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            if (topicId == BroadcastTopic)
+            {
+                await BroadcastMessageToAllUsersAsync(botClient, message, dbContext, cancellationToken);
+                return;
+            }
+
+            var telegramUser = await dbContext.TelegramUsers
+                .FirstOrDefaultAsync(u => u.ForumTopicId == topicId, cancellationToken);
+
+            if (telegramUser == null)
+            {
+                Console.WriteLine($"No user found for topic {topicId}");
+                return;
+            }
+
+            var messageText = message.Text ?? "[Сообщение без текста]";
+            var senderName = message.From?.FirstName ?? "Администратор";
+            
+            if (!string.IsNullOrEmpty(message.From?.Username))
+                senderName = $"{senderName} (@{message.From.Username})";
+
+            var textToSend = $"💬 <b>Ответ от {senderName}:</b>\n\n{messageText}";
+
+            await botClient.SendMessage(
+                chatId: telegramUser.TelegramId,
+                text: textToSend,
+                parseMode: ParseMode.Html,
+                cancellationToken: cancellationToken
+            );
+
+            Console.WriteLine($"Sent reply from topic {topicId} to user {telegramUser.TelegramId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error handling forum message: {ex.Message}");
+            Console.WriteLine(ex.StackTrace);
+        }
+    }
+
+    static async Task BroadcastMessageToAllUsersAsync(ITelegramBotClient botClient, Message message, ApplicationDbContext dbContext, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var messageText = message.Text ?? "[Сообщение без текста]";
+            Console.WriteLine($"Broadcasting message from topic {BroadcastTopic} to all users: {messageText}");
+
+            var allUsers = await dbContext.TelegramUsers.ToListAsync(cancellationToken);
+            
+            if (allUsers.Count == 0)
+            {
+                Console.WriteLine("No users found in database for broadcasting");
+                return;
+            }
+
+            int successCount = 0;
+            int failCount = 0;
+
+            foreach (var user in allUsers)
+            {
+                try
+                {
+                    await botClient.SendMessage(
+                        chatId: user.TelegramId,
+                        text: messageText,
+                        parseMode: ParseMode.Html,
+                        cancellationToken: cancellationToken
+                    );
+                    
+                    successCount++;
+                    Console.WriteLine($"Broadcast message sent to user {user.TelegramId} ({user.Username ?? user.FirstName})");
+                    
+                    // Небольшая задержка между отправками, чтобы избежать лимитов Telegram API
+                    await Task.Delay(50, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    failCount++;
+                    Console.WriteLine($"Failed to send broadcast message to user {user.TelegramId}: {ex.Message}");
+                }
+            }
+
+            Console.WriteLine($"Broadcast completed: {successCount} successful, {failCount} failed out of {allUsers.Count} users");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in broadcast: {ex.Message}");
+            Console.WriteLine(ex.StackTrace);
         }
     }
 
