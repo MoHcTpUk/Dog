@@ -254,7 +254,6 @@ class Program
                     successCount++;
                     Console.WriteLine($"Broadcast message sent to user {user.TelegramId} ({user.Username ?? user.FirstName})");
                     
-                    // Небольшая задержка между отправками, чтобы избежать лимитов Telegram API
                     await Task.Delay(50, cancellationToken);
                 }
                 catch (Exception ex)
@@ -496,7 +495,6 @@ class Program
                 }
             }
 
-            // Пытаемся переслать сообщение в топик
             try
             {
                 await botClient.ForwardMessage(
@@ -511,18 +509,15 @@ class Program
             }
             catch (Exception forwardEx)
             {
-                // Проверяем, не был ли удален топик
                 if (forwardEx.Message.Contains("thread not found") || 
                     forwardEx.Message.Contains("TOPIC_DELETED") ||
                     forwardEx.Message.Contains("message thread not found"))
                 {
                     Console.WriteLine($"Topic {telegramUser.ForumTopicId.Value} was deleted, creating new topic for user {user.Id}");
                     
-                    // Создаем новый топик
                     var newTopicId = await CreateForumTopicAsync(botClient, user, cancellationToken);
                     if (newTopicId.HasValue)
                     {
-                        // Обновляем id топика в базе данных
                         telegramUser.ForumTopicId = newTopicId.Value;
                         telegramUser.UpdatedAt = DateTime.UtcNow;
                         dbContext.TelegramUsers.Update(telegramUser);
@@ -530,7 +525,6 @@ class Program
 
                         Console.WriteLine($"Created new topic {newTopicId.Value} for user {user.Id}");
 
-                        // Пытаемся переслать сообщение в новый топик
                         await botClient.ForwardMessage(
                             chatId: ForumGroupId.Value,
                             fromChatId: message.Chat.Id,
@@ -549,7 +543,6 @@ class Program
                 }
                 else
                 {
-                    // Если ошибка не связана с удалением топика, пробрасываем её дальше
                     throw;
                 }
             }
