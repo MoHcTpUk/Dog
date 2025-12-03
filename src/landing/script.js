@@ -148,49 +148,49 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  const headerCtaButton = document.querySelector(".header .btn-primary");
-  if (headerCtaButton) {
-    headerCtaButton.addEventListener("click", function () {
-      const ctaSection = document.getElementById("cta");
-      if (ctaSection) {
-        const rect = ctaSection.getBoundingClientRect();
-        const scrollTop =
-          window.pageYOffset || document.documentElement.scrollTop;
-        const targetPosition = rect.top + scrollTop - 40;
+  // const headerCtaButton = document.querySelector(".header .btn-primary");
+  // if (headerCtaButton) {
+  //   headerCtaButton.addEventListener("click", function () {
+  //     const ctaSection = document.getElementById("cta");
+  //     if (ctaSection) {
+  //       const rect = ctaSection.getBoundingClientRect();
+  //       const scrollTop =
+  //         window.pageYOffset || document.documentElement.scrollTop;
+  //       const targetPosition = rect.top + scrollTop - 40;
 
-        window.scrollTo({
-          top: targetPosition,
-          behavior: "smooth",
-        });
-        setTimeout(() => {
-          const input = ctaSection.querySelector(".subscribe-input");
-          input?.focus();
-        }, 500);
-      }
-    });
-  }
+  //       window.scrollTo({
+  //         top: targetPosition,
+  //         behavior: "smooth",
+  //       });
+  //       setTimeout(() => {
+  //         const input = ctaSection.querySelector(".subscribe-input");
+  //         input?.focus();
+  //       }, 500);
+  //     }
+  //   });
+  // }
 
-  const footerCtaButton = document.querySelector(".footer .btn-primary");
-  if (footerCtaButton) {
-    footerCtaButton.addEventListener("click", function () {
-      const ctaSection = document.getElementById("cta");
-      if (ctaSection) {
-        const rect = ctaSection.getBoundingClientRect();
-        const scrollTop =
-          window.pageYOffset || document.documentElement.scrollTop;
-        const targetPosition = rect.top + scrollTop - 40;
+  // const footerCtaButton = document.querySelector(".footer .btn-primary");
+  // if (footerCtaButton) {
+  //   footerCtaButton.addEventListener("click", function () {
+  //     const ctaSection = document.getElementById("cta");
+  //     if (ctaSection) {
+  //       const rect = ctaSection.getBoundingClientRect();
+  //       const scrollTop =
+  //         window.pageYOffset || document.documentElement.scrollTop;
+  //       const targetPosition = rect.top + scrollTop - 40;
 
-        window.scrollTo({
-          top: targetPosition,
-          behavior: "smooth",
-        });
-        setTimeout(() => {
-          const input = ctaSection.querySelector(".subscribe-input");
-          input?.focus();
-        }, 500);
-      }
-    });
-  }
+  //       window.scrollTo({
+  //         top: targetPosition,
+  //         behavior: "smooth",
+  //       });
+  //       setTimeout(() => {
+  //         const input = ctaSection.querySelector(".subscribe-input");
+  //         input?.focus();
+  //       }, 500);
+  //     }
+  //   });
+  // }
 
   privacyLinks.forEach((link) => {
     link.addEventListener("click", function (e) {
