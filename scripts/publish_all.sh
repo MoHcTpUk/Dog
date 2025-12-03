@@ -34,7 +34,7 @@ docker buildx build \
   ../src/landing &
 
   docker buildx build \
-  --platform $PLATFORM \
+  --platform $PLATFORMS \
   -f ../build/telegrambot/TelegramBot.Dockerfile \
   -t ghcr.io/mohctpuk/dog-telegram-bot:latest \
   --push \

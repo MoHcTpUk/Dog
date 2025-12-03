@@ -15,11 +15,13 @@ docker buildx build \
   -f ../build/backend/Gateway.Dockerfile \
   -t ghcr.io/mohctpuk/dog-gateway:latest \
   --load \
-  ../src/backend/Dog
+  ../src/backend/Dog &
 
 docker buildx build \
   --platform $PLATFORM \
   -f ../build/backend/Users.Dockerfile \
   -t ghcr.io/mohctpuk/dog-users:latest \
   --load \
-  ../src/backend/Dog
+  ../src/backend/Dog &
+
+wait
