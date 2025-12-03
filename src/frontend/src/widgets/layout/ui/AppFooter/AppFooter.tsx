@@ -8,14 +8,6 @@ import {
   IonBadge,
 } from "@ionic/react";
 import {
-  homeOutline,
-  home,
-  mapOutline,
-  map,
-  addCircleOutline,
-  addCircle,
-  personOutline,
-  person,
   heartOutline,
   heart,
 } from "ionicons/icons";
@@ -39,8 +31,8 @@ export const AppFooter: FC = () => {
   const tabs: TabConfig[] = [
     {
       path: "/activities",
-      icon: homeOutline,
-      iconActive: home,
+      icon: "home-outline",
+      iconActive: "home",
       label: t("Home"),
     },
     {
@@ -51,20 +43,20 @@ export const AppFooter: FC = () => {
     },
     {
       path: "/activity/create",
-      icon: addCircleOutline,
-      iconActive: addCircle,
+      icon: "add-circle-outline",
+      iconActive: "add-circle",
       label: t("Create"),
     },
     {
       path: "/map",
-      icon: mapOutline,
-      iconActive: map,
+      icon: "map-outline",
+      iconActive: "map",
       label: t("Map"),
     },
     {
       path: "/profile",
-      icon: personOutline,
-      iconActive: person,
+      icon: "person-outline",
+      iconActive: "person",
       label: t("Profile"),
       badge: 0, // TODO: implement badge count
     },

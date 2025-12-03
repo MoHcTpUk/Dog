@@ -16,8 +16,8 @@ export const DogCommentStep: React.FC<DogCommentStepProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-6">
-      <Text variant="bold-24" tag="h1" className="mb-8  text-start">
+    <div className="flex flex-col gap-8">
+      <Text variant="bold-24" tag="h1" className="text-start">
         {t("Tell us about your pet")}
       </Text>
 

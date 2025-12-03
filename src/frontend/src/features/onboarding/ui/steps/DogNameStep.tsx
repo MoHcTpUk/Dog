@@ -17,8 +17,8 @@ export const DogNameStep: React.FC<DogNameStepProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-6">
-      <Text variant="bold-24" tag="h1" className="mb-2 text-start">
+    <div className="flex flex-col gap-8">
+      <Text variant="bold-24" className="text-start">
         {t("What is your pet's name?")}
       </Text>
 
@@ -27,7 +27,6 @@ export const DogNameStep: React.FC<DogNameStepProps> = ({
         value={data.name}
         maxLength={30}
         error={errors.name}
-        required
         className="border-0 bg-transparent p-0 h-auto"
         onInput={(value) => {
           onUpdate({

@@ -9,11 +9,6 @@ import {
   IonTitle,
   IonBadge,
 } from "@ionic/react";
-import {
-  addOutline,
-  notificationsOutline,
-  personCircleOutline,
-} from "ionicons/icons";
 import { useHistory, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useApp } from "@shared/hooks";
@@ -92,7 +87,7 @@ export const AppHeader: FC<AppHeaderProps> = ({
                 />
               ) : (
                 <IonIcon
-                  icon={personCircleOutline}
+                  icon="person-circle-outline"
                   className="text-3xl"
                   style={{ color: transparent ? "var(--color-text-primary)" : "var(--color-text-on-primary)" }}
                 />
@@ -115,7 +110,7 @@ export const AppHeader: FC<AppHeaderProps> = ({
             className="relative"
           >
             <IonIcon
-              icon={notificationsOutline}
+              icon="notifications-outline"
               style={{ color: transparent ? "var(--color-text-primary)" : "var(--color-text-on-primary)" }}
             />
             {notificationCount > 0 && (
@@ -139,7 +134,7 @@ export const AppHeader: FC<AppHeaderProps> = ({
               )}
             >
               <IonIcon
-                icon={addOutline}
+                icon="add-outline"
                 style={{ color: transparent ? "var(--color-text-primary)" : "var(--color-text-on-primary)" }}
               />
             </IonButton>

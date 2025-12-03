@@ -72,7 +72,7 @@ export const Button: React.FC<ButtonProps> = ({
 
     // Width
     if (fullWidth) {
-      baseClasses.push("self-stretch");
+      baseClasses.push("w-full");
     }
 
     // Variant-specific styles

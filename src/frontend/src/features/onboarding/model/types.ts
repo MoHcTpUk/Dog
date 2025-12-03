@@ -29,8 +29,8 @@ export interface DogProfileData {
 }
 
 export interface StepErrors {
-  name?: boolean;
-  gender?: boolean;
-  breed?: boolean;
-  ownerName?: boolean;
+  name?: string;
+  gender?: string;
+  breed?: string;
+  ownerName?: string;
 }

@@ -168,7 +168,6 @@ export const OwnerInfoStep: React.FC<OwnerInfoStepProps> = ({
               <Input
                 placeholder={t("Your name")}
                 value={data.owner.name}
-                required
                 error={errors.ownerName}
                 onInput={(value) => handleOwnerUpdate("name", value)}
                 className="border-0 bg-transparent p-0 h-auto"

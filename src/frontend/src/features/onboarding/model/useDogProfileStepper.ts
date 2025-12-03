@@ -96,14 +96,14 @@ export const useDogProfileStepper = (
     switch (step) {
       case 1:
         if (!dataToValidate.name.trim()) {
-          newErrors.name = true;
+          newErrors.name = t("Please enter your pet's name");
           setErrors(newErrors);
           return false;
         }
         break;
       case 2:
         if (!dataToValidate.gender) {
-          newErrors.gender = true;
+          newErrors.gender = t("Please select your pet's gender");
           setErrors(newErrors);
           return false;
         }
@@ -121,7 +121,7 @@ export const useDogProfileStepper = (
         break;
       case 10:
         if (!dataToValidate.owner.name.trim()) {
-          newErrors.ownerName = true;
+          newErrors.ownerName = t("Please enter your name");
           setErrors(newErrors);
           return false;
         }

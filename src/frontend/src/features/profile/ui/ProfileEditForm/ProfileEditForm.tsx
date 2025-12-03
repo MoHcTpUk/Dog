@@ -99,32 +99,24 @@ export const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
         {/* Form Fields */}
         <div className="space-y-4">
           <Input
-            label={t("Name")}
             placeholder={t("Enter your name")}
             value={formData.name}
-            required
-            error={errors.name}
-            errorMessage={t("Name is required")}
+            error={errors.name ? t("Name is required") : undefined}
             onInput={(value) => updateField("name", value)}
           />
 
           <Input
-            label={t("Email")}
             type="email"
             placeholder="your@email.com"
             value={formData.email}
-            required
-            error={errors.email}
-            errorMessage={t("Email is required")}
+            error={errors.email ? t("Email is required") : undefined}
             onInput={(value) => updateField("email", value)}
           />
 
           <Input
-            label={t("Age")}
             type="number"
             placeholder="25"
             value={formData.age}
-            helperText={t("Helps find company with common interests")}
             onInput={(value) => updateField("age", value)}
           />
 

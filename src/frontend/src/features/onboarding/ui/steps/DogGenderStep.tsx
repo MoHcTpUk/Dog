@@ -26,18 +26,25 @@ export const DogGenderStep: React.FC<DogGenderStepProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      <Text variant="bold-24" tag="h1" className="mb-2 text-start">
+    <div className="flex flex-col gap-8">
+      <Text variant="bold-24" tag="h1" className="text-start">
         {t("Pet Gender")}
       </Text>
 
-      <TagRadioGroup
-        options={genderOptions}
-        value={data.gender || ""}
-        onChange={handleGenderChange}
-        className="justify-start"
-        hasError={!!errors.gender}
-      />
+      <div className="flex flex-col gap-1.5">
+        <TagRadioGroup
+          options={genderOptions}
+          value={data.gender || ""}
+          onChange={handleGenderChange}
+          className="justify-start"
+          hasError={!!errors.gender}
+        />
+        {errors.gender && (
+          <Text variant="medium-14" color="error" className="text-start">
+            {errors.gender}
+          </Text>
+        )}
+      </div>
     </div>
   );
 };

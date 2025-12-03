@@ -45,10 +45,6 @@ export const Input: React.FC<InputProps> = ({
   // Wrapper classes based on state
   const wrapperClasses = classNames(
     "w-full h-16 p-5 bg-white rounded-2xl inline-flex flex-col justify-center items-center overflow-hidden",
-    {
-      "outline outline-1 outline-offset-[-1px] outline-info": focused && !hasError,
-      "outline outline-1 outline-offset-[-1px] outline-error": hasError,
-    }
   );
 
   // Text classes based on state
@@ -60,9 +56,21 @@ export const Input: React.FC<InputProps> = ({
     }
   );
 
+  const getBorderColor = () => {
+    if (hasError) return "var(--color-error)";
+    if (focused) return "var(--color-info)";
+    return "transparent";
+  };
+
   return (
     <div className={classNames("flex flex-col gap-1.5 w-full", className)}>
-      <div className={wrapperClasses}>
+      <div
+        className={wrapperClasses}
+        style={{
+          boxShadow: `inset 0 0 0 1px ${getBorderColor()}`,
+          transition: "box-shadow 300ms ease-in-out",
+        }}
+      >
         <div className="w-full inline-flex justify-between items-center">
           <IonInput
             type={type}

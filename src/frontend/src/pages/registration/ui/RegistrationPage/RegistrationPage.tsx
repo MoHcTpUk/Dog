@@ -67,11 +67,9 @@ export const RegistrationPage: React.FC = () => {
                 <Input
                   placeholder={t("E-mail")}
                   type="email"
-                  size="full"
                   value={emailValue || ""}
                   onInput={(value) => setValue("email", value)}
-                  error={!!errors.email}
-                  // errorMessage={errors.email?.message ? t(errors.email.message) : undefined}
+                  error={errors.email?.message ? t(errors.email.message) : undefined}
                 />
               </div>
 
