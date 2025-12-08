@@ -1,5 +1,13 @@
 services:
   traefik:
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--entryPoints.traefik.address=:8080"
+      - "--providers.swarm=true"
+      - "--providers.swarm.exposedbydefault=false"
+      - "--providers.swarm.network=infra_traefik"
+      - "--entryPoints.web.address=:80"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:

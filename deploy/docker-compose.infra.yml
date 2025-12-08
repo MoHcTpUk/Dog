@@ -1,16 +1,6 @@
 services:
   traefik:
     image: traefik:v3.6.2
-    command:
-      - "--log.level=DEBUG"
-      - "--api.insecure=true"
-      - "--providers.swarm=true"
-      - "--providers.swarm.exposedbydefault=false"
-      - "--providers.swarm.network=infra_traefik"
-      - "--entryPoints.web.address=:80"
-      - "--entryPoints.websecure.address=:443"
-      - "--certificatesResolvers.letsencrypt.acme.email=oleg.shmatkoff@gmail.com"
-      - "--certificatesResolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     deploy:

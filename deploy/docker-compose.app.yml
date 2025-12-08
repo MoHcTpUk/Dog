@@ -1,23 +1,25 @@
 services:
-  # gateway:
-  #   image: ghcr.io/mohctpuk/dog-gateway:latest
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
-  #     - "traefik.http.routers.backend.entrypoints=web"
-  #     - "traefik.http.middlewares.strip-api-prefix.stripprefix.prefixes=/api"
-  #     - "traefik.http.routers.backend.middlewares=strip-api-prefix"
-  #     - "traefik.http.services.backend.loadbalancer.server.port=8080"
-  #   networks:
-  #     - infra_traefik
-  #   environment:
-  #     - ASPNETCORE_ENVIRONMENT=Development
-  #   deploy:
-  #     restart_policy:
-  #         condition: on-failure
-  #         delay: 5s
-  #         max_attempts: 10
-  #         window: 60s
+  gateway:
+    image: ghcr.io/mohctpuk/dog-gateway:latest
+    networks:
+      - infra_traefik
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - postgres
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
+        - "traefik.http.routers.backend.entrypoints=web"
+        - "traefik.http.middlewares.strip-api-prefix.stripprefix.prefixes=/api"
+        - "traefik.http.routers.backend.middlewares=strip-api-prefix"
+        - "traefik.http.services.backend.loadbalancer.server.port=8080"
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 60s
           
   # users:
   #   image: ghcr.io/mohctpuk/dog-users:latest

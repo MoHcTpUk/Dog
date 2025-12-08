@@ -1,8 +1,6 @@
 services:
   traefik:
     command:
-      - "--log.level=DEBUG"
-      - "--api.insecure=true"
       - "--providers.swarm=true"
       - "--providers.swarm.exposedbydefault=false"
       - "--providers.swarm.network=infra_traefik"
