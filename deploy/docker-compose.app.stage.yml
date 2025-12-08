@@ -43,6 +43,19 @@ services:
     networks:
       - infra_traefik
 
+  telegram-bot:
+    image: ghcr.io/mohctpuk/dog-telegram-bot:latest
+    depends_on:
+      - postgres
+    networks:
+      - infra_traefik
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 60s
+
 networks:
   infra_traefik:
     external: true

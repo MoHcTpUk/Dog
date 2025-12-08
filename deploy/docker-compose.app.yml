@@ -40,18 +40,6 @@ services:
   #     - "traefik.http.services.frontend.loadbalancer.server.port=80"
   #   networks:
   #     - infra_traefik
-
-  landing:
-    image: ghcr.io/mohctpuk/dog-landing:latest
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.landing.rule=PathPrefix(`/`)"
-        - "traefik.http.routers.landing.entrypoints=web"
-        - "traefik.http.services.landing.loadbalancer.server.port=80"
-    networks:
-      - infra_traefik
-
   postgres:
     image: postgres:latest
     environment:
@@ -66,19 +54,6 @@ services:
         mode: host
     networks:
       - infra_traefik
-
-  telegram-bot:
-    image: ghcr.io/mohctpuk/dog-telegram-bot:latest
-    depends_on:
-      - postgres
-    networks:
-      - infra_traefik
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 10
-        window: 60s
 
   # nats:
   #   image: nats:latest
