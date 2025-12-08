@@ -56,33 +56,40 @@ services:
         mode: host
     networks:
       - infra_traefik
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  # nats:
-  #   image: nats:latest
-  #   command: ["-js", "-m", "8222"]
-  #   ports:
-  #     - "4222:4222"
-  #     - "8222:8222"
-  #   volumes:
-  #     - nats_data:/data
-  #   deploy:
-  #     replicas: 1
-  #     placement:
-  #       constraints: [node.role == manager]
-  #   networks:
-  #     - infra_traefik
+  nats:
+    image: nats:latest
+    command: ["-js", "-m", "8222"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    volumes:
+      - nats_data:/data
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - infra_traefik
 
-  # minio:
-  #   image: minio/minio:latest
-  #   ports:
-  #     - "9009:9000"     # API
-  #     - "9001:9001"     # Web UI
-  #   environment:
-  #     MINIO_ROOT_USER: adminadmin
-  #     MINIO_ROOT_PASSWORD: adminadmin
-  #   volumes:
-  #     - minio_data:/data
-  #   command: server /data --console-address ":9001"
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9009:9000"     # API
+      - "9001:9001"     # Web UI
+    environment:
+      MINIO_ROOT_USER: adminadmin
+      MINIO_ROOT_PASSWORD: adminadmin
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - infra_traefik
 
   # keycloak:
   #   image: quay.io/keycloak/keycloak:latest
@@ -107,8 +114,8 @@ services:
 
 volumes:
   postgres_data:
-#   nats_data:
-#   minio_data:
+  nats_data:
+  minio_data:
 
 networks:
   infra_traefik:
