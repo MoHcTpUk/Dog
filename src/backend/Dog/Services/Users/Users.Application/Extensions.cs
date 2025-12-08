@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Shared.Application;
 using Users.Api.Services;
 using Users.Application.Interfaces;
-using Users.Application.Models.Keycloak;
+using Users.Application.Models.Authentik;
 using Users.Application.Services;
 using Users.Infrastructure;
 
@@ -22,20 +22,20 @@ public static class Extensions
         return services;
     }
 
-    public static IServiceCollection AddKeycloakClient(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddAuthentikClient(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<KeycloakConfiguration>(configuration.GetSection("Keycloak"));
+        services.Configure<AuthentikConfiguration>(configuration.GetSection("Authentik"));
 
-        services.AddHttpClient<IKeycloakClient, KeycloakClient>(client =>
+        services.AddHttpClient<IAuthentikClient, AuthentikClient>(client =>
         {
-            var keycloakConfig = configuration.GetSection("Keycloak").Get<KeycloakConfiguration>();
-            if (keycloakConfig == null) return;
+            var authentikConfig = configuration.GetSection("Authentik").Get<AuthentikConfiguration>();
+            if (authentikConfig == null) return;
 
-            client.BaseAddress = new Uri($"{keycloakConfig.BaseUrl}/realms/{keycloakConfig.Realm}/");
+            client.BaseAddress = new Uri(authentikConfig.BaseUrl);
             client.Timeout = TimeSpan.FromSeconds(30);
         });
 
-        services.AddScoped<IKeycloakClient, KeycloakClient>();
+        services.AddScoped<IAuthentikClient, AuthentikClient>();
 
         return services;
     }

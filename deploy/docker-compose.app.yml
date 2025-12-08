@@ -7,6 +7,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       - postgres
+      - authentik-server
     deploy:
       labels:
         - "traefik.enable=true"
@@ -42,6 +43,7 @@ services:
   #     - "traefik.http.services.frontend.loadbalancer.server.port=80"
   #   networks:
   #     - infra_traefik
+
   postgres:
     image: postgres:latest
     environment:
@@ -49,7 +51,7 @@ services:
       POSTGRES_PASSWORD: password
     volumes:
       - postgres_data:/var/lib/postgresql
-      - ./keycloak/init-keycloak.sql:/docker-entrypoint-initdb.d/01-init-keycloak.sql
+      - ./authentik/init-authentik.sql:/docker-entrypoint-initdb.d/01-init-authentik.sql
     ports:
       - target: 5432
         published: 4321
@@ -61,6 +63,76 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  redis:
+    image: redis:alpine
+    command: --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    networks:
+      - infra_traefik
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  authentik-server:
+    image: ghcr.io/goauthentik/server:2024.2.2
+    command: server
+    environment:
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:-PleaseChangeThisToASecureRandomString123456}
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_POSTGRESQL__HOST: postgres
+      AUTHENTIK_POSTGRESQL__USER: user
+      AUTHENTIK_POSTGRESQL__PASSWORD: password
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_BOOTSTRAP_PASSWORD: admin
+      AUTHENTIK_BOOTSTRAP_TOKEN: admintoken123
+    volumes:
+      - authentik_media:/media
+      - authentik_templates:/templates
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - infra_traefik
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 60s
+
+  authentik-worker:
+    image: ghcr.io/goauthentik/server:2024.2.2
+    command: worker
+    environment:
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:-PleaseChangeThisToASecureRandomString123456}
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_POSTGRESQL__HOST: postgres
+      AUTHENTIK_POSTGRESQL__USER: user
+      AUTHENTIK_POSTGRESQL__PASSWORD: password
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - authentik_media:/media
+      - authentik_templates:/templates
+      - authentik_certs:/certs
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - infra_traefik
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 60s
 
   nats:
     image: nats:latest
@@ -91,31 +163,14 @@ services:
     networks:
       - infra_traefik
 
-  # keycloak:
-  #   image: quay.io/keycloak/keycloak:latest
-  #   command:
-  #     # replace on prod
-  #     - start-dev
-  #   environment:
-  #     # DB
-  #     KC_DB: postgres
-  #     KC_DB_URL: jdbc:postgresql://app_postgres:5432/keycloak
-  #     KC_DB_USERNAME: user
-  #     KC_DB_PASSWORD: password
-  #     # Admin
-  #     KEYCLOAK_ADMIN: admin
-  #     KEYCLOAK_ADMIN_PASSWORD: admin
-  #   ports:
-  #     - "8085:8080"
-  #   depends_on:
-  #     - postgres
-  #   networks:
-  #     - infra_traefik
-
 volumes:
   postgres_data:
   nats_data:
   minio_data:
+  redis_data:
+  authentik_media:
+  authentik_templates:
+  authentik_certs:
 
 networks:
   infra_traefik:

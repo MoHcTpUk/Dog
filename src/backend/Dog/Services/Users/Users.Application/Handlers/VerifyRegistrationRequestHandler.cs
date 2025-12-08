@@ -3,7 +3,7 @@ using Shared.Messaging.Interfaces;
 using Users.Api.Commands.RegistrationRequest;
 using Users.Api.Dtos;
 using Users.Application.Interfaces;
-using Users.Application.Models.Keycloak;
+using Users.Application.Models.Authentik;
 using Users.Domain.Aggregates;
 using Users.Infrastructure.Repositories;
 
@@ -11,7 +11,7 @@ namespace Users.Application.Handlers;
 
 public class VerifyRegistrationRequestHandler(
     IRegistrationRequestRepository registrationRequestRepository,
-    IKeycloakClient keycloakClient,
+    IAuthentikClient authentikClient,
     IUserRepository userRepository
 )
     : ICommandHandler<VerifyRegistrationRequestCommand, BearerTokenDto>
@@ -35,22 +35,23 @@ public class VerifyRegistrationRequestHandler(
         var username = $"user{Guid.NewGuid():N}";
         var password = $"{Guid.NewGuid():N}"[..TemporaryPasswordLength];
 
-        var newKeycloakUser = new CreateKeycloakUserRequest
+        var newAuthentikUser = new CreateAuthentikUserRequest
         {
             Username = username,
-            Email = registrationRequest.Email
+            Email = registrationRequest.Email,
+            Name = username
         };
 
-        var userId = await keycloakClient.CreateUserAsync(newKeycloakUser);
+        var authentikUserId = await authentikClient.CreateUserAsync(newAuthentikUser);
 
-        await keycloakClient.SetUserPasswordAsync(userId, password);
+        await authentikClient.SetUserPasswordAsync(authentikUserId, password);
 
-        var tokenResponse = await keycloakClient.GetUserTokenAsync(username, password);
+        var tokenResponse = await authentikClient.GetUserTokenAsync(username, password);
 
         var newUser = new UserAggregate
         {
             Email = registrationRequest.Email,
-            Id = userId
+            Id = Guid.NewGuid()
         };
 
         await userRepository.CreateAsync([newUser], cancellationToken);

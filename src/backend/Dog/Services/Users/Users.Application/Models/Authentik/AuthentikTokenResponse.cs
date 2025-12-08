@@ -1,8 +1,8 @@
 using Newtonsoft.Json;
 
-namespace Users.Application.Models.Keycloak;
+namespace Users.Application.Models.Authentik;
 
-public class KeycloakTokenResponse
+public class AuthentikTokenResponse
 {
     [JsonProperty("access_token")]
     public string AccessToken { get; set; } = string.Empty;
@@ -18,4 +18,8 @@ public class KeycloakTokenResponse
 
     [JsonProperty("scope")]
     public string? Scope { get; set; }
+    
+    [JsonProperty("id_token")]
+    public string? IdToken { get; set; }
 }
+

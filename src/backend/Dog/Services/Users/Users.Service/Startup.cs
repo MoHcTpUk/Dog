@@ -12,7 +12,7 @@ public static class Program
             .CreateHostBuilder(args, (services, config) =>
             {
                 services.AddUsersApplication(config);
-                services.AddKeycloakClient(config);
+                services.AddAuthentikClient(config);
             }).Build();
 
         await host.RunAsync();
