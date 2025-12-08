@@ -78,7 +78,7 @@ services:
       retries: 5
 
   authentik-server:
-    image: ghcr.io/goauthentik/server:2024.2.2
+    image: ghcr.io/goauthentik/server:latest
     command: server
     environment:
       AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:-PleaseChangeThisToASecureRandomString123456}
@@ -88,10 +88,12 @@ services:
       AUTHENTIK_POSTGRESQL__PASSWORD: password
       AUTHENTIK_POSTGRESQL__NAME: authentik
       AUTHENTIK_BOOTSTRAP_PASSWORD: admin
-      AUTHENTIK_BOOTSTRAP_TOKEN: admintoken123
+      AUTHENTIK_BOOTSTRAP_TOKEN: 72wy8CDoThVNCFJn9mqVBkX4xnag3P5jBbvbNXUKGW58VPdE5M8yUOYWibQb
+      AUTHENTIK_BLUEPRINTS_DIR: /blueprints
     volumes:
       - authentik_media:/media
       - authentik_templates:/templates
+      - ./authentik/blueprints:/blueprints/custom
     ports:
       - "9000:9000"
       - "9443:9443"
@@ -100,6 +102,12 @@ services:
       - redis
     networks:
       - infra_traefik
+    healthcheck:
+      test: ["CMD", "ak", "healthcheck"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 60s
     deploy:
       restart_policy:
         condition: on-failure
@@ -108,7 +116,7 @@ services:
         window: 60s
 
   authentik-worker:
-    image: ghcr.io/goauthentik/server:2024.2.2
+    image: ghcr.io/goauthentik/server:latest
     command: worker
     environment:
       AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:-PleaseChangeThisToASecureRandomString123456}
@@ -117,11 +125,13 @@ services:
       AUTHENTIK_POSTGRESQL__USER: user
       AUTHENTIK_POSTGRESQL__PASSWORD: password
       AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_BLUEPRINTS_DIR: /blueprints
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - authentik_media:/media
       - authentik_templates:/templates
       - authentik_certs:/certs
+      - ./authentik/blueprints:/blueprints/custom
     depends_on:
       - postgres
       - redis
