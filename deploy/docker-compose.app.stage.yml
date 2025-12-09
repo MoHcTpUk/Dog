@@ -56,6 +56,14 @@ services:
         max_attempts: 10
         window: 60s
 
+  authentik-server:
+    volumes:
+      - ./authentik/blueprints/stage:/blueprints/custom
+
+  authentik-worker:
+    volumes:
+      - ./authentik/blueprints/stage:/blueprints/custom
+
 networks:
   infra_traefik:
     external: true

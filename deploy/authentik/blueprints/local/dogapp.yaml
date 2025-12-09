@@ -44,3 +44,4 @@ entries:
       slug: dogapp
       provider: !KeyOf dogapp-provider
       policy_engine_mode: any
+

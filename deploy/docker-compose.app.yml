@@ -94,7 +94,7 @@ services:
     volumes:
       - authentik_media:/media
       - authentik_templates:/templates
-      - ./authentik/blueprints:/blueprints/custom
+      - ./authentik/blueprints/local:/blueprints/custom
     ports:
       - "9000:9000"
       - "9443:9443"
@@ -135,7 +135,7 @@ services:
       - authentik_media:/media
       - authentik_templates:/templates
       - authentik_certs:/certs
-      - ./authentik/blueprints:/blueprints/custom
+      - ./authentik/blueprints/local:/blueprints/custom
     depends_on:
       - postgres
       - redis
