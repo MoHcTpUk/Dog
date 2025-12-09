@@ -63,7 +63,3 @@ services:
   authentik-worker:
     volumes:
       - ./authentik/blueprints/stage:/blueprints/custom
-
-networks:
-  infra_traefik:
-    external: true
