@@ -68,3 +68,6 @@ export { LoaderScreen } from "./LoaderScreen";
 
 export { CodeInput } from "./CodeInput";
 export type { CodeInputProps } from "./CodeInput";
+
+export { Toggle } from "./Toggle";
+export type { ToggleProps, ToggleOption } from "./Toggle";

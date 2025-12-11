@@ -1,4 +1,3 @@
-// src/shared/utils/date.utils.ts
 import {
   format,
   formatDistance,
@@ -8,6 +7,7 @@ import {
   parseISO,
 } from "date-fns";
 import { enUS, ru } from "date-fns/locale";
+import i18n from "@i18n/config";
 
 const locales = {
   en: enUS,
@@ -51,6 +51,31 @@ export const formatRelativeTime = (date: string | Date, lang = "en") => {
     locale: getLocale(lang),
   });
 };
+
+export const getDaysInMonth = (month: number, year: number) => {
+  return new Date(year, month, 0).getDate();
+};
+
+export const MONTHS = () => ({
+  "1": i18n.t("January"),
+  "2": i18n.t("February"),
+  "3": i18n.t("March"),
+  "4": i18n.t("April"),
+  "5": i18n.t("May"),
+  "6": i18n.t("June"),
+  "7": i18n.t("July"),
+  "8": i18n.t("August"),
+  "9": i18n.t("September"),
+  "10": i18n.t("October"),
+  "11": i18n.t("November"),
+  "12": i18n.t("December"),
+});
+
+export const getMonthsList = () =>
+  Object.keys(MONTHS()).map((key) => ({
+    value: key,
+    label: MONTHS()[key as keyof ReturnType<typeof MONTHS>],
+  }));
 
 export const getDateFilterOptions = () => ({
   today: {

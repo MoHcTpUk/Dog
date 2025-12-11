@@ -32,6 +32,7 @@ export default defineConfig({
       "@api": path.resolve(__dirname, "./src/shared/api"),
       "@config": path.resolve(__dirname, "./src/shared/config"),
       "@store": path.resolve(__dirname, "./src/shared/store"),
+      "@i18n": path.resolve(__dirname, "./src/i18n"),
     },
   },
 

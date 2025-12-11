@@ -38,7 +38,8 @@
       "@types/*": ["shared/types/*"],
       "@api/*": ["shared/api/*"],
       "@config/*": ["shared/config/*"],
-      "@store/*": ["shared/store/*"]
+      "@store/*": ["shared/store/*"],
+      "@i18n/*": ["i18n/*"]
     }
   },
   "include": ["src"],

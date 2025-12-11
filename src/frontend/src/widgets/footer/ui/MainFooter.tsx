@@ -1,0 +1,84 @@
+import React from "react";
+import { useHistory, useLocation } from "react-router-dom";
+import { Avatar, Icon } from "@shared/ui";
+import { useAppStore } from "@shared/store/app.store";
+import classNames from "classnames";
+
+type TabType = "profile" | "map" | "list" | "dogs";
+
+export const MainFooter: React.FC = () => {
+  const history = useHistory();
+  const location = useLocation();
+  const { currentDog } = useAppStore();
+
+  const getActiveTab = (): TabType => {
+    if (location.pathname.includes("/profile")) return "profile";
+    if (location.pathname.includes("/map")) return "map";
+    if (location.pathname.includes("/dogs")) return "dogs";
+    return "list";
+  };
+
+  const activeTab = getActiveTab();
+
+  const handleTabClick = (tab: TabType) => {
+    const routes: Record<TabType, string> = {
+      profile: "/profile",
+      map: "/home?tab=places",
+      list: "/home?tab=walks",
+      dogs: "/dogs",
+    };
+    history.push(routes[tab]);
+  };
+
+  return (
+    <div className="w-full px-[3px] pt-2.5 pb-5 bg-white/60 rounded-t-2xl shadow-[0px_0px_9.3px_0px_rgba(66,58,58,0.06)] backdrop-blur-[5.5px] flex justify-center items-center gap-10">
+      <button
+        onClick={() => handleTabClick("profile")}
+        className={classNames(
+          "p-3.5 rounded-full flex justify-start items-start transition-colors",
+          activeTab === "profile" ? "bg-white" : "bg-transparent"
+        )}
+      >
+        <Avatar
+          src={currentDog?.avatar || "https://placehold.co/28x28"}
+          alt={currentDog?.name || "Dog"}
+          size="small"
+          variant="circular"
+          className="w-7 h-7"
+        />
+      </button>
+
+      <div className="p-[3px] rounded-full flex justify-start items-center gap-0">
+        <button
+          onClick={() => handleTabClick("map")}
+          className={classNames(
+            "p-3 rounded-full flex justify-start items-start transition-colors",
+            activeTab === "map" ? "bg-white" : "bg-transparent"
+          )}
+        >
+          <Icon name="pin-stroke" size={24} />
+        </button>
+
+        <button
+          onClick={() => handleTabClick("list")}
+          className={classNames(
+            "p-3 rounded-full flex justify-start items-start transition-colors",
+            activeTab === "list" ? "bg-white" : "bg-transparent"
+          )}
+        >
+          <Icon name="list-filled" size={24} />
+        </button>
+      </div>
+
+      <button
+        onClick={() => handleTabClick("dogs")}
+        className={classNames(
+          "p-4 rounded-full flex justify-start items-start transition-colors",
+          activeTab === "dogs" ? "bg-white" : "bg-transparent"
+        )}
+      >
+        <Icon name="paw-stroke" size={24} />
+      </button>
+    </div>
+  );
+};

@@ -173,7 +173,7 @@ export const Slider: React.FC<SliderProps> = ({
             xmlns="http://www.w3.org/2000/svg"
           >
             <g filter="url(#filter0_d_622_3090)">
-              <circle cx="21.5" cy="16.5" r="12.5" fill="white" />
+              <circle cx="21.5" cy="13" r="12.5" fill="white" />
               <circle
                 cx="21.5"
                 cy="14"
