@@ -1,5 +1,6 @@
 import React from "react";
 import { IonPage, IonContent } from "@ionic/react";
+import { useHistory } from "react-router-dom";
 import { StepperIntroView, DogProfileStepper, VerificationView } from "@features/onboarding";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -7,12 +8,19 @@ import { useTranslation } from "react-i18next";
 type ScreenType = "stepper-intro" | "stepper" | "verification";
 
 export const OnboardingPage: React.FC = () => {
-  const [currentScreen, setCurrentScreen] = useState<ScreenType>("stepper-intro");
+  const history = useHistory();
+  const [currentScreen, setCurrentScreen] = useState<ScreenType>(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    return searchParams.get('step') ? 'stepper' : 'stepper-intro';
+  });
   const { t } = useTranslation();
 
   const showToastMessage = (message: string) => {
-    // TODO: Replace with proper IonToast implementation
     console.log(message);
+  };
+
+  const handleVerificationComplete = () => {
+    history.push("/home");
   };
 
   if (currentScreen === "stepper-intro") {
@@ -33,8 +41,8 @@ export const OnboardingPage: React.FC = () => {
       <IonPage>
         <IonContent>
           <VerificationView
-            onVerify={() => showToastMessage(t("Proceeding to verification"))}
-            onSkip={() => showToastMessage(t("Switching to limited functionality mode"))}
+            onVerify={handleVerificationComplete}
+            onSkip={handleVerificationComplete}
           />
         </IonContent>
       </IonPage>

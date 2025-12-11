@@ -18,6 +18,11 @@ interface PlatformInfo {
     left: number;
     right: number;
   };
+  haptic: {
+    impact: (style?: "light" | "medium" | "heavy") => void;
+    notification: (type?: "error" | "success" | "warning") => void;
+    selection: () => void;
+  };
 }
 
 export const usePlatform = (): PlatformInfo => {
@@ -96,6 +101,7 @@ export const usePlatform = (): PlatformInfo => {
     isIOS: platform === "ios",
     isAndroid: platform === "android",
     safeAreaInsets,
+    haptic: platformUtils.haptic,
   };
 };
 

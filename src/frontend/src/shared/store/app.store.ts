@@ -18,11 +18,23 @@ export interface User {
   isOnboarded?: boolean;
 }
 
+export interface Dog {
+  id: string;
+  name: string;
+  avatar: string;
+  breed?: string;
+  age?: number;
+}
+
 export interface AppState {
   // User data
   user: User | null;
   isAuthenticated: boolean;
   token: string | null;
+
+  // Dog data
+  currentDog: Dog | null;
+  setCurrentDog: (dog: Dog | null) => void;
 
   // App state
   isLoading: boolean;
@@ -53,6 +65,7 @@ export const useAppStore = create<AppState>()(
         user: null,
         isAuthenticated: false,
         token: null,
+        currentDog: null,
         isLoading: false,
         isInitializing: true,
         isOnboarded: false,
@@ -72,6 +85,8 @@ export const useAppStore = create<AppState>()(
             isAuthenticated: !!token,
           }),
 
+        setCurrentDog: (currentDog) => set({ currentDog }),
+
         setLoading: (isLoading) => set({ isLoading }),
 
         setInitializing: (isInitializing) => set({ isInitializing }),
@@ -79,10 +94,18 @@ export const useAppStore = create<AppState>()(
         initializeApp: async () => {
           set({ isInitializing: true });
 
-          // Имитируем загрузку API (проверка аутентификации, настроек и т.д.)
           await new Promise(resolve => setTimeout(resolve, 2000));
 
-          set({ isInitializing: false });
+          set({
+            isInitializing: false,
+            currentDog: {
+              id: "1",
+              name: "Рекс",
+              avatar: "https://placehold.co/28x28/FF6B9D/white?text=R",
+              breed: "Лабрадор",
+              age: 3,
+            }
+          });
         },
 
         setOnboarded: (isOnboarded) => set({ isOnboarded }),
@@ -91,6 +114,7 @@ export const useAppStore = create<AppState>()(
           set({
             user: null,
             token: null,
+            currentDog: null,
             isAuthenticated: false,
             isOnboarded: false,
           }),
@@ -104,6 +128,7 @@ export const useAppStore = create<AppState>()(
         partialize: (state) => ({
           user: state.user,
           token: state.token,
+          currentDog: state.currentDog,
           isOnboarded: state.isOnboarded,
           language: state.language,
           theme: state.theme,

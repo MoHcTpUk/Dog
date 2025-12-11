@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { IonIcon } from "@ionic/react";
 import { shieldCheckmark } from "ionicons/icons";
-import { OnboardingLayout } from "../layouts/OnboardingLayout";
+import { OnboardingLayout } from "@app/layouts/OnboardingLayout";
 
 interface VerificationViewProps {
   onVerify: () => void;
