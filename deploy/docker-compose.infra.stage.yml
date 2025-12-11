@@ -31,3 +31,11 @@ services:
         mode: host
     volumes:
       - ./traefik/acme.json:/letsencrypt/acme.json
+
+  authentik-server:
+    volumes:
+      - ./authentik/blueprints/stage:/blueprints/custom
+
+  authentik-worker:
+    volumes:
+      - ./authentik/blueprints/stage:/blueprints/custom

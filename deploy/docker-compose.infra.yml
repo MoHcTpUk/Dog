@@ -10,6 +10,148 @@ services:
     networks:
       - traefik
 
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./authentik/init-authentik.sql:/docker-entrypoint-initdb.d/01-init-authentik.sql
+    ports:
+      - target: 5432
+        published: 4321
+        mode: host
+    networks:
+      - traefik
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    command: --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    networks:
+      - traefik
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  authentik-server:
+    image: ghcr.io/goauthentik/server:latest
+    command: server
+    environment:
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:-PleaseChangeThisToASecureRandomString123456}
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_POSTGRESQL__HOST: postgres
+      AUTHENTIK_POSTGRESQL__USER: user
+      AUTHENTIK_POSTGRESQL__PASSWORD: password
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_BOOTSTRAP_PASSWORD: ${AUTHENTIK_BOOTSTRAP_PASSWORD:-admin}
+      AUTHENTIK_BOOTSTRAP_EMAIL: ${AUTHENTIK_BOOTSTRAP_EMAIL:-admin@dogappa.com}
+      AUTHENTIK_BOOTSTRAP_TOKEN: ${AUTHENTIK_BOOTSTRAP_TOKEN:-72wy8CDoThVNCFJn9mqVBkX4xnag3P5jBbvbNXUKGW58VPdE5M8yUOYWibQb}
+      AUTHENTIK_BLUEPRINTS_DIR: /blueprints
+    volumes:
+      - authentik_media:/media
+      - authentik_templates:/templates
+      - ./authentik/blueprints/local:/blueprints/custom
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - traefik
+    healthcheck:
+      test: ["CMD", "ak", "healthcheck"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 60s
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 60s
+
+  authentik-worker:
+    image: ghcr.io/goauthentik/server:latest
+    command: worker
+    environment:
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:-PleaseChangeThisToASecureRandomString123456}
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_POSTGRESQL__HOST: postgres
+      AUTHENTIK_POSTGRESQL__USER: user
+      AUTHENTIK_POSTGRESQL__PASSWORD: password
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_BOOTSTRAP_PASSWORD: ${AUTHENTIK_BOOTSTRAP_PASSWORD:-admin}
+      AUTHENTIK_BOOTSTRAP_EMAIL: ${AUTHENTIK_BOOTSTRAP_EMAIL:-admin@dogappa.com}
+      AUTHENTIK_BOOTSTRAP_TOKEN: ${AUTHENTIK_BOOTSTRAP_TOKEN:-72wy8CDoThVNCFJn9mqVBkX4xnag3P5jBbvbNXUKGW58VPdE5M8yUOYWibQb}
+      AUTHENTIK_BLUEPRINTS_DIR: /blueprints
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - authentik_media:/media
+      - authentik_templates:/templates
+      - authentik_certs:/certs
+      - ./authentik/blueprints/local:/blueprints/custom
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - traefik
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 60s
+
+  nats:
+    image: nats:latest
+    command: ["-js", "-m", "8222"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    volumes:
+      - nats_data:/data
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - traefik
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9009:9000"     # API
+      - "9001:9001"     # Web UI
+    environment:
+      MINIO_ROOT_USER: adminadmin
+      MINIO_ROOT_PASSWORD: adminadmin
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - traefik
+
+volumes:
+  postgres_data:
+  nats_data:
+  minio_data:
+  redis_data:
+  authentik_media:
+  authentik_templates:
+  authentik_certs:
+
 networks:
   traefik:
     name: infra_traefik
