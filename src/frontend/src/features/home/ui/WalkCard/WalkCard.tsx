@@ -18,7 +18,7 @@ export const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
   return (
     <div
       onClick={handleClick}
-      className="p-5 bg-white rounded-3xl flex flex-col gap-5 cursor-pointer active:opacity-80 transition-opacity"
+      className="p-5 bg-white rounded-3xl flex flex-col gap-5 cursor-pointer active:opacity-80 transition-opacity w-full"
     >
       <div className="flex justify-start items-center gap-2.5">
         <Avatar

@@ -9,6 +9,7 @@ import { RegistrationPage } from "@pages/registration";
 import { OnboardingPage } from "@pages/onboarding";
 import { CodeVerificationPage } from "@pages/verification";
 import { HomePage } from "@pages/home";
+import { MapPage } from "@pages/map";
 
 export const AppRoutes: FC = () => {
   return (
@@ -20,6 +21,7 @@ export const AppRoutes: FC = () => {
         <Route exact path="/onboarding" component={OnboardingPage} />
         <Route exact path="/verification" component={CodeVerificationPage} />
         <Route exact path="/home" component={HomePage} />
+        <Route exact path="/map" component={MapPage} />
         <Route exact path="/">
           <Redirect to="/home" />
         </Route>

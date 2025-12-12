@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppRoutes } from "./app/routes/AppRoutes";
 import { useAppStore } from "./shared/store/app.store";
 import { LoaderScreen } from "./shared/ui";
+import { MapGLProvider } from "./features/map/context/MapGLContext";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -56,11 +57,11 @@ const App: React.FC = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <QueryClientProvider client={queryClient}>
+      <MapGLProvider>
         <IonApp>
           <AppRoutes />
         </IonApp>
-      </QueryClientProvider>
+      </MapGLProvider>
     </QueryClientProvider>
   );
 };
