@@ -142,8 +142,15 @@ public class AuthentikClient : IAuthentikClient
 
     public Task<string> CreateLoginUrlAsync(string username)
     {
+        if (string.IsNullOrWhiteSpace(_configuration.RedirectUri))
+        {
+            throw new InvalidOperationException(
+                "Authentik RedirectUri не настроен. Добавьте Authentik:RedirectUri в appsettings.{Environment}.json (например, Users.Service/appsettings.Local.json) или appsettings.json.");
+        }
+
         var baseUrl = _configuration.BaseUrl.TrimEnd('/');
-        var authorizeUrl = $"{baseUrl}/application/o/authorize";
+        // Authentik OAuth2 authorize endpoint обычно со слэшем в конце: /application/o/authorize/
+        var authorizeUrl = $"{baseUrl}/application/o/authorize/";
         
         var queryParams = new List<KeyValuePair<string, string>>
         {
@@ -159,6 +166,7 @@ public class AuthentikClient : IAuthentikClient
             $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value)}"));
         
         var loginUrl = $"{authorizeUrl}?{queryString}";
+        _logger.LogInformation("Создан login URL для пользователя {Username}: {LoginUrl}", username, loginUrl);
         
         return Task.FromResult(loginUrl);
     }
