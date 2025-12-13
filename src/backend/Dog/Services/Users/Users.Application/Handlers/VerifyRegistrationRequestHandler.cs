@@ -14,54 +14,93 @@ public class VerifyRegistrationRequestHandler(
     IAuthentikClient authentikClient,
     IUserRepository userRepository
 )
-    : ICommandHandler<VerifyRegistrationRequestCommand, BearerTokenDto>
+    : ICommandHandler<VerifyRegistrationRequestCommand, LoginUrlDto>
 {
     private const int TemporaryPasswordLength = 20;
 
-    public async Task<BearerTokenDto> Handle(VerifyRegistrationRequestCommand request,
+    public async Task<LoginUrlDto> Handle(VerifyRegistrationRequestCommand request,
         CancellationToken cancellationToken)
     {
         var registrationRequest = await registrationRequestRepository.AsQueryable()
             .FirstOrDefaultAsync(item => item.Id == Guid.Parse(request.Id), cancellationToken);
 
         if (registrationRequest == null || registrationRequest.ActivationCode != request.VerificationCode)
-            return new BearerTokenDto
+            return new LoginUrlDto
             {
-                AccessToken = string.Empty,
-                ExpiresIn = 0,
-                RefreshToken = string.Empty
+                LoginUrl = string.Empty
             };
 
-        var username = $"user{Guid.NewGuid():N}";
-        var password = $"{Guid.NewGuid():N}"[..TemporaryPasswordLength];
+        // Генерируем username из email (можно использовать часть до @)
+        var username = registrationRequest.Email.Split('@')[0].ToLowerInvariant();
+        
+        // Генерируем временный пароль
+        var password = GenerateTemporaryPassword();
 
+        // 1. Создаём пользователя в Authentik
         var newAuthentikUser = new CreateAuthentikUserRequest
         {
             Username = username,
             Email = registrationRequest.Email,
-            Name = username
+            Name = username,
+            IsActive = true,
+            Groups = []
         };
 
         var authentikUserId = await authentikClient.CreateUserAsync(newAuthentikUser);
 
-        await authentikClient.SetUserPasswordAsync(authentikUserId, password);
-
-        var tokenResponse = await authentikClient.GetUserTokenAsync(username, password);
-
+        // 2. Создаём пользователя в своей БД с authentik_user_id
         var newUser = new UserAggregate
         {
             Email = registrationRequest.Email,
-            Id = Guid.NewGuid()
+            Id = Guid.NewGuid(),
+            AuthentikUserId = authentikUserId
         };
 
         await userRepository.CreateAsync([newUser], cancellationToken);
         await userRepository.SaveChangesAsync();
 
-        return new BearerTokenDto
+        // 3. Задаём временный пароль (однократно)
+        await authentikClient.SetUserPasswordAsync(authentikUserId, password);
+
+        // 4. Создаём login URL для одноразового автологина
+        var loginUrl = await authentikClient.CreateLoginUrlAsync(username);
+
+        return new LoginUrlDto
         {
-            AccessToken = tokenResponse.AccessToken,
-            ExpiresIn = tokenResponse.ExpiresIn,
-            RefreshToken = tokenResponse.RefreshToken ?? string.Empty
+            LoginUrl = loginUrl
         };
+    }
+
+    private static string GenerateTemporaryPassword()
+    {
+        const string uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const string lowercase = "abcdefghijklmnopqrstuvwxyz";
+        const string digits = "0123456789";
+        const string special = "!@#$%^&*()-_=+[]{}|;:,.<>?";
+        const string allChars = uppercase + lowercase + digits + special;
+
+        var random = new Random();
+        var password = new char[TemporaryPasswordLength];
+
+        // Гарантируем наличие хотя бы одного символа каждого типа
+        password[0] = uppercase[random.Next(uppercase.Length)];
+        password[1] = lowercase[random.Next(lowercase.Length)];
+        password[2] = digits[random.Next(digits.Length)];
+        password[3] = special[random.Next(special.Length)];
+
+        // Заполняем остальные позиции случайными символами
+        for (int i = 4; i < TemporaryPasswordLength; i++)
+        {
+            password[i] = allChars[random.Next(allChars.Length)];
+        }
+
+        // Перемешиваем символы
+        for (int i = TemporaryPasswordLength - 1; i > 0; i--)
+        {
+            int j = random.Next(i + 1);
+            (password[i], password[j]) = (password[j], password[i]);
+        }
+
+        return new string(password);
     }
 }

@@ -10,5 +10,6 @@ public interface IAuthentikClient
 
     Task<int> CreateUserAsync(CreateAuthentikUserRequest userRequest);
     Task SetUserPasswordAsync(int userId, string password);
+    Task<string> CreateLoginUrlAsync(string username);
 }
 

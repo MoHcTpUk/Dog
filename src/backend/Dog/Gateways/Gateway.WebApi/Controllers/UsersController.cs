@@ -19,7 +19,7 @@ public class UsersController(IUserService userService)
     }
 
     [HttpPost(nameof(VerifyRegistrationRequest))]
-    public Task<BearerTokenDto> VerifyRegistrationRequest(VerifyRegistrationRequestCommand requestCommand)
+    public Task<LoginUrlDto> VerifyRegistrationRequest(VerifyRegistrationRequestCommand requestCommand)
     {
         var result = userService.VerifyRegistrationRequest(requestCommand);
 

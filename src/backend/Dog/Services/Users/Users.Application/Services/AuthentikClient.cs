@@ -140,6 +140,29 @@ public class AuthentikClient : IAuthentikClient
         return tokenResponse ?? throw new InvalidOperationException("Не удалось обновить токен");
     }
 
+    public Task<string> CreateLoginUrlAsync(string username)
+    {
+        var baseUrl = _configuration.BaseUrl.TrimEnd('/');
+        var authorizeUrl = $"{baseUrl}/application/o/authorize";
+        
+        var queryParams = new List<KeyValuePair<string, string>>
+        {
+            new("response_type", "code"),
+            new("client_id", _configuration.ClientId),
+            new("redirect_uri", _configuration.RedirectUri),
+            new("scope", "openid profile email"),
+            new("login_hint", username),
+            new("prompt", "login")
+        };
+
+        var queryString = string.Join("&", queryParams.Select(p => 
+            $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value)}"));
+        
+        var loginUrl = $"{authorizeUrl}?{queryString}";
+        
+        return Task.FromResult(loginUrl);
+    }
+
     #endregion
 }
 
