@@ -32,7 +32,7 @@ public class VerifyRegistrationRequestHandler(
 
         // Генерируем username из email (можно использовать часть до @)
         var username = registrationRequest.Email.Split('@')[0].ToLowerInvariant();
-        
+
         // Генерируем временный пароль
         var password = GenerateTemporaryPassword();
 
@@ -62,12 +62,9 @@ public class VerifyRegistrationRequestHandler(
         // 3. Задаём временный пароль (однократно)
         await authentikClient.SetUserPasswordAsync(authentikUserId, password);
 
-        // 4. Создаём login URL для одноразового автологина
-        var loginUrl = await authentikClient.CreateLoginUrlAsync(username);
-
         return new LoginUrlDto
         {
-            LoginUrl = loginUrl
+            LoginUrl = ""
         };
     }
 
@@ -89,15 +86,12 @@ public class VerifyRegistrationRequestHandler(
         password[3] = special[random.Next(special.Length)];
 
         // Заполняем остальные позиции случайными символами
-        for (int i = 4; i < TemporaryPasswordLength; i++)
-        {
-            password[i] = allChars[random.Next(allChars.Length)];
-        }
+        for (var i = 4; i < TemporaryPasswordLength; i++) password[i] = allChars[random.Next(allChars.Length)];
 
         // Перемешиваем символы
-        for (int i = TemporaryPasswordLength - 1; i > 0; i--)
+        for (var i = TemporaryPasswordLength - 1; i > 0; i--)
         {
-            int j = random.Next(i + 1);
+            var j = random.Next(i + 1);
             (password[i], password[j]) = (password[j], password[i]);
         }
 

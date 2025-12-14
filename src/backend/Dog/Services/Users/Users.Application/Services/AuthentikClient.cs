@@ -139,38 +139,6 @@ public class AuthentikClient : IAuthentikClient
 
         return tokenResponse ?? throw new InvalidOperationException("Не удалось обновить токен");
     }
-
-    public Task<string> CreateLoginUrlAsync(string username)
-    {
-        if (string.IsNullOrWhiteSpace(_configuration.RedirectUri))
-        {
-            throw new InvalidOperationException(
-                "Authentik RedirectUri не настроен. Добавьте Authentik:RedirectUri в appsettings.{Environment}.json (например, Users.Service/appsettings.Local.json) или appsettings.json.");
-        }
-
-        var baseUrl = _configuration.BaseUrl.TrimEnd('/');
-        // Authentik OAuth2 authorize endpoint обычно со слэшем в конце: /application/o/authorize/
-        var authorizeUrl = $"{baseUrl}/application/o/authorize/";
-        
-        var queryParams = new List<KeyValuePair<string, string>>
-        {
-            new("response_type", "code"),
-            new("client_id", _configuration.ClientId),
-            new("redirect_uri", _configuration.RedirectUri),
-            new("scope", "openid profile email"),
-            new("login_hint", username),
-            new("prompt", "login")
-        };
-
-        var queryString = string.Join("&", queryParams.Select(p => 
-            $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value)}"));
-        
-        var loginUrl = $"{authorizeUrl}?{queryString}";
-        _logger.LogInformation("Создан login URL для пользователя {Username}: {LoginUrl}", username, loginUrl);
-        
-        return Task.FromResult(loginUrl);
-    }
-
     #endregion
 }
 
