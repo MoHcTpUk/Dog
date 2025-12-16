@@ -1,10 +1,11 @@
 import { useEffect, useRef } from "react";
 import { useMapGL } from "../context/MapGLContext";
+import type { MapInstance, MapGLAPI } from "../types/map.types";
 
 interface UseMapLoaderProps {
   center?: [number, number];
   zoom?: number;
-  onMapReady?: (map: any, mapglAPI: any) => void;
+  onMapReady?: (map: MapInstance, mapglAPI: MapGLAPI) => void;
 }
 
 export const useMapLoader = ({

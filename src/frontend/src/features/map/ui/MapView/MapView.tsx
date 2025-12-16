@@ -1,5 +1,8 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { useMapLoader } from "../../hooks/useMapLoader";
+import type { Walk } from "@shared/types/walk";
+import { useMapZoom, usePlaceMarkers, useWalkMarkers } from "@shared/hooks";
+import type { MapInstance, MapGLAPI } from "../../types/map.types";
 
 export interface Place {
   id: string;
@@ -9,8 +12,9 @@ export interface Place {
 }
 
 interface MapViewProps {
-  onMapReady?: (map: any, mapglAPI: any) => void;
+  onMapReady?: (map: MapInstance, mapglAPI: MapGLAPI) => void;
   places?: Place[];
+  walks?: Walk[];
   center?: [number, number];
   zoom?: number;
 }
@@ -18,6 +22,7 @@ interface MapViewProps {
 export const MapView: React.FC<MapViewProps> = ({
   onMapReady,
   places = [],
+  walks = [],
   center = [37.573856, 55.751574],
   zoom = 13,
 }) => {
@@ -26,26 +31,22 @@ export const MapView: React.FC<MapViewProps> = ({
     zoom,
     onMapReady,
   });
-  const markersRef = useRef<any[]>([]);
 
-  useEffect(() => {
-    if (!mapInstance || !mapglAPI) return;
+  const { clusterZoomLevel, handleClusterClick, hasClusteringChanged } = useMapZoom({
+    mapInstance,
+    initialZoom: zoom,
+  });
 
-    markersRef.current.forEach((marker) => marker.destroy());
-    markersRef.current = [];
+  usePlaceMarkers({ mapInstance, mapglAPI, places });
 
-    places.forEach((place) => {
-      const marker = new mapglAPI.Marker(mapInstance, {
-        coordinates: place.coordinates,
-      });
-      markersRef.current.push(marker);
-    });
-
-    return () => {
-      markersRef.current.forEach((marker) => marker.destroy());
-      markersRef.current = [];
-    };
-  }, [places, mapglAPI, mapInstance]);
+  useWalkMarkers({
+    mapInstance,
+    mapglAPI,
+    walks,
+    clusterZoomLevel,
+    hasClusteringChanged,
+    onClusterClick: handleClusterClick,
+  });
 
   return (
     <div className="relative w-full h-full">

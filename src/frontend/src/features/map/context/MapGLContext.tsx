@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { load } from "@2gis/mapgl";
+import type { MapGLAPI, MapInstance } from "../types/map.types";
 
 const MAP_API_KEY = "a5ea882e-e0dd-485c-ab08-6e702a9b8c49";
 
 interface MapGLContextValue {
-  mapglAPI: any;
+  mapglAPI: MapGLAPI;
   isLoaded: boolean;
   isMapReady: boolean;
-  mapInstance: any;
+  mapInstance: MapInstance;
   initMap: (container: HTMLElement, center: [number, number], zoom: number) => void;
   destroyMap: () => void;
 }
@@ -27,8 +28,8 @@ export const MapGLProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   // Refs для персистентного хранения (не вызывают ре-рендеры)
-  const mapglRef = useRef<any>(null);
-  const mapInstanceRef = useRef<any>(null);
+  const mapglRef = useRef<MapGLAPI>(null);
+  const mapInstanceRef = useRef<MapInstance>(null);
   const isInitializingRef = useRef(false);
 
   // State только для триггера ре-рендеров при изменении статусов
@@ -111,7 +112,7 @@ export const MapGLProvider: React.FC<{ children: React.ReactNode }> = ({
         isInitializingRef.current = false;
       });
 
-      map.on("error", (error: any) => {
+      map.on("error", (error: unknown) => {
         console.error("❌ Ошибка карты:", error);
       });
     } catch (error) {

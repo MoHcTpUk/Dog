@@ -4,7 +4,9 @@ import { Toggle, Icon, Button } from "@shared/ui";
 import { Text } from "@shared/ui/Text";
 import { MainLayout } from "@app/layouts/MainLayout";
 import { MapView, type Place } from "@features/map";
+import type { MapInstance } from "@features/map/types/map.types";
 import { Geolocation } from "@capacitor/geolocation";
+import { mockWalks } from "@shared/mocks/walks.mock";
 
 type TabValue = "walks" | "places";
 
@@ -44,12 +46,16 @@ export const MapPage: React.FC = () => {
     (searchParams.get("tab") as TabValue) || "walks"
   );
   const [notificationCount] = useState(2);
-  const mapRef = useRef<any>(null);
+  const mapRef = useRef<MapInstance | null>(null);
 
   const displayedPlaces = useMemo(() => {
     return activeTab === "places"
       ? mockPlaces.filter((place) => place.dogFriendly)
       : [];
+  }, [activeTab]);
+
+  const displayedWalks = useMemo(() => {
+    return activeTab === "walks" ? mockWalks : [];
   }, [activeTab]);
 
   const handleNotificationClick = () => {
@@ -74,7 +80,7 @@ export const MapPage: React.FC = () => {
     history.push("/walk/new");
   };
 
-  const handleMapReady = (map: any) => {
+  const handleMapReady = (map: MapInstance) => {
     mapRef.current = map;
   };
 
@@ -82,7 +88,11 @@ export const MapPage: React.FC = () => {
     <MainLayout>
       <div className="absolute inset-0">
         {/* Карта на весь экран */}
-        <MapView onMapReady={handleMapReady} places={displayedPlaces} />
+        <MapView
+          onMapReady={handleMapReady}
+          places={displayedPlaces}
+          walks={displayedWalks}
+        />
 
         {/* Верхняя панель поверх карты */}
         <div className="absolute top-0 left-0 right-0 px-3 pt-5 flex justify-between items-center z-10">

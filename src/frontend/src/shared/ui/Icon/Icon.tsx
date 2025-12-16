@@ -37,6 +37,9 @@ import GeoIcon from '@shared/assets/icons/geo.svg?react';
 import CameraIcon from '@shared/assets/icons/camera.svg?react';
 import MenuDotsIcon from '@shared/assets/icons/menu-dots.svg?react';
 import DrawerHandleIcon from '@shared/assets/icons/drawer-handle.svg?react';
+import WaitIcon from '@shared/assets/icons/wait.svg?react';
+import MinusIcon from '@shared/assets/icons/minus.svg?react';
+import UserIcon from '@shared/assets/icons/user.svg?react';
 
 export type IconName =
   | 'plus'
@@ -76,7 +79,10 @@ export type IconName =
   | 'geo'
   | 'camera'
   | 'menu-dots'
-  | 'drawer-handle';
+  | 'drawer-handle'
+  | 'wait'
+  | 'minus'
+  | 'user';
 
 export interface IconProps {
   name: IconName;
@@ -124,6 +130,9 @@ const iconMap: Record<IconName, React.FC<React.SVGProps<SVGSVGElement>>> = {
   camera: CameraIcon,
   'menu-dots': MenuDotsIcon,
   'drawer-handle': DrawerHandleIcon,
+  wait: WaitIcon,
+  minus: MinusIcon,
+  user: UserIcon,
 };
 
 export const Icon: React.FC<IconProps> = ({
