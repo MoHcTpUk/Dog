@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
-import { Text } from '../Text';
+import { Text } from '@shared/ui';
 import './WalkPin.animations.css';
 
 export interface WalkPinClusterProps {

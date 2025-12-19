@@ -1,9 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
 import type { Walk } from '@shared/types/walk';
 import { clusterWalks, isCluster } from '@shared/utils/clustering.utils';
-import { WalkPin, WalkPinCluster } from '@shared/ui/WalkPin';
+import { WalkPin, WalkPinCluster } from '@entities/walk';
 import type { MapInstance, MapGLAPI, MapMarker } from '@features/map/types/map.types';
 
 interface UseWalkMarkersProps {
@@ -13,6 +13,7 @@ interface UseWalkMarkersProps {
   clusterZoomLevel: number;
   hasClusteringChanged: () => boolean;
   onClusterClick: (center: [number, number]) => void;
+  onWalkClick?: (walkId: string) => void;
 }
 
 interface WalkMarkerData {
@@ -28,37 +29,40 @@ export const useWalkMarkers = ({
   clusterZoomLevel,
   hasClusteringChanged,
   onClusterClick,
+  onWalkClick,
 }: UseWalkMarkersProps) => {
   const walkMarkersRef = useRef<WalkMarkerData[]>([]);
+  const onClusterClickRef = useRef(onClusterClick);
+  const onWalkClickRef = useRef(onWalkClick);
+  const cleanupTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const createTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+
+  onClusterClickRef.current = onClusterClick;
+  onWalkClickRef.current = onWalkClick;
+
+  const shouldUpdate = useMemo(() => {
+    return hasClusteringChanged();
+  }, [clusterZoomLevel, hasClusteringChanged]);
 
   useEffect(() => {
-    if (!mapInstance || !mapglAPI) {
-      console.log('⚠️ Карта или API не готовы для маркеров прогулок');
-      return;
+    if (!mapInstance || !mapglAPI) return;
+
+    if (!shouldUpdate && walkMarkersRef.current.length > 0) return;
+
+    if (cleanupTimeoutRef.current) {
+      clearTimeout(cleanupTimeoutRef.current);
     }
-
-    // Проверяем, изменился ли уровень кластеризации
-    if (!hasClusteringChanged() && walkMarkersRef.current.length > 0) {
-      console.log('⏭️ Пропускаем пересоздание маркеров - уровень кластеризации не изменился');
-      return;
+    if (createTimeoutRef.current) {
+      clearTimeout(createTimeoutRef.current);
     }
-
-    console.log('🚶 Пересоздание маркеров прогулок:', {
-      walkCount: walks.length,
-      clusterZoomLevel,
-    });
-
-    console.log('📍 Старые маркеры:', walkMarkersRef.current.map(m => m.id));
 
     const clusteredItems = clusterWalks(walks, clusterZoomLevel);
-
-    console.log('🆕 Новые элементы:', clusteredItems.map(item => ({ id: item.id, isCluster: isCluster(item) })));
 
     const newItemsMap = new Map(clusteredItems.map(item => [item.id, item]));
     const oldItemsMap = new Map(walkMarkersRef.current.map(m => [m.id, m]));
 
-    const markersToRemove: typeof walkMarkersRef.current = [];
-    const markersToKeep: typeof walkMarkersRef.current = [];
+    const markersToRemove: WalkMarkerData[] = [];
+    const markersToKeep: WalkMarkerData[] = [];
 
     walkMarkersRef.current.forEach((markerData) => {
       if (newItemsMap.has(markerData.id)) {
@@ -68,10 +72,6 @@ export const useWalkMarkers = ({
       }
     });
 
-    console.log('❌ Удаляем:', markersToRemove.map(m => m.id));
-    console.log('✅ Сохраняем:', markersToKeep.map(m => m.id));
-
-    // Запускаем анимацию исчезновения
     markersToRemove.forEach(({ marker }) => {
       const element = marker.getContent?.() || marker._el;
       if (element) {
@@ -88,8 +88,7 @@ export const useWalkMarkers = ({
       }
     });
 
-    // Удаляем старые маркеры после анимации
-    const cleanupTimeout = setTimeout(() => {
+    cleanupTimeoutRef.current = setTimeout(() => {
       markersToRemove.forEach(({ marker, root }) => {
         root.unmount();
         marker.destroy();
@@ -101,7 +100,7 @@ export const useWalkMarkers = ({
     const itemsToCreate = clusteredItems.filter(item => !oldItemsMap.has(item.id));
 
     if (itemsToCreate.length > 0) {
-      const createTimeout = setTimeout(() => {
+      createTimeoutRef.current = setTimeout(() => {
         itemsToCreate.forEach((item) => {
           const markerElement = document.createElement('div');
           const root = createRoot(markerElement);
@@ -111,7 +110,7 @@ export const useWalkMarkers = ({
               <WalkPinCluster
                 dogAvatars={item.dogAvatars}
                 walkCount={item.walkCount}
-                onClick={() => onClusterClick(item.center)}
+                onClick={() => onClusterClickRef.current(item.center)}
                 isAnimating={true}
               />
             );
@@ -130,6 +129,7 @@ export const useWalkMarkers = ({
                 time={item.time}
                 dogCount={item.dogCount}
                 status={item.status}
+                onClick={() => onWalkClickRef.current?.(item.id)}
                 isAnimating={true}
               />
             );
@@ -143,24 +143,27 @@ export const useWalkMarkers = ({
             walkMarkersRef.current.push({ marker, root, id: item.id });
           }
         });
-
-        console.log(`🎯 Создано новых маркеров: ${itemsToCreate.length}, сохранено: ${markersToKeep.length}`);
       }, 180);
-
-      return () => {
-        clearTimeout(cleanupTimeout);
-        clearTimeout(createTimeout);
-      };
     }
 
     return () => {
-      clearTimeout(cleanupTimeout);
+      if (cleanupTimeoutRef.current) {
+        clearTimeout(cleanupTimeoutRef.current);
+      }
+      if (createTimeoutRef.current) {
+        clearTimeout(createTimeoutRef.current);
+      }
     };
-  }, [walks, mapglAPI, mapInstance, clusterZoomLevel, hasClusteringChanged, onClusterClick]);
+  }, [walks, mapglAPI, mapInstance, clusterZoomLevel, shouldUpdate]);
 
-  // Очистка всех маркеров при размонтировании
   useEffect(() => {
     return () => {
+      if (cleanupTimeoutRef.current) {
+        clearTimeout(cleanupTimeoutRef.current);
+      }
+      if (createTimeoutRef.current) {
+        clearTimeout(createTimeoutRef.current);
+      }
       walkMarkersRef.current.forEach(({ marker, root }) => {
         root.unmount();
         marker.destroy();

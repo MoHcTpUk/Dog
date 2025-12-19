@@ -1,5 +1,6 @@
-import React, { useState, useRef, useMemo } from "react";
-import { useHistory, useLocation } from "react-router-dom";
+import React, { useState, useRef, useMemo, useCallback } from "react";
+import { useIonRouter } from "@ionic/react";
+import { useLocation } from "react-router-dom";
 import { Toggle, Icon, Button } from "@shared/ui";
 import { Text } from "@shared/ui/Text";
 import { MainLayout } from "@app/layouts/MainLayout";
@@ -10,7 +11,6 @@ import { mockWalks } from "@shared/mocks/walks.mock";
 
 type TabValue = "walks" | "places";
 
-// Моковые данные для мест (временно, пока не готов API)
 const mockPlaces: Place[] = [
   {
     id: "1",
@@ -39,7 +39,7 @@ const mockPlaces: Place[] = [
 ];
 
 export const MapPage: React.FC = () => {
-  const history = useHistory();
+  const router = useIonRouter();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const [activeTab, setActiveTab] = useState<TabValue>(
@@ -58,11 +58,11 @@ export const MapPage: React.FC = () => {
     return activeTab === "walks" ? mockWalks : [];
   }, [activeTab]);
 
-  const handleNotificationClick = () => {
-    history.push("/notifications");
-  };
+  const handleNotificationClick = useCallback(() => {
+    router.push("/notifications", "forward", "push");
+  }, [router]);
 
-  const handleCenterLocation = async () => {
+  const handleCenterLocation = useCallback(async () => {
     try {
       const position = await Geolocation.getCurrentPosition();
       const { latitude, longitude } = position.coords;
@@ -71,18 +71,24 @@ export const MapPage: React.FC = () => {
         mapRef.current.setCenter([longitude, latitude]);
         mapRef.current.setZoom(15);
       }
-    } catch (error) {
-      console.error("Ошибка получения геолокации:", error);
+    } catch {
+      // Silently handle geolocation errors
     }
-  };
+  }, []);
 
-  const handleNewWalk = () => {
-    history.push("/walk/new");
-  };
+  const handleNewWalk = useCallback(() => {
+    router.push("/walk/new", "forward", "push");
+  }, [router]);
 
-  const handleMapReady = (map: MapInstance) => {
+  const handleMapReady = useCallback((map: MapInstance) => {
     mapRef.current = map;
-  };
+  }, []);
+
+  const handleWalkClick = useCallback((walkId: string) => {
+    const newSearchParams = new URLSearchParams(location.search);
+    newSearchParams.set("walkId", walkId);
+    router.push(location.pathname + "?" + newSearchParams.toString(), "forward", "push");
+  }, [location.search, location.pathname, router]);
 
   return (
     <MainLayout>
@@ -92,6 +98,7 @@ export const MapPage: React.FC = () => {
           onMapReady={handleMapReady}
           places={displayedPlaces}
           walks={displayedWalks}
+          onWalkClick={handleWalkClick}
         />
 
         {/* Верхняя панель поверх карты */}

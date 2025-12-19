@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
-import { Text } from '../Text';
-import { Icon } from '../Icon';
+import { Text, Icon } from '@shared/ui';
 import { useFormatWalkTime } from '@shared/hooks/useFormatWalkTime';
 import { formatDogCount, getWalkNotificationConfig } from '@shared/utils';
 import { WalkStatus } from '@shared/types/walk';

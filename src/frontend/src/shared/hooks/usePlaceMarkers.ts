@@ -8,24 +8,38 @@ interface UsePlaceMarkersProps {
   places: Place[];
 }
 
+interface PlaceMarkerData {
+  marker: MapMarker;
+  placeId: string;
+}
+
 export const usePlaceMarkers = ({ mapInstance, mapglAPI, places }: UsePlaceMarkersProps) => {
-  const markersRef = useRef<MapMarker[]>([]);
+  const markersRef = useRef<PlaceMarkerData[]>([]);
 
   useEffect(() => {
     if (!mapInstance || !mapglAPI) return;
 
-    markersRef.current.forEach((marker) => marker.destroy());
-    markersRef.current = [];
+    const newPlacesMap = new Map(places.map(place => [place.id, place]));
+    const oldPlacesMap = new Map(markersRef.current.map(m => [m.placeId, m]));
 
-    places.forEach((place) => {
+    const markersToRemove = markersRef.current.filter(m => !newPlacesMap.has(m.placeId));
+    const markersToKeep = markersRef.current.filter(m => newPlacesMap.has(m.placeId));
+
+    markersToRemove.forEach(({ marker }) => marker.destroy());
+
+    const placesToCreate = places.filter(place => !oldPlacesMap.has(place.id));
+
+    placesToCreate.forEach((place) => {
       const marker = new mapglAPI.Marker(mapInstance, {
         coordinates: place.coordinates,
       });
-      markersRef.current.push(marker);
+      markersToKeep.push({ marker, placeId: place.id });
     });
 
+    markersRef.current = markersToKeep;
+
     return () => {
-      markersRef.current.forEach((marker) => marker.destroy());
+      markersRef.current.forEach(({ marker }) => marker.destroy());
       markersRef.current = [];
     };
   }, [places, mapglAPI, mapInstance]);

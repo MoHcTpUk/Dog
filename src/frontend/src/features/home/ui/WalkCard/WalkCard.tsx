@@ -1,18 +1,16 @@
 import React from "react";
-import { useHistory } from "react-router-dom";
 import { Avatar, Icon } from "@shared/ui";
 import { Text } from "@shared/ui/Text";
 import { Walk } from "../../model/types";
 
 export interface WalkCardProps {
   walk: Walk;
+  onClick?: (walkId: string) => void;
 }
 
-export const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
-  const history = useHistory();
-
+export const WalkCard: React.FC<WalkCardProps> = ({ walk, onClick }) => {
   const handleClick = () => {
-    history.push(`/walk/${walk.id}`);
+    onClick?.(walk.id);
   };
 
   return (

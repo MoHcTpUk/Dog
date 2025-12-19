@@ -15,34 +15,21 @@ export const useMapLoader = ({
 }: UseMapLoaderProps = {}) => {
   const { mapglAPI, isLoaded, isMapReady, mapInstance, initMap } = useMapGL();
   const onReadyCalledRef = useRef(false);
+  const centerRef = useRef(center);
+  const zoomRef = useRef(zoom);
 
-  // Инициализация карты только один раз
+  centerRef.current = center;
+  zoomRef.current = zoom;
+
   useEffect(() => {
     if (!isLoaded || mapInstance) return;
 
     const container = document.getElementById("map-container");
-    if (!container) {
-      console.error("Map container not found!");
-      return;
-    }
+    if (!container) return;
 
-    // Ждем пока контейнер получит размеры от CSS
-    const waitForSize = () => {
-      const { offsetWidth, offsetHeight } = container;
+    initMap(container, centerRef.current, zoomRef.current);
+  }, [isLoaded, mapInstance, initMap]);
 
-      if (offsetWidth > 0 && offsetHeight > 0) {
-        console.log("✅ Контейнер получил размеры:", { offsetWidth, offsetHeight });
-        initMap(container, center, zoom);
-      } else {
-        console.log("⏳ Контейнер еще без размеров, ждем...");
-        requestAnimationFrame(waitForSize);
-      }
-    };
-
-    requestAnimationFrame(waitForSize);
-  }, [isLoaded, mapInstance, initMap, center, zoom]);
-
-  // Callback когда карта готова
   useEffect(() => {
     if (isMapReady && mapInstance && onMapReady && !onReadyCalledRef.current) {
       onMapReady(mapInstance, mapglAPI);

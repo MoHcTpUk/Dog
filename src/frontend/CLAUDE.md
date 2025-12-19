@@ -114,6 +114,54 @@ The app features a comprehensive dog profile creation process managed by `useDog
 - Tab-based navigation structure prepared but not fully implemented
 - Route definitions in `src/app/routes/AppRoutes.tsx`
 
+**Mobile Navigation Patterns:**
+- ✅ **BOTTOM TAB BAR:** Primary navigation using `IonTabs` + `IonTabBar` with `IonTabButton`
+- ✅ **STACK PER TAB:** Each tab has its own stack navigation using nested `IonRouterOutlet`
+- ✅ **ROUTES ARE ROUTES:** All screens (including modals, drawers, detail pages) are routes in `IonRouterOutlet`
+- ✅ **IONIC MANAGES TRANSITIONS:** Ionic automatically handles page transitions and animations via router
+- ❌ **NEVER REPLACE TAB:** Don't navigate away from tab structure - maintain navigation context
+- ❌ **NEVER DEEP STACK IN TAB:** Keep tab stacks shallow (1-2 levels max)
+
+**CRITICAL: IonModal Usage Rules:**
+- 🔴 **IonModal is NOT for route-based screens** - NEVER wrap routes/pages in IonModal
+- 🔴 **IonModal is NOT for drawers** - Use IonPage + CSS for bottom sheets/drawers
+- 🔴 **IonModal is NOT for navigation** - Use IonRouterOutlet with proper routing
+- ✅ **ONLY use IonModal for:**
+  - Confirmation dialogs (confirm/cancel actions)
+  - Alert messages (one-time notifications)
+  - Action sheets (select from options)
+  - Temporary UI overlays (color pickers, mini forms)
+- ❌ **NEVER use IonModal for:**
+  - Entity detail screens (dog profile, walk details, etc.)
+  - Any screen accessible via URL/route
+  - Deep-linkable content
+  - Navigable screens in app flow
+
+**How to Create Modals/Drawers Correctly:**
+1. **Bottom Sheet / Drawer:**
+   - Create as IonPage route in AppRoutes.tsx
+   - Use IonPage + IonContent with custom CSS
+   - Style with `height`, `transform`, `border-radius` for drawer effect
+   - Router handles transitions automatically
+
+2. **Full-Screen Modal:**
+   - Create as IonPage route in AppRoutes.tsx
+   - Use presentation="modal" on IonRouterOutlet (iOS-style)
+   - Or use standard IonPage with CSS animations
+   - Router manages the stack
+
+3. **True Dialog (rare):**
+   - Use IonModal ONLY for non-navigable UI
+   - Keep state local (not route-based)
+   - No deep-linking required
+
+**Navigation Best Practices:**
+- All screens are routes managed by IonRouterOutlet
+- Use `router.push()` and `router.goBack()` for navigation
+- Ionic handles all animations natively
+- CSS handles visual presentation (drawer, modal, etc.)
+- NEVER mix IonModal with route-based navigation
+
 **Component Generation System:**
 Plop.js templates support FSD architecture:
 - Page generation: Creates complete page structure with lazy loading

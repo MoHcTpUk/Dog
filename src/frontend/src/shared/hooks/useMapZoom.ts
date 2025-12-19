@@ -9,19 +9,19 @@ interface UseMapZoomProps {
 
 export const useMapZoom = ({ mapInstance, initialZoom }: UseMapZoomProps) => {
   const [currentZoom, setCurrentZoom] = useState(initialZoom);
+  const currentZoomRef = useRef(initialZoom);
   const prevClusterZoomLevelRef = useRef<number>(getClusterZoomLevel(initialZoom));
 
-  // Вычисляем дискретный уровень зума для кластеризации
   const clusterZoomLevel = useMemo(() => {
     return getClusterZoomLevel(currentZoom);
   }, [currentZoom]);
 
-  // Отслеживание изменения зума
   useEffect(() => {
     if (!mapInstance) return;
 
     const handleZoomChange = () => {
       const newZoom = mapInstance.getZoom();
+      currentZoomRef.current = newZoom;
       setCurrentZoom(newZoom);
     };
 
@@ -32,21 +32,19 @@ export const useMapZoom = ({ mapInstance, initialZoom }: UseMapZoomProps) => {
     };
   }, [mapInstance]);
 
-  // Обработчик клика на кластер
   const handleClusterClick = useCallback((clusterCenter: [number, number]) => {
     if (!mapInstance) return;
 
     mapInstance.setCenter(clusterCenter);
-    mapInstance.setZoom(Math.min(currentZoom + 2, 18));
-  }, [mapInstance, currentZoom]);
+    mapInstance.setZoom(Math.min(currentZoomRef.current + 2, 18));
+  }, [mapInstance]);
 
-  // Проверка изменения уровня кластеризации
-  const hasClusteringChanged = () => {
+  const hasClusteringChanged = useCallback(() => {
     const prevClusterZoomLevel = prevClusterZoomLevelRef.current;
     const changed = prevClusterZoomLevel !== clusterZoomLevel;
     prevClusterZoomLevelRef.current = clusterZoomLevel;
     return changed;
-  };
+  }, [clusterZoomLevel]);
 
   return {
     currentZoom,

@@ -71,6 +71,3 @@ export type { CodeInputProps } from "./CodeInput";
 
 export { Toggle } from "./Toggle";
 export type { ToggleProps, ToggleOption } from "./Toggle";
-
-export { WalkPin, WalkPinCluster } from "./WalkPin";
-export type { WalkPinProps, WalkPinClusterProps } from "./WalkPin";

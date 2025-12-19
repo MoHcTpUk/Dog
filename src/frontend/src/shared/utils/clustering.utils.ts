@@ -40,11 +40,6 @@ export const clusterWalks = (
     distanceThreshold = 0.002; // ~200 м
   }
 
-  console.log('🔍 Кластеризация:', {
-    zoom: zoom.toFixed(2),
-    distanceThreshold,
-    walkCount: walks.length
-  });
 
   const clusters: WalkCluster[] = [];
   const processedWalks = new Set<string>();

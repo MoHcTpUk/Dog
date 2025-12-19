@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { useMapLoader } from "../../hooks/useMapLoader";
 import type { Walk } from "@shared/types/walk";
 import { useMapZoom, usePlaceMarkers, useWalkMarkers } from "@shared/hooks";
@@ -17,14 +17,16 @@ interface MapViewProps {
   walks?: Walk[];
   center?: [number, number];
   zoom?: number;
+  onWalkClick?: (walkId: string) => void;
 }
 
-export const MapView: React.FC<MapViewProps> = ({
+const MapViewComponent: React.FC<MapViewProps> = ({
   onMapReady,
   places = [],
   walks = [],
   center = [37.573856, 55.751574],
   zoom = 13,
+  onWalkClick,
 }) => {
   const { mapglAPI, mapInstance, isLoading } = useMapLoader({
     center,
@@ -46,6 +48,7 @@ export const MapView: React.FC<MapViewProps> = ({
     clusterZoomLevel,
     hasClusteringChanged,
     onClusterClick: handleClusterClick,
+    onWalkClick,
   });
 
   return (
@@ -63,3 +66,5 @@ export const MapView: React.FC<MapViewProps> = ({
     </div>
   );
 };
+
+export const MapView = memo(MapViewComponent);

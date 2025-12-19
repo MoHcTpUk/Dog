@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { load } from "@2gis/mapgl";
 import type { MapGLAPI, MapInstance } from "../types/map.types";
 
@@ -27,47 +27,39 @@ export const useMapGL = () => useContext(MapGLContext);
 export const MapGLProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  // Refs для персистентного хранения (не вызывают ре-рендеры)
   const mapglRef = useRef<MapGLAPI>(null);
   const mapInstanceRef = useRef<MapInstance>(null);
   const isInitializingRef = useRef(false);
 
-  // State только для триггера ре-рендеров при изменении статусов
   const [isLoaded, setIsLoaded] = useState(false);
   const [isMapReady, setIsMapReady] = useState(false);
 
-  // Загрузка API только один раз
+  // Загружаем только API карты при инициализации приложения (для быстрой загрузки)
   useEffect(() => {
-    load()
-      .then((api) => {
+    const loadMapAPI = async () => {
+      try {
+        const api = await load();
         mapglRef.current = api;
         setIsLoaded(true);
-      })
-      .catch((error) => {
-        console.error("Failed to load MapGL API:", error);
+      } catch (error) {
+        console.error('Failed to load map API:', error);
         setIsLoaded(false);
-      });
+      }
+    };
+
+    loadMapAPI();
   }, []);
 
   const initMap = useCallback((container: HTMLElement, center: [number, number], zoom: number) => {
-    // Если карта уже создана - просто центрируем
+    // Если карта уже существует, просто обновляем параметры
     if (mapInstanceRef.current) {
-      console.log("Карта уже создана, центрируем...");
       mapInstanceRef.current.setCenter(center);
       mapInstanceRef.current.setZoom(zoom);
       return;
     }
 
-    // Защита от race conditions
-    if (isInitializingRef.current) return;
-    if (!mapglRef.current) return;
-
-    console.log("Инициализация карты...", {
-      container,
-      containerSize: { width: container.offsetWidth, height: container.offsetHeight },
-      center,
-      zoom
-    });
+    // Не создаем карту если API еще не загружен или уже идет инициализация
+    if (isInitializingRef.current || !mapglRef.current) return;
 
     try {
       isInitializingRef.current = true;
@@ -84,39 +76,20 @@ export const MapGLProvider: React.FC<{ children: React.ReactNode }> = ({
 
       mapInstanceRef.current = map;
 
+      // @ts-ignore - событие ready существует, но типы 2GIS неполные
       map.on("ready", () => {
-        console.log("✅ Карта готова!");
-
-        // Принудительный пересчет размеров canvas
         requestAnimationFrame(() => {
           const canvas = container.querySelector('canvas');
-          if (canvas) {
-            const { width, height } = container.getBoundingClientRect();
-            console.log("📐 Размеры контейнера:", { width, height });
-            console.log("📐 Размеры canvas:", {
-              width: canvas.width,
-              height: canvas.height,
-              styleWidth: canvas.style.width,
-              styleHeight: canvas.style.height
-            });
-
-            // Если canvas имеет 0x0, пересоздаем размеры
-            if (canvas.width === 0 || canvas.height === 0) {
-              console.log("⚠️ Canvas имеет нулевые размеры, обновляем...");
-              map.invalidateSize?.();
-            }
+          if (canvas && (canvas.width === 0 || canvas.height === 0)) {
+            map.invalidateSize?.();
           }
         });
 
         setIsMapReady(true);
         isInitializingRef.current = false;
       });
-
-      map.on("error", (error: unknown) => {
-        console.error("❌ Ошибка карты:", error);
-      });
     } catch (error) {
-      console.error("❌ Failed to initialize map:", error);
+      console.error('Failed to init map:', error);
       isInitializingRef.current = false;
     }
   }, []);
@@ -129,24 +102,27 @@ export const MapGLProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  // Cleanup при размонтировании
+  // Уничтожаем карту только при размонтировании провайдера
   useEffect(() => {
     return () => {
       destroyMap();
     };
   }, [destroyMap]);
 
+  const contextValue = useMemo(
+    () => ({
+      mapglAPI: mapglRef.current,
+      isLoaded,
+      isMapReady,
+      mapInstance: mapInstanceRef.current,
+      initMap,
+      destroyMap,
+    }),
+    [isLoaded, isMapReady, initMap, destroyMap]
+  );
+
   return (
-    <MapGLContext.Provider
-      value={{
-        mapglAPI: mapglRef.current,
-        isLoaded,
-        isMapReady,
-        mapInstance: mapInstanceRef.current,
-        initMap,
-        destroyMap,
-      }}
-    >
+    <MapGLContext.Provider value={contextValue}>
       {children}
     </MapGLContext.Provider>
   );
