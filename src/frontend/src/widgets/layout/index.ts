@@ -2,3 +2,4 @@
 export { AppLayout } from "./ui/AppLayout/AppLayout";
 export { AppHeader } from "./ui/AppHeader/AppHeader";
 export { AppFooter } from "./ui/AppFooter/AppFooter";
+export { BottomSheetLayout } from "./ui/BottomSheetLayout/BottomSheetLayout";

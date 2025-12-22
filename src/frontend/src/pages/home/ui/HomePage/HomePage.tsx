@@ -85,89 +85,106 @@ export const HomePage: React.FC = () => {
   );
   const [notificationCount] = useState(2);
 
+  const selectedWalkId = searchParams.get("walkId") || null;
+
   useEffect(() => {
     const newSearchParams = new URLSearchParams(location.search);
     newSearchParams.set("tab", activeTab);
-    history.replace({ search: newSearchParams.toString() });
-  }, [activeTab, history, location.search]);
+
+    if (!selectedWalkId) {
+      newSearchParams.delete("walkId");
+    }
+
+    const newSearch = newSearchParams.toString();
+    if (location.search !== `?${newSearch}`) {
+      history.replace({ search: newSearch });
+    }
+  }, [activeTab, selectedWalkId, history, location.search]);
 
   const handleNotificationClick = () => {
     history.push("/notifications");
   };
 
+  const handleWalkClick = (walkId: string) => {
+    const newSearchParams = new URLSearchParams(location.search);
+    newSearchParams.set("walkId", walkId);
+    history.push({ search: newSearchParams.toString() });
+  };
+
+
   return (
     <MainLayout>
       <div className="px-3 py-5 flex flex-col justify-start items-start gap-8">
-          <div className="self-stretch h-14 flex justify-between items-center">
-            <Toggle
-              options={[
-                { value: "walks", label: "Прогулки" },
-                { value: "places", label: "Места" },
-              ]}
-              value={activeTab}
-              onChange={setActiveTab}
-            />
-            <div
-              className="relative cursor-pointer"
-              onClick={handleNotificationClick}
-            >
-              <div className="p-3 -rotate-90 bg-white rounded-full shadow-[0px_5px_9px_0px_rgba(66,58,58,0.06)] flex flex-col justify-center items-center">
-                <div className="rotate-90">
-                  <Icon name="bell" size={24} />
-                </div>
+        <div className="self-stretch h-14 flex justify-between items-center">
+          <Toggle
+            options={[
+              { value: "walks", label: "Прогулки" },
+              { value: "places", label: "Места" },
+            ]}
+            value={activeTab}
+            onChange={setActiveTab}
+          />
+          <div
+            className="relative cursor-pointer"
+            onClick={handleNotificationClick}
+          >
+            <div className="p-3 -rotate-90 bg-white rounded-full shadow-[0px_5px_9px_0px_rgba(66,58,58,0.06)] flex flex-col justify-center items-center">
+              <div className="rotate-90">
+                <Icon name="bell" size={24} />
               </div>
-              {notificationCount > 0 && (
-                <div className="absolute min-w-5 px-1.5 py-0.5 left-[29px] top-[-9px] bg-pink-300 rounded-full flex flex-col justify-center items-center">
-                  <Text variant="medium-14" color="white">
-                    {notificationCount}
-                  </Text>
-                </div>
-              )}
             </div>
-          </div>
-
-          <div className="self-stretch flex flex-col justify-start items-center gap-10">
-            <NewWalkButton />
-
-            {activeTab === "walks" && (
-              <div className="self-stretch flex flex-col justify-start items-start gap-5">
-                <div className="self-stretch flex justify-center items-center gap-2.5">
-                  <Text
-                    variant="bold-24"
-                    color="primary"
-                    className="flex-1 leading-6"
-                  >
-                    Прогулки рядом
-                  </Text>
-                </div>
-                <div className="self-stretch flex flex-col justify-start items-start gap-1">
-                  {mockWalks.map((walk) => (
-                    <WalkCard key={walk.id} walk={walk} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {activeTab === "places" && (
-              <div className="self-stretch flex flex-col justify-start items-start gap-5">
-                <div className="self-stretch flex justify-center items-center gap-2.5">
-                  <Text
-                    variant="bold-24"
-                    color="primary"
-                    className="flex-1 leading-6"
-                  >
-                    Места рядом
-                  </Text>
-                </div>
-                <div className="self-stretch flex justify-center items-center p-10">
-                  <Text variant="regular-14" color="muted">
-                    Места пока не добавлены
-                  </Text>
-                </div>
+            {notificationCount > 0 && (
+              <div className="absolute min-w-5 px-1.5 py-0.5 left-[29px] top-[-9px] bg-pink-300 rounded-full flex flex-col justify-center items-center">
+                <Text variant="medium-14" color="white">
+                  {notificationCount}
+                </Text>
               </div>
             )}
           </div>
         </div>
+
+        <div className="self-stretch flex flex-col justify-start items-center gap-10">
+          <NewWalkButton />
+
+          {activeTab === "walks" && (
+            <div className="self-stretch flex flex-col justify-start items-start gap-5">
+              <div className="self-stretch flex justify-center items-center gap-2.5">
+                <Text
+                  variant="bold-24"
+                  color="primary"
+                  className="flex-1 leading-6"
+                >
+                  Прогулки рядом
+                </Text>
+              </div>
+              <div className="self-stretch flex flex-col justify-start items-start gap-1">
+                {mockWalks.map((walk) => (
+                  <WalkCard key={walk.id} walk={walk} onClick={handleWalkClick} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === "places" && (
+            <div className="self-stretch flex flex-col justify-start items-start gap-5">
+              <div className="self-stretch flex justify-center items-center gap-2.5">
+                <Text
+                  variant="bold-24"
+                  color="primary"
+                  className="flex-1 leading-6"
+                >
+                  Места рядом
+                </Text>
+              </div>
+              <div className="self-stretch flex justify-center items-center p-10">
+                <Text variant="regular-14" color="muted">
+                  Места пока не добавлены
+                </Text>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </MainLayout>
   );
 };

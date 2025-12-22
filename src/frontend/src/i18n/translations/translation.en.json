@@ -113,5 +113,8 @@
   "Get new code": "Get new code",
   "Get new code available in ": "Get new code available in ",
   "New code": "New code",
-  "Invalid code": "Invalid code"
+  "Invalid code": "Invalid code",
+  "dog_one": "{{count}} dog",
+  "dog_few": "{{count}} dogs",
+  "dog_many": "{{count}} dogs"
 }

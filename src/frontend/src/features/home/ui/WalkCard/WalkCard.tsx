@@ -1,24 +1,22 @@
 import React from "react";
-import { useHistory } from "react-router-dom";
 import { Avatar, Icon } from "@shared/ui";
 import { Text } from "@shared/ui/Text";
 import { Walk } from "../../model/types";
 
 export interface WalkCardProps {
   walk: Walk;
+  onClick?: (walkId: string) => void;
 }
 
-export const WalkCard: React.FC<WalkCardProps> = ({ walk }) => {
-  const history = useHistory();
-
+export const WalkCard: React.FC<WalkCardProps> = ({ walk, onClick }) => {
   const handleClick = () => {
-    history.push(`/walk/${walk.id}`);
+    onClick?.(walk.id);
   };
 
   return (
     <div
       onClick={handleClick}
-      className="p-5 bg-white rounded-3xl flex flex-col gap-5 cursor-pointer active:opacity-80 transition-opacity"
+      className="p-5 bg-white rounded-3xl flex flex-col gap-5 cursor-pointer active:opacity-80 transition-opacity w-full"
     >
       <div className="flex justify-start items-center gap-2.5">
         <Avatar

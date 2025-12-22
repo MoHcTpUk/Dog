@@ -113,5 +113,8 @@
   "Get new code": "Получить новый код",
   "Get new code available in ": "Получить новый код можно через ",
   "New code": "Новый код",
-  "Invalid code": "Неверный код"
+  "Invalid code": "Неверный код",
+  "dog_one": "{{count}} собака",
+  "dog_few": "{{count}} собаки",
+  "dog_many": "{{count}} собак"
 }

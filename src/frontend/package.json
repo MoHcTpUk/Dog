@@ -25,6 +25,7 @@
     "android:build:sync:run": "npm run build && npx cap sync android && npx cap run android"
   },
   "dependencies": {
+    "@2gis/mapgl": "^1.67.0",
     "@capacitor/android": "^7.4.3",
     "@capacitor/app": "7.0.1",
     "@capacitor/core": "^7.4.3",

@@ -23,7 +23,7 @@ export const MainFooter: React.FC = () => {
   const handleTabClick = (tab: TabType) => {
     const routes: Record<TabType, string> = {
       profile: "/profile",
-      map: "/home?tab=places",
+      map: "/map",
       list: "/home?tab=walks",
       dogs: "/dogs",
     };
@@ -56,7 +56,7 @@ export const MainFooter: React.FC = () => {
             activeTab === "map" ? "bg-white" : "bg-transparent"
           )}
         >
-          <Icon name="pin-stroke" size={24} />
+          <Icon name={activeTab === "map" ? "pin-filled" : "pin-stroke"} size={24} />
         </button>
 
         <button
@@ -66,7 +66,7 @@ export const MainFooter: React.FC = () => {
             activeTab === "list" ? "bg-white" : "bg-transparent"
           )}
         >
-          <Icon name="list-filled" size={24} />
+          <Icon name={activeTab === "list" ? "list-filled" : "list-stroke"} size={24} />
         </button>
       </div>
 
@@ -77,7 +77,7 @@ export const MainFooter: React.FC = () => {
           activeTab === "dogs" ? "bg-white" : "bg-transparent"
         )}
       >
-        <Icon name="paw-stroke" size={24} />
+        <Icon name={activeTab === "dogs" ? "paw-filled" : "paw-stroke"} size={24} />
       </button>
     </div>
   );
