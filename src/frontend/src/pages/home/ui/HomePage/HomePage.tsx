@@ -85,30 +85,22 @@ export const HomePage: React.FC = () => {
   );
   const [notificationCount] = useState(2);
 
-  const selectedWalkId = searchParams.get("walkId") || null;
-
   useEffect(() => {
     const newSearchParams = new URLSearchParams(location.search);
     newSearchParams.set("tab", activeTab);
-
-    if (!selectedWalkId) {
-      newSearchParams.delete("walkId");
-    }
 
     const newSearch = newSearchParams.toString();
     if (location.search !== `?${newSearch}`) {
       history.replace({ search: newSearch });
     }
-  }, [activeTab, selectedWalkId, history, location.search]);
+  }, [activeTab, history, location.search]);
 
   const handleNotificationClick = () => {
     history.push("/notifications");
   };
 
   const handleWalkClick = (walkId: string) => {
-    const newSearchParams = new URLSearchParams(location.search);
-    newSearchParams.set("walkId", walkId);
-    history.push({ search: newSearchParams.toString() });
+    history.push(`/walk/${walkId}`, { background: location });
   };
 
 

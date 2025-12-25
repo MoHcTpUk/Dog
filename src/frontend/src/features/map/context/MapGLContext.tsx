@@ -76,7 +76,6 @@ export const MapGLProvider: React.FC<{ children: React.ReactNode }> = ({
 
       mapInstanceRef.current = map;
 
-      // @ts-ignore - событие ready существует, но типы 2GIS неполные
       map.on("ready", () => {
         requestAnimationFrame(() => {
           const canvas = container.querySelector('canvas');
