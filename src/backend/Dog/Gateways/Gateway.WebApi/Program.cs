@@ -45,30 +45,14 @@ if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName =
                     try
                     {
                         var uri = new Uri(origin);
-                        var isLocalhost = uri.Host == "localhost";
+                        var isLocalhost = uri.Host == "localhost" || uri.Host == "127.0.0.1";
                         
-                        // Проверяем домены .dogappa.local
                         var isDogappaLocal = uri.Host == "dogappa.local" || uri.Host.EndsWith(".dogappa.local");
                         
-                        if (isDogappaLocal)
-                        {
-                            // Разрешаем все домены .dogappa.local
-                            // Проверяем порт: разрешаем 8443 или если порт не указан (-1)
-                            var port = uri.Port;
-                            var allowed = port == 8443 || port == -1;
-                            
-                            // Логируем для отладки
-                            System.Diagnostics.Debug.WriteLine($"CORS check: origin={origin}, host={uri.Host}, port={port}, allowed={allowed}");
-                            
-                            return allowed;
-                        }
-                        
-                        return isLocalhost;
+                        return isLocalhost || isDogappaLocal;
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        // Логируем ошибку для отладки
-                        System.Diagnostics.Debug.WriteLine($"CORS origin validation error: {ex.Message} for origin: {origin}");
                         return false;
                     }
                 })
