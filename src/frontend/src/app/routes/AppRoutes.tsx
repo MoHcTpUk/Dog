@@ -11,6 +11,8 @@ import { CodeVerificationPage } from "@pages/verification";
 import { HomePage } from "@pages/home";
 import { MapPage } from "@pages/map";
 import { DogProfilePage } from "@pages/dog-profile";
+import { DebugAuthentikFlowPage } from "@pages/debug-authentik";
+import { AuthCallbackPage } from "@pages/auth-callback";
 import { WalkDetailsDrawer } from "@widgets/WalkDetailsDrawer";
 import { mockWalks } from "@shared/mocks/walks.mock";
 
@@ -48,6 +50,8 @@ const AppContent: FC = () => {
         <Route exact path="/home" component={HomePage} />
         <Route exact path="/map" component={MapPage} />
         <Route exact path="/dog/:id" component={DogProfilePage} />
+        <Route exact path="/debug-authentik" component={DebugAuthentikFlowPage} />
+        <Route exact path="/auth/callback" component={AuthCallbackPage} />
         <Route exact path="/">
           <Redirect to="/home" />
         </Route>

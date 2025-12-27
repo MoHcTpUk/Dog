@@ -1,4 +1,9 @@
 services:
+  # Gateway сервис в Docker
+  # Для переключения между Docker и локальным режимом используйте скрипт:
+  #   ./switch-gateway-mode.sh docker  - Gateway в Docker (по умолчанию)
+  #   ./switch-gateway-mode.sh local   - Gateway локально на host.docker.internal:5000
+  # См. GATEWAY-SWITCH-MODE.md для подробностей
   gateway:
     image: ghcr.io/mohctpuk/dog-gateway:latest
     networks:
@@ -8,11 +13,17 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
-        - "traefik.http.routers.backend.entrypoints=web"
-        - "traefik.http.middlewares.strip-api-prefix.stripprefix.prefixes=/api"
-        - "traefik.http.routers.backend.middlewares=strip-api-prefix"
-        - "traefik.http.services.backend.loadbalancer.server.port=8080"
+        # HTTP роутер (редирект на HTTPS)
+        - "traefik.http.routers.gateway.rule=Host(`api.dogappa.local`)"
+        - "traefik.http.routers.gateway.entrypoints=web"
+        - "traefik.http.routers.gateway.middlewares=gateway-redirect"
+        - "traefik.http.middlewares.gateway-redirect.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.gateway-redirect.redirectscheme.permanent=true"
+        # HTTPS роутер
+        - "traefik.http.routers.gateway-secure.rule=Host(`api.dogappa.local`)"
+        - "traefik.http.routers.gateway-secure.entrypoints=websecure"
+        - "traefik.http.routers.gateway-secure.tls=true"
+        - "traefik.http.services.gateway.loadbalancer.server.port=8080"
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -32,14 +43,53 @@ services:
   #         max_attempts: 10
   #         window: 60s
 
-  # frontend:
-  #   image: ghcr.io/mohctpuk/dog-frontend:latest
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
-  #     - "traefik.http.services.frontend.loadbalancer.server.port=80"
-  #   networks:
-  #     - infra_traefik
+  landing:
+    image: ghcr.io/mohctpuk/dog-landing:latest
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        # HTTP роутер (редирект на HTTPS)
+        - "traefik.http.routers.landing.rule=Host(`dogappa.local`)"
+        - "traefik.http.routers.landing.entrypoints=web"
+        - "traefik.http.routers.landing.middlewares=landing-redirect"
+        - "traefik.http.middlewares.landing-redirect.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.landing-redirect.redirectscheme.permanent=true"
+        # HTTPS роутер
+        - "traefik.http.routers.landing-secure.rule=Host(`dogappa.local`)"
+        - "traefik.http.routers.landing-secure.entrypoints=websecure"
+        - "traefik.http.routers.landing-secure.tls=true"
+        - "traefik.http.services.landing.loadbalancer.server.port=80"
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 60s
+    networks:
+      - infra_traefik
+
+  frontend:
+    image: ghcr.io/mohctpuk/dog-frontend:latest
+    networks:
+      - infra_traefik
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        # HTTP роутер (редирект на HTTPS)
+        - "traefik.http.routers.frontend.rule=Host(`app.dogappa.local`)"
+        - "traefik.http.routers.frontend.entrypoints=web"
+        - "traefik.http.routers.frontend.middlewares=frontend-redirect"
+        - "traefik.http.middlewares.frontend-redirect.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.frontend-redirect.redirectscheme.permanent=true"
+        # HTTPS роутер
+        - "traefik.http.routers.frontend-secure.rule=Host(`app.dogappa.local`)"
+        - "traefik.http.routers.frontend-secure.entrypoints=websecure"
+        - "traefik.http.routers.frontend-secure.tls=true"
+        - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 60s
 
 networks:
   infra_traefik:

@@ -3,6 +3,31 @@ services:
     image: traefik:v3.6.2
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./certs:/certs:ro
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--entryPoints.traefik.address=:8080"
+      - "--providers.swarm=true"
+      - "--providers.swarm.exposedbydefault=false"
+      - "--providers.swarm.network=infra_traefik"
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.websecure.address=:443"
+      - "--providers.file.directory=/certs"
+      - "--providers.file.watch=true"
+    ports:
+      - target: 80
+        published: 8000
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 8443
+        protocol: tcp
+        mode: host
+      - target: 8080
+        published: 9002
+        protocol: tcp
+        mode: host
     deploy:
       placement:
         constraints:
@@ -56,7 +81,11 @@ services:
       AUTHENTIK_BOOTSTRAP_PASSWORD: ${AUTHENTIK_BOOTSTRAP_PASSWORD:-admin}
       AUTHENTIK_BOOTSTRAP_EMAIL: ${AUTHENTIK_BOOTSTRAP_EMAIL:-admin@dogappa.com}
       AUTHENTIK_BOOTSTRAP_TOKEN: ${AUTHENTIK_BOOTSTRAP_TOKEN:-72wy8CDoThVNCFJn9mqVBkX4xnag3P5jBbvbNXUKGW58VPdE5M8yUOYWibQb}
-      AUTHENTIK_BLUEPRINTS_DIR: /blueprints
+      # Cookie configuration for cross-domain support
+      # Set cookie domain to .dogappa.local so cookies work across all subdomains
+      # Format: AUTHENTIK_<SECTION>__<KEY> (double underscore for nested config)
+      AUTHENTIK_COOKIE_DOMAIN: .dogappa.local
+      # Custom blueprints are mounted to /blueprints/custom (default Authentik scan path)
     volumes:
       - authentik_media:/media
       - authentik_templates:/templates
@@ -76,6 +105,19 @@ services:
       retries: 5
       start_period: 60s
     deploy:
+      labels:
+        - "traefik.enable=true"
+        # HTTP роутер (редирект на HTTPS)
+        - "traefik.http.routers.authentik.rule=Host(`auth.dogappa.local`)"
+        - "traefik.http.routers.authentik.entrypoints=web"
+        - "traefik.http.routers.authentik.middlewares=authentik-redirect"
+        - "traefik.http.middlewares.authentik-redirect.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.authentik-redirect.redirectscheme.permanent=true"
+        # HTTPS роутер
+        - "traefik.http.routers.authentik-secure.rule=Host(`auth.dogappa.local`)"
+        - "traefik.http.routers.authentik-secure.entrypoints=websecure"
+        - "traefik.http.routers.authentik-secure.tls=true"
+        - "traefik.http.services.authentik.loadbalancer.server.port=9000"
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -95,7 +137,10 @@ services:
       AUTHENTIK_BOOTSTRAP_PASSWORD: ${AUTHENTIK_BOOTSTRAP_PASSWORD:-admin}
       AUTHENTIK_BOOTSTRAP_EMAIL: ${AUTHENTIK_BOOTSTRAP_EMAIL:-admin@dogappa.com}
       AUTHENTIK_BOOTSTRAP_TOKEN: ${AUTHENTIK_BOOTSTRAP_TOKEN:-72wy8CDoThVNCFJn9mqVBkX4xnag3P5jBbvbNXUKGW58VPdE5M8yUOYWibQb}
-      AUTHENTIK_BLUEPRINTS_DIR: /blueprints
+      # Cookie configuration for cross-domain support (must match server settings)
+      # Format: AUTHENTIK_<SECTION>__<KEY> (double underscore for nested config)
+      AUTHENTIK_COOKIE_DOMAIN: .dogappa.local
+      # Custom blueprints are mounted to /blueprints/custom (default Authentik scan path)
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - authentik_media:/media

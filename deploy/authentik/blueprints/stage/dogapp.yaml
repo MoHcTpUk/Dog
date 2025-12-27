@@ -7,8 +7,19 @@ metadata:
 context:
   provider_authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
   provider_invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+  # Use the standard interactive authentication flow for login (required for Traefik/outpost redirects).
+  provider_authentication_flow: !Find [authentik_flows.flow, [slug, default-authentication-flow]]
+  brand_authentication_flow: !Find [authentik_flows.flow, [slug, default-authentication-flow]]
 
 entries:
+  # Brand: update default brand with authentication flow
+  - model: authentik_brands.brand
+    id: authentik-default-brand
+    identifiers:
+      domain: authentik-default
+    attrs:
+      flow_authentication: !Context brand_authentication_flow
+
   # OAuth2 Provider
   - model: authentik_providers_oauth2.oauth2provider
     id: dogapp-provider
@@ -16,6 +27,7 @@ entries:
       name: dogapp-provider
     attrs:
       name: dogapp-provider
+      authentication_flow: !Context provider_authentication_flow
       authorization_flow: !Context provider_authorization_flow
       invalidation_flow: !Context provider_invalidation_flow
       client_type: public
@@ -24,7 +36,19 @@ entries:
         - matching_mode: strict
           url: "http://localhost:3000/callback"
         - matching_mode: strict
+          url: "http://localhost:3000/auth/callback"
+        - matching_mode: strict
+          url: "http://localhost:5173/callback"
+        - matching_mode: strict
+          url: "http://localhost:5173/auth/callback"
+        - matching_mode: strict
+          url: "http://localhost:8100/callback"
+        - matching_mode: strict
+          url: "http://localhost:8100/auth/callback"
+        - matching_mode: strict
           url: "http://localhost:8080/callback"
+        - matching_mode: strict
+          url: "http://localhost:8080/auth/callback"
       access_token_validity: hours=1
       refresh_token_validity: days=30
       include_claims_in_id_token: true
