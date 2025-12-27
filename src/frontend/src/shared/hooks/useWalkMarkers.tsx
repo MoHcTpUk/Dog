@@ -42,7 +42,7 @@ export const useWalkMarkers = ({
 
   const shouldUpdate = useMemo(() => {
     return hasClusteringChanged();
-  }, [clusterZoomLevel, hasClusteringChanged]);
+  }, [hasClusteringChanged]);
 
   useEffect(() => {
     if (!mapInstance || !mapglAPI) return;

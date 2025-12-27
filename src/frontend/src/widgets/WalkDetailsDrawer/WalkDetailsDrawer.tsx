@@ -20,9 +20,9 @@ export const WalkDetailsDrawer: React.FC<WalkDetailsDrawerProps> = ({
   onDogClick,
   onJoinClick,
 }) => {
-  if (!walk) return null;
+  const formattedTime = useFormatWalkTime(walk?.time || new Date());
 
-  const formattedTime = useFormatWalkTime(walk.time);
+  if (!walk) return null;
 
   return (
     <BottomDrawer isOpen={isOpen} onClose={onClose}>

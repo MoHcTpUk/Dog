@@ -1,7 +1,8 @@
-import { FC, useMemo, useCallback } from "react";
-import { IonRouterOutlet, useIonRouter } from "@ionic/react";
+import { FC } from "react";
+import { IonRouterOutlet } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
-import { Route, Redirect, useLocation } from "react-router-dom";
+import { Route, Redirect, useLocation, Switch } from "react-router-dom";
+import { Location } from "history";
 
 import { WelcomePage } from "@pages/welcome";
 import { LoginPage } from "@pages/login";
@@ -11,59 +12,38 @@ import { CodeVerificationPage } from "@pages/verification";
 import { HomePage } from "@pages/home";
 import { MapPage } from "@pages/map";
 import { DogProfilePage } from "@pages/dog-profile";
+import { WalkDetailsPage } from "@pages/walk-details";
 import { DebugAuthentikFlowPage } from "@pages/debug-authentik";
-import { AuthCallbackPage } from "@pages/auth-callback";
-import { WalkDetailsDrawer } from "@widgets/WalkDetailsDrawer";
-import { mockWalks } from "@shared/mocks/walks.mock";
+interface LocationState {
+  background?: Location;
+}
 
 const AppContent: FC = () => {
-  const router = useIonRouter();
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-
-  const selectedWalkId = searchParams.get("walkId") || null;
-  const selectedWalk = useMemo(
-    () => selectedWalkId ? mockWalks.find((w) => w.id === selectedWalkId) || null : null,
-    [selectedWalkId]
-  );
-
-  const handleCloseDrawer = useCallback(() => {
-    const newSearchParams = new URLSearchParams(location.search);
-    newSearchParams.delete("walkId");
-
-    const newPath = location.pathname + (newSearchParams.toString() ? "?" + newSearchParams.toString() : "");
-    router.push(newPath, "back", "pop");
-  }, [location.search, location.pathname, router]);
-
-  const handleDogClick = useCallback((dogId: string) => {
-    router.push(`/dog/${dogId}`, "forward", "push");
-  }, [router]);
+  const location = useLocation<LocationState>();
+  const background = location.state?.background;
 
   return (
     <>
-      <IonRouterOutlet animated>
-        <Route exact path="/welcome" component={WelcomePage} />
-        <Route exact path="/login" component={LoginPage} />
-        <Route exact path="/registration" component={RegistrationPage} />
-        <Route exact path="/onboarding" component={OnboardingPage} />
-        <Route exact path="/verification" component={CodeVerificationPage} />
-        <Route exact path="/home" component={HomePage} />
-        <Route exact path="/map" component={MapPage} />
-        <Route exact path="/dog/:id" component={DogProfilePage} />
-        <Route exact path="/debug-authentik" component={DebugAuthentikFlowPage} />
-        <Route exact path="/auth/callback" component={AuthCallbackPage} />
-        <Route exact path="/">
-          <Redirect to="/home" />
-        </Route>
+      <IonRouterOutlet animated={true}>
+        <Switch location={background || location}>
+          <Route exact path="/welcome" component={WelcomePage} />
+          <Route exact path="/debug-authentik" component={DebugAuthentikFlowPage} />
+          <Route exact path="/login" component={LoginPage} />
+          <Route exact path="/registration" component={RegistrationPage} />
+          <Route exact path="/onboarding" component={OnboardingPage} />
+          <Route exact path="/verification" component={CodeVerificationPage} />
+          <Route exact path="/home" component={HomePage} />
+          <Route exact path="/map" component={MapPage} />
+          <Route exact path="/dog/:id" component={DogProfilePage} />
+          <Route exact path="/">
+            <Redirect to="/home" />
+          </Route>
+        </Switch>
       </IonRouterOutlet>
 
-      {/* Единая модалка на уровне всего приложения */}
-      <WalkDetailsDrawer
-        walk={selectedWalk}
-        isOpen={!!selectedWalkId}
-        onClose={handleCloseDrawer}
-        onDogClick={handleDogClick}
-      />
+      {background && (
+        <Route exact path="/walk/:id" component={WalkDetailsPage} />
+      )}
     </>
   );
 };

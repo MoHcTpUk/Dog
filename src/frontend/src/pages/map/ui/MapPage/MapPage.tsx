@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useCallback } from "react";
 import { useIonRouter } from "@ionic/react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useHistory } from "react-router-dom";
 import { Toggle, Icon, Button } from "@shared/ui";
 import { Text } from "@shared/ui/Text";
 import { MainLayout } from "@app/layouts/MainLayout";
@@ -41,6 +41,7 @@ const mockPlaces: Place[] = [
 export const MapPage: React.FC = () => {
   const router = useIonRouter();
   const location = useLocation();
+  const history = useHistory();
   const searchParams = new URLSearchParams(location.search);
   const [activeTab, setActiveTab] = useState<TabValue>(
     (searchParams.get("tab") as TabValue) || "walks"
@@ -85,10 +86,8 @@ export const MapPage: React.FC = () => {
   }, []);
 
   const handleWalkClick = useCallback((walkId: string) => {
-    const newSearchParams = new URLSearchParams(location.search);
-    newSearchParams.set("walkId", walkId);
-    router.push(location.pathname + "?" + newSearchParams.toString(), "forward", "push");
-  }, [location.search, location.pathname, router]);
+    history.push(`/walk/${walkId}`, { background: location });
+  }, [location, history]);
 
   return (
     <MainLayout>
