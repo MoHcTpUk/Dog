@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MainLayout } from '@app/layouts/MainLayout';
-import { Icon, Text, MenuItem } from '@shared/ui';
+import { Icon, Text, MenuItem, BottomDrawer, CenterModal, Button } from '@shared/ui';
 import { useAppStore } from '@shared/store/app.store';
 
 interface MenuItemConfig {
@@ -16,6 +16,8 @@ export const ProfilePage: React.FC = () => {
   const { t } = useTranslation();
   const { currentDog, user, logout } = useAppStore();
   const [notificationCount] = useState(2);
+  const [isReferralDrawerOpen, setIsReferralDrawerOpen] = useState(false);
+  const [isThankYouModalOpen, setIsThankYouModalOpen] = useState(false);
 
   const handleNotificationClick = () => {
     history.push('/notifications');
@@ -23,6 +25,32 @@ export const ProfilePage: React.FC = () => {
 
   const handleEditProfile = () => {
     history.push('/profile/edit');
+  };
+
+  const handleReferralClick = () => {
+    setIsReferralDrawerOpen(true);
+  };
+
+  const handleShareLink = async () => {
+    const shareData = {
+      title: 'Dog&Co',
+      text: 'Присоединяйся к Dog&Co и получи скидку!',
+      url: window.location.origin + '/invite',
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        setIsReferralDrawerOpen(false);
+        setTimeout(() => {
+          setIsThankYouModalOpen(true);
+        }, 300);
+      }
+    } catch (err: any) {
+      if (err.name !== 'AbortError') {
+        console.log('Error sharing:', err);
+      }
+    }
   };
 
   const menuItems: MenuItemConfig[] = [
@@ -101,7 +129,10 @@ export const ProfilePage: React.FC = () => {
             </div>
           </div>
 
-          <div className="w-full p-5 relative bg-pink-300 rounded-3xl flex flex-col justify-end items-center gap-5 overflow-hidden">
+          <div
+            className="w-full p-5 relative bg-pink-300 rounded-3xl flex flex-col justify-end items-center gap-5 overflow-hidden cursor-pointer"
+            onClick={handleReferralClick}
+          >
             <div
               className="w-full h-[476px] left-0 top-[-50px] absolute bg-cover bg-center"
               style={{
@@ -137,6 +168,64 @@ export const ProfilePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <BottomDrawer
+        isOpen={isReferralDrawerOpen}
+        onClose={() => setIsReferralDrawerOpen(false)}
+      >
+        <div className="self-stretch flex flex-col justify-start items-center gap-5">
+          <div className="self-stretch p-5 bg-white rounded-3xl flex flex-col justify-center items-start gap-5">
+            <div className="self-stretch inline-flex justify-start items-start gap-[5px]">
+              <div className="flex-1 inline-flex flex-col justify-start items-start gap-[5px]">
+                <Text variant="extra-bold-28" color="primary" className="self-stretch leading-6">
+                  Скидка 10% в магазине Dog&Co
+                </Text>
+              </div>
+            </div>
+            <Text variant="regular-14" color="primary" className="self-stretch">
+              За друга, который зарегистрируется и заполнит инфо о своей собаке, вы получите промокод на скидку
+            </Text>
+          </div>
+        </div>
+        <Button
+          variant="primary"
+          size="L"
+          fullWidth
+          onClick={handleShareLink}
+        >
+          Поделиться ссылкой
+        </Button>
+      </BottomDrawer>
+
+      <CenterModal
+        isOpen={isThankYouModalOpen}
+        onClose={() => setIsThankYouModalOpen(false)}
+      >
+        <div className="p-5 bg-white rounded-2xl inline-flex flex-col justify-center items-start gap-10">
+          <div className="w-80 flex flex-col justify-start items-start gap-2.5">
+            <div className="self-stretch inline-flex justify-start items-start gap-[5px]">
+              <Text variant="bold-24" color="primary" className="flex-1 leading-6">
+                Спасибо, что делитесь!
+              </Text>
+            </div>
+            <Text variant="regular-14" color="muted" className="self-stretch">
+              Когда друг заполнит профиль собаки, промокод появится в разделе «Мои промокоды»
+            </Text>
+          </div>
+          <div className="self-stretch inline-flex justify-start items-start gap-1">
+            <div className="flex-1 h-12 flex justify-start items-center gap-1">
+              <Button
+                variant="secondary-gray"
+                size="M"
+                fullWidth
+                onClick={() => setIsThankYouModalOpen(false)}
+              >
+                Закрыть
+              </Button>
+            </div>
+          </div>
+        </div>
+      </CenterModal>
     </MainLayout>
   );
 };

@@ -29,6 +29,9 @@ export type { SpinnerProps } from "./Spinner/Spinner";
 export { Modal } from "./Modal/Modal";
 export type { ModalProps } from "./Modal/Modal";
 
+export { CenterModal } from "./CenterModal/CenterModal";
+export type { CenterModalProps } from "./CenterModal/CenterModal";
+
 export { BottomDrawer } from "./BottomDrawer";
 export type { BottomDrawerProps } from "./BottomDrawer/BottomDrawer";
 
