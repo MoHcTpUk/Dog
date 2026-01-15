@@ -108,7 +108,7 @@ export const ProfilePage: React.FC = () => {
                 src={currentDog?.avatar || 'https://placehold.co/50x50'}
                 alt={currentDog?.name || 'Dog'}
               />
-              <div className="flex-1 pr-2.5 flex justify-start items-center gap-2.5">
+              <div className="flex-1 pr-2.5 flex justify-start items-center gap-2.5 cursor-pointer" onClick={handleEditProfile}>
                 <div className="flex-1 inline-flex flex-col justify-center items-start gap-[5px]">
                   <Text variant="semibold-18" color="primary">
                     {currentDog?.name || t('Name')}
@@ -119,10 +119,7 @@ export const ProfilePage: React.FC = () => {
                     </Text>
                   </div>
                 </div>
-                <div
-                  className="size-6 cursor-pointer"
-                  onClick={handleEditProfile}
-                >
+                <div className="size-6">
                   <Icon name="edit" size={24} />
                 </div>
               </div>
