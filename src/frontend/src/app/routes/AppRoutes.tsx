@@ -13,6 +13,8 @@ import { HomePage } from "@pages/home";
 import { MapPage } from "@pages/map";
 import { DogProfilePage } from "@pages/dog-profile";
 import { WalkDetailsPage } from "@pages/walk-details";
+import { DogsPage } from "@pages/dogs";
+import { ProfilePage } from "@pages/profile";
 
 interface LocationState {
   background?: Location;
@@ -33,7 +35,9 @@ const AppContent: FC = () => {
           <Route exact path="/verification" component={CodeVerificationPage} />
           <Route exact path="/home" component={HomePage} />
           <Route exact path="/map" component={MapPage} />
+          <Route exact path="/dog" component={DogsPage} />
           <Route exact path="/dog/:id" component={DogProfilePage} />
+          <Route exact path="/profile" component={ProfilePage} />
           <Route exact path="/">
             <Redirect to="/home" />
           </Route>

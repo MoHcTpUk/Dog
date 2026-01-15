@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { IonPage, IonContent, IonImg } from '@ionic/react';
 import { Text, Icon, Tag, Button } from '@shared/ui';
 import { Dog } from '@shared/types/walk';
@@ -14,13 +14,40 @@ export const DogProfileModal: React.FC<DogProfileModalProps> = ({
   onClose,
   onInviteClick,
 }) => {
-  const [currentImageIndex] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const images = dog ? [dog.avatar, dog.avatar, dog.avatar, dog.avatar] : [];
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const scrollLeft = container.scrollLeft;
+      const width = container.offsetWidth;
+      const newIndex = Math.round(scrollLeft / width);
+      setCurrentImageIndex(newIndex);
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
 
   if (!dog) {
     return null;
   }
 
-  const images = [dog.avatar, dog.avatar, dog.avatar, dog.avatar];
+  const handleDotClick = (index: number) => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const width = container.offsetWidth;
+    container.scrollTo({
+      left: width * index,
+      behavior: 'smooth'
+    });
+  };
 
   const healthTags = [];
   if (dog.isSterilized) healthTags.push('Стерилизована');
@@ -56,23 +83,51 @@ export const DogProfileModal: React.FC<DogProfileModalProps> = ({
 
           <div className="flex flex-col items-center gap-5">
             <div className="flex flex-col items-center gap-[15px]">
-              <div className="w-[334px] h-[334px] rounded-3xl overflow-hidden">
-                <IonImg
-                  src={images[currentImageIndex]}
-                  alt={dog.name}
-                  className="w-full h-full object-cover"
-                />
+              <style>
+                {`
+                  .slider-container::-webkit-scrollbar {
+                    display: none;
+                  }
+                  .slider-container {
+                    scrollbar-width: none;
+                    -ms-overflow-style: none;
+                    scroll-snap-type: x mandatory;
+                    -webkit-overflow-scrolling: touch;
+                  }
+                  .slider-item {
+                    scroll-snap-align: center;
+                    scroll-snap-stop: always;
+                  }
+                `}
+              </style>
+              <div
+                ref={scrollContainerRef}
+                className="slider-container w-[334px] h-[334px] flex overflow-x-auto overflow-y-hidden gap-3"
+              >
+                {images.map((image, index) => (
+                  <div
+                    key={index}
+                    className="slider-item w-[334px] h-[334px] flex-shrink-0 rounded-3xl overflow-hidden"
+                  >
+                    <IonImg
+                      src={image}
+                      alt={`${dog.name} ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
               </div>
 
               <div className="flex items-center gap-1.5">
                 {images.map((_, index) => (
                   <div
                     key={index}
-                    className={`rounded-full ${
+                    className={`rounded-full cursor-pointer ${
                       index === currentImageIndex
                         ? 'w-[7px] h-[7px] bg-primary'
                         : 'w-[5px] h-[5px] bg-white'
                     }`}
+                    onClick={() => handleDotClick(index)}
                   />
                 ))}
               </div>

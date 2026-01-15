@@ -14,7 +14,7 @@ export const MainFooter: React.FC = () => {
   const getActiveTab = (): TabType => {
     if (location.pathname.includes("/profile")) return "profile";
     if (location.pathname.includes("/map")) return "map";
-    if (location.pathname.includes("/dogs")) return "dogs";
+    if (location.pathname === "/dog") return "dogs";
     return "list";
   };
 
@@ -25,7 +25,7 @@ export const MainFooter: React.FC = () => {
       profile: "/profile",
       map: "/map",
       list: "/home?tab=walks",
-      dogs: "/dogs",
+      dogs: "/dog",
     };
     history.push(routes[tab]);
   };

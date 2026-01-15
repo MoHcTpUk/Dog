@@ -116,5 +116,15 @@
   "Invalid code": "Неверный код",
   "dog_one": "{{count}} собака",
   "dog_few": "{{count}} собаки",
-  "dog_many": "{{count}} собак"
+  "dog_many": "{{count}} собак",
+  "Owner": "Хозяин",
+  "My Promocodes": "Мои промокоды",
+  "Feedback": "Обратная связь",
+  "Notification Settings": "Настройка уведомлений",
+  "Terms and Privacy": "Условия и политика",
+  "Location Access": "Доступ к геопозиции",
+  "Log Out": "Выйти",
+  "Delete Account": "Удалить аккаунт",
+  "10% Discount at Dog&Co": "Скидка 10% в Dog&Co",
+  "Invite a friend to the app": "Пригласи в приложение друга"
 }

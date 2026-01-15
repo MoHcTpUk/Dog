@@ -71,3 +71,6 @@ export type { CodeInputProps } from "./CodeInput";
 
 export { Toggle } from "./Toggle";
 export type { ToggleProps, ToggleOption } from "./Toggle";
+
+export { MenuItem } from "./MenuItem";
+export type { MenuItemProps } from "./MenuItem/MenuItem";
