@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MainLayout } from '@app/layouts/MainLayout';
 import { Icon, Text, NotificationCard } from '@shared/ui';
@@ -11,7 +11,7 @@ const mockNotifications: Notification[] = [
     type: 'join-request',
     dogName: 'Сара',
     dogAvatar: 'https://placehold.co/48x48',
-    walkId: 'walk-1',
+    walkId: '1',
     timestamp: new Date(Date.now() - 5 * 60 * 1000),
     isRead: false,
   },
@@ -20,7 +20,7 @@ const mockNotifications: Notification[] = [
     type: 'walk-invite',
     dogName: 'Макс',
     dogAvatar: 'https://placehold.co/48x48',
-    walkId: 'walk-2',
+    walkId: '2',
     timestamp: new Date(Date.now() - 30 * 60 * 1000),
     isRead: false,
   },
@@ -29,7 +29,7 @@ const mockNotifications: Notification[] = [
     type: 'invite-accepted',
     dogName: 'Белла',
     dogAvatar: 'https://placehold.co/48x48',
-    walkId: 'walk-3',
+    walkId: '3',
     timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
     isRead: true,
   },
@@ -38,7 +38,7 @@ const mockNotifications: Notification[] = [
     type: 'invite-rejected',
     dogName: 'Рекс',
     dogAvatar: 'https://placehold.co/48x48',
-    walkId: 'walk-4',
+    walkId: '4',
     timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000),
     isRead: true,
   },
@@ -47,7 +47,7 @@ const mockNotifications: Notification[] = [
     type: 'request-accepted',
     dogName: 'Луна',
     dogAvatar: 'https://placehold.co/48x48',
-    walkId: 'walk-5',
+    walkId: '5',
     timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
     isRead: true,
   },
@@ -56,7 +56,7 @@ const mockNotifications: Notification[] = [
     type: 'request-rejected',
     dogName: 'Чарли',
     dogAvatar: 'https://placehold.co/48x48',
-    walkId: 'walk-6',
+    walkId: '6',
     timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
     isRead: true,
   },
@@ -74,7 +74,7 @@ const mockNotifications: Notification[] = [
     type: 'walk-updated',
     dogName: 'Джек',
     dogAvatar: 'https://placehold.co/48x48',
-    walkId: 'walk-8',
+    walkId: '7',
     timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
     isRead: true,
   },
@@ -82,9 +82,9 @@ const mockNotifications: Notification[] = [
 
 export const NotificationsPage: React.FC = () => {
   const history = useHistory();
+  const location = useLocation();
   const { t } = useTranslation();
   const [notifications] = useState<Notification[]>(mockNotifications);
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const handleBack = () => {
     history.goBack();
@@ -92,7 +92,7 @@ export const NotificationsPage: React.FC = () => {
 
   const handleNotificationClick = (notification: Notification) => {
     if (notification.walkId) {
-      history.push(`/walk/${notification.walkId}`);
+      history.push(`/walk/${notification.walkId}`, { background: location });
     }
   };
 
@@ -111,20 +111,6 @@ export const NotificationsPage: React.FC = () => {
           <Text variant="bold-24" color="primary" className="flex-1 leading-6">
             {t('Notifications')}
           </Text>
-          <div className="relative cursor-pointer">
-            <div className="p-3 -rotate-90 bg-white rounded-full shadow-[0px_5px_9px_0px_rgba(66,58,58,0.06)] flex flex-col justify-center items-center gap-2.5 overflow-hidden">
-              <div className="rotate-90">
-                <Icon name="bell" size={24} />
-              </div>
-            </div>
-            {unreadCount > 0 && (
-              <div className="absolute min-w-5 px-1.5 py-0.5 left-[29px] top-[-9px] bg-pink-300 rounded-full flex flex-col justify-center items-center gap-2.5">
-                <Text variant="medium-14" color="white">
-                  {unreadCount}
-                </Text>
-              </div>
-            )}
-          </div>
         </div>
 
         <div className="self-stretch flex flex-col justify-start items-start gap-[8px]">

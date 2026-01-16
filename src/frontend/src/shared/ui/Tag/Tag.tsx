@@ -7,7 +7,7 @@ export interface TagProps {
   disabled?: boolean;
   icon?: React.ReactNode;
   size?: "small" | "medium";
-  variant?: "default" | "accent" | "outline";
+  variant?: "default" | "accent" | "outline" | "secondary";
   onClick?: () => void;
   className?: string;
   hasError?: boolean;
@@ -69,8 +69,10 @@ export const Tag: React.FC<TagProps> = ({
           "outline-offset-[-1px]",
           "outline-border"
         );
+      } else if (variant === "secondary") {
+        baseClasses.push("bg-background-secondary", "text-text-primary");
       } else {
-        baseClasses.push("bg-background-secondary", "text-text-primary", "hover:bg-background-secondary");
+        baseClasses.push("bg-white", "text-text-primary", "hover:bg-white");
       }
     }
 

@@ -163,7 +163,7 @@ export const DogProfileModal: React.FC<DogProfileModalProps> = ({
                     {healthTags.map((tag, index) => (
                       <Tag
                         key={index}
-                        variant="default"
+                        variant="secondary"
                         size="small"
                         icon={<Icon name="check-filled" size={16} color="#23BA6E" />}
                       >
