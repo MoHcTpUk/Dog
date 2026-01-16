@@ -40,6 +40,7 @@ import DrawerHandleIcon from '@shared/assets/icons/drawer-handle.svg?react';
 import WaitIcon from '@shared/assets/icons/wait.svg?react';
 import MinusIcon from '@shared/assets/icons/minus.svg?react';
 import UserIcon from '@shared/assets/icons/user.svg?react';
+import CopyIcon from '@shared/assets/icons/copy.svg?react';
 
 export type IconName =
   | 'plus'
@@ -82,7 +83,8 @@ export type IconName =
   | 'drawer-handle'
   | 'wait'
   | 'minus'
-  | 'user';
+  | 'user'
+  | 'copy';
 
 export interface IconProps {
   name: IconName;
@@ -133,6 +135,7 @@ const iconMap: Record<IconName, React.FC<React.SVGProps<SVGSVGElement>>> = {
   wait: WaitIcon,
   minus: MinusIcon,
   user: UserIcon,
+  copy: CopyIcon,
 };
 
 export const Icon: React.FC<IconProps> = ({

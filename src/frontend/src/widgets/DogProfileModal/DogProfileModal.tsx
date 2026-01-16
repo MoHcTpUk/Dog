@@ -62,16 +62,16 @@ export const DogProfileModal: React.FC<DogProfileModalProps> = ({
 
   return (
     <IonPage>
-      <IonContent className="bg-zinc-100">
+      <IonContent className="bg-background-secondary">
         <div className="flex flex-col gap-5 px-3 pt-2.5 pb-5">
 
           <div className="flex justify-between items-center h-[55px]">
             <div className="w-6 h-6 flex items-center justify-center cursor-pointer" onClick={handleClose}>
-              <Icon name="arrow-left" size={24} color="#3F335A" />
+              <Icon name="arrow-left" size={24} color="var(--color-text-primary)" />
             </div>
             <div className="relative flex flex-col">
               <div className="w-6 h-6 flex items-center justify-center">
-                <Icon name="bell" size={24} color="#3F335A" />
+                <Icon name="bell" size={24} color="var(--color-text-primary)" />
               </div>
               <div className="absolute -top-2 -right-2 min-w-[21px] px-1.5 py-0.5 bg-pink-300 rounded-full flex items-center justify-center">
                 <Text variant="medium-small-12" color="white">
@@ -136,22 +136,22 @@ export const DogProfileModal: React.FC<DogProfileModalProps> = ({
             <div className="w-full flex flex-col gap-1">
               <div className="p-5 bg-white rounded-3xl flex flex-col gap-5">
                 <div className="flex flex-col gap-1.5">
-                  <Text variant="bold-24" color="primary" className="leading-6">
+                  <div className="text-text-primary text-2xl font-bold font-['Golos_Text'] leading-6">
                     {dog.name}
-                  </Text>
-                  <Text variant="regular-14" color="secondary" className="leading-[18px]">
+                  </div>
+                  <div className="text-text-secondary text-sm font-normal font-['Golos_Text'] leading-4">
                     {dog.breed}
-                  </Text>
+                  </div>
                 </div>
 
-                <div className="flex items-start gap-1 flex-wrap">
-                  <Tag variant="outline" size="small">
+                <div className="inline-flex justify-start items-start gap-1 flex-wrap">
+                  <Tag variant="outline" size="small" className="text-text-secondary outline-border">
                     {dog.gender === 'female' ? 'Девочка' : 'Мальчик'}
                   </Tag>
-                  <Tag variant="outline" size="small">
+                  <Tag variant="outline" size="small" className="text-text-secondary outline-border">
                     {dog.age} {dog.age === 1 ? 'год' : dog.age < 5 ? 'года' : 'лет'}
                   </Tag>
-                  <Tag variant="outline" size="small">
+                  <Tag variant="outline" size="small" className="text-text-secondary outline-border">
                     {dog.weight} кг
                   </Tag>
                 </div>
@@ -159,13 +159,13 @@ export const DogProfileModal: React.FC<DogProfileModalProps> = ({
 
               {healthTags.length > 0 && (
                 <div className="p-5 bg-white rounded-3xl">
-                  <div className="flex items-start gap-1 flex-wrap">
+                  <div className="inline-flex justify-start items-start gap-1 flex-wrap">
                     {healthTags.map((tag, index) => (
                       <Tag
                         key={index}
                         variant="default"
                         size="small"
-                        icon={<Icon name="check" size={16} color="#3F335A" />}
+                        icon={<Icon name="check-filled" size={16} color="#23BA6E" />}
                       >
                         {tag}
                       </Tag>
@@ -176,19 +176,19 @@ export const DogProfileModal: React.FC<DogProfileModalProps> = ({
 
               {dog.description && (
                 <div className="p-5 bg-white rounded-3xl flex flex-col gap-5">
-                  <Text variant="regular-14" color="primary" className="leading-[18px]">
+                  <div className="text-text-primary text-sm font-normal font-['Golos_Text'] leading-4">
                     {dog.description}
-                  </Text>
+                  </div>
 
                   {(dog.activityLevel || (dog.compatibility && dog.compatibility.length > 0)) && (
-                    <div className="flex items-start gap-1 flex-wrap">
+                    <div className="inline-flex justify-start items-start gap-1 flex-wrap">
                       {dog.activityLevel && (
-                        <Tag variant="outline" size="small">
+                        <Tag variant="outline" size="small" className="text-text-secondary outline-border">
                           {dog.activityLevel}
                         </Tag>
                       )}
                       {dog.compatibility?.map((item, index) => (
-                        <Tag key={index} variant="outline" size="small">
+                        <Tag key={index} variant="outline" size="small" className="text-text-secondary outline-border">
                           {item}
                         </Tag>
                       ))}

@@ -64,11 +64,13 @@ export const Tag: React.FC<TagProps> = ({
         baseClasses.push(
           "bg-transparent",
           "text-text-muted",
-          "border",
-          "border-border"
+          "outline",
+          "outline-1",
+          "outline-offset-[-1px]",
+          "outline-border"
         );
       } else {
-        baseClasses.push("bg-surface", "text-text-primary", "hover:bg-background-secondary");
+        baseClasses.push("bg-background-secondary", "text-text-primary", "hover:bg-background-secondary");
       }
     }
 

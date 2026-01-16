@@ -1,39 +1,39 @@
 // Base UI Components
-export { Button } from "./Button/Button";
-export type { ButtonProps } from "./Button/Button";
+export { Button } from "./Button";
+export type { ButtonProps } from "./Button";
 
-export { Input } from "./Input/Input";
-export type { InputProps } from "./Input/Input";
+export { Input } from "./Input";
+export type { InputProps } from "./Input";
 
-export { Textarea } from "./Textarea/Textarea";
-export type { TextareaProps } from "./Textarea/Textarea";
+export { Textarea } from "./Textarea";
+export type { TextareaProps } from "./Textarea";
 
-export { Card } from "./Card/Card";
-export type { CardProps } from "./Card/Card";
+export { Card } from "./Card";
+export type { CardProps } from "./Card";
 
-export { Checkbox } from "./Checkbox/Checkbox";
-export type { CheckboxProps } from "./Checkbox/Checkbox";
+export { Checkbox } from "./Checkbox";
+export type { CheckboxProps } from "./Checkbox";
 
-export { RadioGroup } from "./RadioGroup/RadioGroup";
-export type { RadioGroupProps, RadioOption } from "./RadioGroup/RadioGroup";
+export { RadioGroup } from "./RadioGroup";
+export type { RadioGroupProps, RadioOption } from "./RadioGroup";
 
-export { Badge } from "./Badge/Badge";
-export type { BadgeProps } from "./Badge/Badge";
+export { Badge } from "./Badge";
+export type { BadgeProps } from "./Badge";
 
-export { Avatar } from "./Avatar/Avatar";
-export type { AvatarProps } from "./Avatar/Avatar";
+export { Avatar } from "./Avatar";
+export type { AvatarProps } from "./Avatar";
 
-export { Spinner } from "./Spinner/Spinner";
-export type { SpinnerProps } from "./Spinner/Spinner";
+export { Spinner } from "./Spinner";
+export type { SpinnerProps } from "./Spinner";
 
-export { Modal } from "./Modal/Modal";
-export type { ModalProps } from "./Modal/Modal";
+export { Modal } from "./Modal";
+export type { ModalProps } from "./Modal";
 
-export { CenterModal } from "./CenterModal/CenterModal";
-export type { CenterModalProps } from "./CenterModal/CenterModal";
+export { CenterModal } from "./CenterModal";
+export type { CenterModalProps } from "./CenterModal";
 
 export { BottomDrawer } from "./BottomDrawer";
-export type { BottomDrawerProps } from "./BottomDrawer/BottomDrawer";
+export type { BottomDrawerProps } from "./BottomDrawer";
 
 export { Tag, TagRadioGroup, TagCheckboxGroup } from "./Tag";
 export type {
@@ -76,4 +76,10 @@ export { Toggle } from "./Toggle";
 export type { ToggleProps, ToggleOption } from "./Toggle";
 
 export { MenuItem } from "./MenuItem";
-export type { MenuItemProps } from "./MenuItem/MenuItem";
+export type { MenuItemProps } from "./MenuItem";
+
+export { PromoCodeCard } from "./PromoCodeCard";
+export type { PromoCodeCardProps } from "./PromoCodeCard";
+
+export { Switch } from "./Switch";
+export type { SwitchProps } from "./Switch";

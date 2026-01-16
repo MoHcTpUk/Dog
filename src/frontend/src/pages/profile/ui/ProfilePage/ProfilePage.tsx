@@ -18,6 +18,8 @@ export const ProfilePage: React.FC = () => {
   const [notificationCount] = useState(2);
   const [isReferralDrawerOpen, setIsReferralDrawerOpen] = useState(false);
   const [isThankYouModalOpen, setIsThankYouModalOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] = useState(false);
 
   const handleNotificationClick = () => {
     history.push('/notifications');
@@ -62,16 +64,32 @@ export const ProfilePage: React.FC = () => {
     {
       labelKey: 'Log Out',
       route: '/welcome',
-      action: () => logout()
+      action: () => setIsLogoutModalOpen(true)
     },
-    { labelKey: 'Delete Account', route: '/profile/delete' }
+    {
+      labelKey: 'Delete Account',
+      route: '/profile/delete',
+      action: () => setIsDeleteAccountModalOpen(true)
+    }
   ];
 
   const handleMenuClick = (item: MenuItemConfig) => {
     if (item.action) {
       item.action();
+      return;
     }
     history.push(item.route);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setIsLogoutModalOpen(false);
+    history.push('/welcome');
+  };
+
+  const handleDeleteAccount = () => {
+    console.log('Deleting account...');
+    setIsDeleteAccountModalOpen(false);
   };
 
   return (
@@ -198,28 +216,85 @@ export const ProfilePage: React.FC = () => {
         isOpen={isThankYouModalOpen}
         onClose={() => setIsThankYouModalOpen(false)}
       >
-        <div className="p-5 bg-white rounded-2xl inline-flex flex-col justify-center items-start gap-10">
-          <div className="w-80 flex flex-col justify-start items-start gap-2.5">
-            <div className="self-stretch inline-flex justify-start items-start gap-[5px]">
-              <Text variant="bold-24" color="primary" className="flex-1 leading-6">
-                Спасибо, что делитесь!
-              </Text>
-            </div>
-            <Text variant="regular-14" color="muted" className="self-stretch">
+        <div className="p-5 bg-white rounded-2xl flex flex-col gap-10">
+          <div className="flex flex-col gap-2.5">
+            <Text variant="bold-24" color="primary" className="leading-6">
+              Спасибо, что делитесь!
+            </Text>
+            <Text variant="regular-14" color="muted">
               Когда друг заполнит профиль собаки, промокод появится в разделе «Мои промокоды»
             </Text>
           </div>
-          <div className="self-stretch inline-flex justify-start items-start gap-1">
-            <div className="flex-1 h-12 flex justify-start items-center gap-1">
-              <Button
-                variant="secondary-gray"
-                size="M"
-                fullWidth
-                onClick={() => setIsThankYouModalOpen(false)}
-              >
-                Закрыть
-              </Button>
-            </div>
+          <Button
+            variant="secondary-gray"
+            size="M"
+            fullWidth
+            onClick={() => setIsThankYouModalOpen(false)}
+          >
+            Закрыть
+          </Button>
+        </div>
+      </CenterModal>
+
+      <CenterModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+      >
+        <div className="p-5 bg-white rounded-2xl flex flex-col gap-10">
+          <Text variant="bold-24" color="primary" className="leading-6">
+            Уходите?
+          </Text>
+          <div className="flex gap-1">
+            <Button
+              variant="secondary-gray"
+              size="M"
+              fullWidth
+              onClick={handleLogout}
+            >
+              Да, ухожу
+            </Button>
+            <Button
+              variant="primary"
+              size="M"
+              fullWidth
+              onClick={() => setIsLogoutModalOpen(false)}
+            >
+              Отмена
+            </Button>
+          </div>
+        </div>
+      </CenterModal>
+
+      <CenterModal
+        isOpen={isDeleteAccountModalOpen}
+        onClose={() => setIsDeleteAccountModalOpen(false)}
+      >
+        <div className="p-5 bg-white rounded-2xl flex flex-col gap-10">
+          <div className="flex flex-col gap-2.5">
+            <Text variant="bold-24" color="primary" className="leading-6">
+              Удалить аккаунт?
+            </Text>
+            <Text variant="regular-14" color="muted" className="leading-4">
+              Вы не сможете восстановить аккаунт или данные после удаления
+            </Text>
+          </div>
+          <div className="flex gap-1">
+            <Button
+              variant="secondary-gray"
+              size="M"
+              fullWidth
+              onClick={handleDeleteAccount}
+            >
+              Да, удалить
+            </Button>
+            <Button
+              variant="primary"
+              size="M"
+              fullWidth
+              onClick={() => setIsDeleteAccountModalOpen(false)}
+            >
+              Отмена
+            </Button>
           </div>
         </div>
       </CenterModal>

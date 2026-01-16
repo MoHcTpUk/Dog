@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import './CenterModal.css';
+import styles from './CenterModal.module.css';
 
 export interface CenterModalProps {
   isOpen: boolean;
@@ -21,7 +21,9 @@ export const CenterModal: React.FC<CenterModalProps> = ({
       setShouldRender(true);
       document.body.style.overflow = 'hidden';
       requestAnimationFrame(() => {
-        setIsVisible(true);
+        requestAnimationFrame(() => {
+          setIsVisible(true);
+        });
       });
     } else {
       setIsVisible(false);
@@ -43,11 +45,11 @@ export const CenterModal: React.FC<CenterModalProps> = ({
 
   return createPortal(
     <div
-      className={`center-modal-overlay ${isVisible ? 'visible' : ''}`}
+      className={`${styles.overlay} ${isVisible ? styles.visible : ''}`}
       onClick={onClose}
     >
       <div
-        className={`center-modal-content ${isVisible ? 'visible' : ''}`}
+        className={`${styles.content} ${isVisible ? styles.visible : ''}`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}
