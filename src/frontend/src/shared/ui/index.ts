@@ -83,3 +83,6 @@ export type { PromoCodeCardProps } from "./PromoCodeCard";
 
 export { Switch } from "./Switch";
 export type { SwitchProps } from "./Switch";
+
+export { NotificationCard } from "./NotificationCard";
+export type { NotificationCardProps } from "./NotificationCard";

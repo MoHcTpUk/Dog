@@ -58,7 +58,7 @@ export const ProfilePage: React.FC = () => {
   const menuItems: MenuItemConfig[] = [
     { labelKey: 'My Promocodes', route: '/profile/promocodes' },
     { labelKey: 'Feedback', route: '/profile/feedback' },
-    { labelKey: 'Notification Settings', route: '/profile/notifications' },
+    { labelKey: 'Notification Settings', route: '/profile/settings' },
     { labelKey: 'Terms and Privacy', route: '/profile/terms' },
     { labelKey: 'Location Access', route: '/profile/location' },
     {

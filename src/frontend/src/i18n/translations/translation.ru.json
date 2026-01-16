@@ -151,5 +151,17 @@
   "September": "сентября",
   "October": "октября",
   "November": "ноября",
-  "December": "декабря"
+  "December": "декабря",
+  "Notifications": "Уведомления",
+  "Wants To Join Your Walk": "хочет присоединиться к вашей прогулке",
+  "Invited You To Walk": "пригласил(а) вас на прогулку",
+  "Accepted Your Invitation": "принял(а) ваше приглашение",
+  "Declined Your Invitation": "отклонил(а) ваше приглашение",
+  "Accepted Your Walk Request": "принял(а) ваш запрос на прогулку",
+  "Declined Your Walk Request": "отклонил(а) ваш запрос на прогулку",
+  "Deleted Walk": "удалил(а) прогулку",
+  "Updated Walk": "изменил(а) прогулку",
+  "min ago": "мин назад",
+  "h ago": "ч назад",
+  "d ago": "д назад"
 }

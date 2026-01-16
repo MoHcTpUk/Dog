@@ -1,46 +1,99 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { MainLayout } from '@app/layouts/MainLayout';
-import { Icon, Text, Switch } from '@shared/ui';
+import { Icon, Text, NotificationCard } from '@shared/ui';
+import { Notification } from '@shared/types/notification';
 
-interface NotificationSetting {
-  id: string;
-  label: string;
-  enabled: boolean;
-}
+const mockNotifications: Notification[] = [
+  {
+    id: '1',
+    type: 'join-request',
+    dogName: 'Сара',
+    dogAvatar: 'https://placehold.co/48x48',
+    walkId: 'walk-1',
+    timestamp: new Date(Date.now() - 5 * 60 * 1000),
+    isRead: false,
+  },
+  {
+    id: '2',
+    type: 'walk-invite',
+    dogName: 'Макс',
+    dogAvatar: 'https://placehold.co/48x48',
+    walkId: 'walk-2',
+    timestamp: new Date(Date.now() - 30 * 60 * 1000),
+    isRead: false,
+  },
+  {
+    id: '3',
+    type: 'invite-accepted',
+    dogName: 'Белла',
+    dogAvatar: 'https://placehold.co/48x48',
+    walkId: 'walk-3',
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    isRead: true,
+  },
+  {
+    id: '4',
+    type: 'invite-rejected',
+    dogName: 'Рекс',
+    dogAvatar: 'https://placehold.co/48x48',
+    walkId: 'walk-4',
+    timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000),
+    isRead: true,
+  },
+  {
+    id: '5',
+    type: 'request-accepted',
+    dogName: 'Луна',
+    dogAvatar: 'https://placehold.co/48x48',
+    walkId: 'walk-5',
+    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
+    isRead: true,
+  },
+  {
+    id: '6',
+    type: 'request-rejected',
+    dogName: 'Чарли',
+    dogAvatar: 'https://placehold.co/48x48',
+    walkId: 'walk-6',
+    timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    isRead: true,
+  },
+  {
+    id: '7',
+    type: 'walk-deleted',
+    dogName: 'Тоби',
+    dogAvatar: 'https://placehold.co/48x48',
+    walkId: undefined,
+    timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    isRead: true,
+  },
+  {
+    id: '8',
+    type: 'walk-updated',
+    dogName: 'Джек',
+    dogAvatar: 'https://placehold.co/48x48',
+    walkId: 'walk-8',
+    timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+    isRead: true,
+  },
+];
 
 export const NotificationsPage: React.FC = () => {
   const history = useHistory();
-  const [notificationCount] = useState(2);
-  const [allNotificationsEnabled, setAllNotificationsEnabled] = useState(true);
-
-  const [settings, setSettings] = useState<NotificationSetting[]>([
-    { id: 'walk-invites', label: 'Приглашения на прогулки', enabled: true },
-    { id: 'walks-nearby', label: 'Прогулки рядом', enabled: true },
-    { id: 'walk-reminders', label: 'Напоминания о прогулках', enabled: true },
-    { id: 'team-updates', label: 'Обновления от команды', enabled: false },
-    { id: 'new-places', label: 'Новое дог-френдли место', enabled: true },
-  ]);
-
-  const handleNotificationClick = () => {
-    history.push('/notifications');
-  };
+  const { t } = useTranslation();
+  const [notifications] = useState<Notification[]>(mockNotifications);
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const handleBack = () => {
     history.goBack();
   };
 
-  const handleToggle = (id: string) => {
-    if (!allNotificationsEnabled) return;
-    setSettings((prev) =>
-      prev.map((setting) =>
-        setting.id === id ? { ...setting, enabled: !setting.enabled } : setting
-      )
-    );
-  };
-
-  const handleToggleAll = (enabled: boolean) => {
-    setAllNotificationsEnabled(enabled);
+  const handleNotificationClick = (notification: Notification) => {
+    if (notification.walkId) {
+      history.push(`/walk/${notification.walkId}`);
+    }
   };
 
   return (
@@ -56,68 +109,32 @@ export const NotificationsPage: React.FC = () => {
             </div>
           </div>
           <Text variant="bold-24" color="primary" className="flex-1 leading-6">
-            Пуши
+            {t('Notifications')}
           </Text>
-          <div
-            className="relative cursor-pointer"
-            onClick={handleNotificationClick}
-          >
+          <div className="relative cursor-pointer">
             <div className="p-3 -rotate-90 bg-white rounded-full shadow-[0px_5px_9px_0px_rgba(66,58,58,0.06)] flex flex-col justify-center items-center gap-2.5 overflow-hidden">
               <div className="rotate-90">
                 <Icon name="bell" size={24} />
               </div>
             </div>
-            {notificationCount > 0 && (
+            {unreadCount > 0 && (
               <div className="absolute min-w-5 px-1.5 py-0.5 left-[29px] top-[-9px] bg-pink-300 rounded-full flex flex-col justify-center items-center gap-2.5">
                 <Text variant="medium-14" color="white">
-                  {notificationCount}
+                  {unreadCount}
                 </Text>
               </div>
             )}
           </div>
         </div>
 
-        <div className="self-stretch flex flex-col justify-start items-start gap-10">
-          <div className="self-stretch p-5 bg-white rounded-3xl flex flex-col justify-start items-start gap-3">
-            <div className="self-stretch inline-flex justify-start items-center gap-3.5">
-              <Text variant="semibold-18" color="primary" className="flex-1">
-                Все уведомления
-              </Text>
-              <Switch
-                checked={allNotificationsEnabled}
-                onChange={handleToggleAll}
-              />
-            </div>
-            <Text variant="regular-14" color="muted" className="leading-4">
-              {allNotificationsEnabled
-                ? 'Вы получаете все уведомления'
-                : 'Уведомления отключены'}
-            </Text>
-          </div>
-
-          <div className="self-stretch flex flex-col justify-start items-start gap-1">
-            {settings.map((setting) => (
-              <div
-                key={setting.id}
-                className="w-full h-14 px-5 py-3.5 bg-white rounded-2xl flex flex-col justify-center items-center gap-5 overflow-hidden"
-              >
-                <div className="self-stretch inline-flex justify-start items-center gap-3.5">
-                  <Text
-                    variant="medium-16"
-                    color={allNotificationsEnabled ? 'primary' : 'muted'}
-                    className="flex-1"
-                  >
-                    {setting.label}
-                  </Text>
-                  <Switch
-                    checked={allNotificationsEnabled && setting.enabled}
-                    onChange={() => handleToggle(setting.id)}
-                    disabled={!allNotificationsEnabled}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="self-stretch flex flex-col justify-start items-start gap-[8px]">
+          {notifications.map((notification) => (
+            <NotificationCard
+              key={notification.id}
+              notification={notification}
+              onClick={() => handleNotificationClick(notification)}
+            />
+          ))}
         </div>
       </div>
     </MainLayout>
