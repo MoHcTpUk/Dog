@@ -7,25 +7,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 
-// Authentik OIDC configuration from appsettings
-var authentikAuthority = builder.Configuration["Authentik:Authority"] 
-    ?? "http://localhost:9000/application/o/dogapp/";
-var authentikIssuer = builder.Configuration["Authentik:Issuer"] 
-    ?? authentikAuthority;
-
-builder.Services.AddAuthentication().AddJwtBearer(options =>
-{
-    options.Authority = authentikAuthority;
-    options.RequireHttpsMetadata = false;
-    options.Audience = "dogapp";
-    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidIssuer = authentikIssuer,
-        ValidateAudience = true,
-        ValidAudience = "dogapp"
-    };
-});
 builder.Services.AddAuthorization();
 
 builder.Services.AddControllers();

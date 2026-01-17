@@ -2,8 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Shared.Messaging.Interfaces;
 using Users.Api.Commands.RegistrationRequest;
 using Users.Api.Dtos;
-using Users.Application.Interfaces;
-using Users.Application.Models.Authentik;
 using Users.Domain.Aggregates;
 using Users.Infrastructure.Repositories;
 
@@ -11,7 +9,6 @@ namespace Users.Application.Handlers;
 
 public class VerifyRegistrationRequestHandler(
     IRegistrationRequestRepository registrationRequestRepository,
-    IAuthentikClient authentikClient,
     IUserRepository userRepository
 )
     : ICommandHandler<VerifyRegistrationRequestCommand, LoginUrlDto>
@@ -35,32 +32,16 @@ public class VerifyRegistrationRequestHandler(
 
         // Генерируем временный пароль
         var password = GenerateTemporaryPassword();
-
-        // 1. Создаём пользователя в Authentik
-        var newAuthentikUser = new CreateAuthentikUserRequest
-        {
-            Username = username,
-            Email = registrationRequest.Email,
-            Name = username,
-            IsActive = true,
-            Groups = []
-        };
-
-        var authentikUserId = await authentikClient.CreateUserAsync(newAuthentikUser);
-
-        // 2. Создаём пользователя в своей БД с authentik_user_id
+        
+        // 2. Создаём пользователя в своей БД
         var newUser = new UserAggregate
         {
             Email = registrationRequest.Email,
             Id = Guid.NewGuid(),
-            AuthentikUserId = authentikUserId
         };
 
         await userRepository.CreateAsync([newUser], cancellationToken);
         await userRepository.SaveChangesAsync();
-
-        // 3. Задаём временный пароль (однократно)
-        await authentikClient.SetUserPasswordAsync(authentikUserId, password);
 
         return new LoginUrlDto
         {

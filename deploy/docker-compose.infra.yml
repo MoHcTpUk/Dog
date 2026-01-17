@@ -96,9 +96,6 @@ volumes:
   nats_data:
   minio_data:
   redis_data:
-  authentik_media:
-  authentik_templates:
-  authentik_certs:
 
 networks:
   traefik:
