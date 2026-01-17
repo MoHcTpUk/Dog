@@ -40,6 +40,12 @@ import DrawerHandleIcon from '@shared/assets/icons/drawer-handle.svg?react';
 import WaitIcon from '@shared/assets/icons/wait.svg?react';
 import MinusIcon from '@shared/assets/icons/minus.svg?react';
 import UserIcon from '@shared/assets/icons/user.svg?react';
+import CopyIcon from '@shared/assets/icons/copy.svg?react';
+import NotificationPlusIcon from '@shared/assets/icons/notification-plus.svg?react';
+import NotificationMinusIcon from '@shared/assets/icons/notification-minus.svg?react';
+import NotificationCheckIcon from '@shared/assets/icons/notification-check.svg?react';
+import NotificationTrashIcon from '@shared/assets/icons/notification-trash.svg?react';
+import NotificationEditIcon from '@shared/assets/icons/notification-edit.svg?react';
 
 export type IconName =
   | 'plus'
@@ -82,7 +88,13 @@ export type IconName =
   | 'drawer-handle'
   | 'wait'
   | 'minus'
-  | 'user';
+  | 'user'
+  | 'copy'
+  | 'notification-plus'
+  | 'notification-minus'
+  | 'notification-check'
+  | 'notification-trash'
+  | 'notification-edit';
 
 export interface IconProps {
   name: IconName;
@@ -133,6 +145,12 @@ const iconMap: Record<IconName, React.FC<React.SVGProps<SVGSVGElement>>> = {
   wait: WaitIcon,
   minus: MinusIcon,
   user: UserIcon,
+  copy: CopyIcon,
+  'notification-plus': NotificationPlusIcon,
+  'notification-minus': NotificationMinusIcon,
+  'notification-check': NotificationCheckIcon,
+  'notification-trash': NotificationTrashIcon,
+  'notification-edit': NotificationEditIcon,
 };
 
 export const Icon: React.FC<IconProps> = ({

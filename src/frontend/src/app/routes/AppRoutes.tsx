@@ -13,7 +13,9 @@ import { HomePage } from "@pages/home";
 import { MapPage } from "@pages/map";
 import { DogProfilePage } from "@pages/dog-profile";
 import { WalkDetailsPage } from "@pages/walk-details";
-import { DebugAuthentikFlowPage } from "@pages/debug-authentik";
+import { DogsPage } from "@pages/dogs";
+import { ProfilePage, EditProfilePage, PromocodesPage, SettingsPage, FeedbackPage, TermsPage, LocationAccessPage, NotificationsPage } from "@pages/profile";
+
 interface LocationState {
   background?: Location;
 }
@@ -27,14 +29,22 @@ const AppContent: FC = () => {
       <IonRouterOutlet animated={true}>
         <Switch location={background || location}>
           <Route exact path="/welcome" component={WelcomePage} />
-          <Route exact path="/debug-authentik" component={DebugAuthentikFlowPage} />
           <Route exact path="/login" component={LoginPage} />
           <Route exact path="/registration" component={RegistrationPage} />
           <Route exact path="/onboarding" component={OnboardingPage} />
           <Route exact path="/verification" component={CodeVerificationPage} />
           <Route exact path="/home" component={HomePage} />
           <Route exact path="/map" component={MapPage} />
+          <Route exact path="/dog" component={DogsPage} />
           <Route exact path="/dog/:id" component={DogProfilePage} />
+          <Route exact path="/profile" component={ProfilePage} />
+          <Route exact path="/profile/edit" component={EditProfilePage} />
+          <Route exact path="/profile/promocodes" component={PromocodesPage} />
+          <Route exact path="/profile/settings" component={SettingsPage} />
+          <Route exact path="/profile/feedback" component={FeedbackPage} />
+          <Route exact path="/profile/terms" component={TermsPage} />
+          <Route exact path="/profile/location" component={LocationAccessPage} />
+          <Route exact path="/notifications" component={NotificationsPage} />
           <Route exact path="/">
             <Redirect to="/home" />
           </Route>

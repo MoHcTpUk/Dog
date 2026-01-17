@@ -19,6 +19,8 @@ export interface TextareaProps {
   onBlur?: () => void;
   onFocus?: () => void;
   className?: string;
+  containerClassName?: string;
+  disableWrapper?: boolean;
 }
 
 export const Textarea: React.FC<TextareaProps> = ({
@@ -37,6 +39,8 @@ export const Textarea: React.FC<TextareaProps> = ({
   onBlur,
   onFocus,
   className,
+  containerClassName,
+  disableWrapper = false,
 }) => {
   const [focused, setFocused] = useState(false);
 
@@ -56,59 +60,111 @@ export const Textarea: React.FC<TextareaProps> = ({
   const getTextareaClasses = () => {
     const baseClasses = [
       "font-normal",
-      "font-sans",
-      "bg-background",
-      "w-full", // Textarea is always full width
+      "font-['Golos_Text']",
+      "w-full",
       "border-0",
       "outline-none",
       "resize-none",
-      "text-input",
-      "leading-[21px]",
-      "min-h-textarea",
-      "rounded-input",
-      "rounded-[16px]",
+      "text-base",
+      "leading-5",
     ];
 
-    // State-based styling
-    if (error) {
+    // Only add default styles if wrapper is enabled
+    if (!disableWrapper) {
       baseClasses.push(
-        "outline",
-        "outline-1",
-        "outline-error",
-        "text-text-primary"
+        "bg-background",
+        "rounded-input",
+        "rounded-[16px]",
+        "min-h-textarea"
       );
-    } else if (focused) {
-      baseClasses.push(
-        "outline",
-        "outline-1",
-        "outline-primary",
-        "text-text-primary"
-      );
-    } else if (required && !hasValue) {
-      baseClasses.push(
-        "outline",
-        "outline-1",
-        "outline-info",
-        "text-text-muted"
-      );
-    } else if (hasValue) {
-      // Filled state
-      baseClasses.push("text-text-primary");
+
+      // State-based styling
+      if (error) {
+        baseClasses.push(
+          "outline",
+          "outline-1",
+          "outline-error",
+          "text-text-primary"
+        );
+      } else if (focused) {
+        baseClasses.push(
+          "outline",
+          "outline-1",
+          "outline-primary",
+          "text-text-primary"
+        );
+      } else if (required && !hasValue) {
+        baseClasses.push(
+          "outline",
+          "outline-1",
+          "outline-info",
+          "text-text-muted"
+        );
+      } else if (hasValue) {
+        baseClasses.push("text-text-primary");
+      } else {
+        baseClasses.push("text-text-muted");
+      }
     } else {
-      // Default state
-      baseClasses.push("text-text-muted");
+      // Minimal styling for custom wrappers
+      baseClasses.push("bg-transparent");
+      if (hasValue) {
+        baseClasses.push("text-gray-700");
+      } else {
+        baseClasses.push("text-text-muted");
+      }
     }
 
     if (disabled) {
       baseClasses.push("opacity-50", "cursor-not-allowed");
     }
 
-    return classNames(baseClasses);
+    return classNames(baseClasses, className);
   };
 
 
+  // If wrapper is disabled, return just the textarea
+  if (disableWrapper) {
+    return (
+      <IonTextarea
+        value={value}
+        placeholder={placeholder}
+        disabled={disabled}
+        maxlength={maxLength}
+        rows={rows}
+        onIonInput={(e) => onInput?.(e.detail.value!)}
+        onIonFocus={handleFocus}
+        onIonBlur={handleBlur}
+        className={getTextareaClasses()}
+        style={{
+          fontSize: '16px',
+          '--background': 'transparent',
+          '--padding-start': '0',
+          '--padding-end': '0',
+          '--padding-top': '0',
+          '--padding-bottom': '0',
+          '--border-width': '0',
+          '--border-radius': '0',
+          '--box-shadow': 'none',
+          '--transition': 'none',
+          '--webkit-transition': 'none',
+          '--moz-transition': 'none',
+          '--ms-transition': 'none',
+          transition: 'none',
+          '--min-height': 'auto',
+          '--inner-padding-top': '0',
+          '--inner-padding-bottom': '0',
+          touchAction: 'manipulation',
+          WebkitUserSelect: 'text',
+          userSelect: 'text'
+        } as React.CSSProperties}
+        fill="outline"
+      />
+    );
+  }
+
   return (
-    <div className={classNames("flex flex-col", className)}>
+    <div className={classNames("flex flex-col", containerClassName)}>
       {label && (
         <label className="block text-sm font-medium text-text-primary mb-2 font-sans">
           {label}
@@ -132,7 +188,7 @@ export const Textarea: React.FC<TextareaProps> = ({
             onIonFocus={handleFocus}
             onIonBlur={handleBlur}
             className={getTextareaClasses()}
-            style={{ 
+            style={{
               fontSize: '16px',
               '--background': 'transparent',
               '--padding-start': '20px',

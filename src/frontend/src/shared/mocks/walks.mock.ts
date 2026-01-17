@@ -4,9 +4,30 @@ import { Walk, WalkCluster, Dog } from '@shared/types/walk';
 export const mockDogs: Dog[] = [
   {
     id: '1',
+    name: 'Оливер',
+    breed: 'Золотистый ретривер',
+    avatar: 'https://placehold.co/240x240',
+    gender: 'male',
+    age: 3,
+    weight: 32,
+    isVaccinated: true,
+    isSterilized: true,
+    isTreatedForParasites: true,
+    description: 'Дружелюбный и игривый пёс. Обожает долгие прогулки и игры с мячом',
+    activityLevel: 'Очень активный',
+    compatibility: ['Комфортно с мальчиками', 'Комфортно с большими собаками'],
+    owner: {
+      id: 'owner1',
+      name: 'Дмитрий',
+      age: 34,
+      avatar: 'https://placehold.co/60x60',
+    },
+  },
+  {
+    id: '2',
     name: 'Сара',
     breed: 'Пудель',
-    avatar: 'https://placehold.co/60x60',
+    avatar: 'https://placehold.co/240x240',
     gender: 'female',
     age: 4,
     weight: 24,
@@ -17,19 +38,40 @@ export const mockDogs: Dog[] = [
     activityLevel: 'Очень активная',
     compatibility: ['Комфортно с девочками', 'Комфортно с большими собаками'],
     owner: {
-      id: 'owner1',
+      id: 'owner2',
       name: 'Альберт',
       age: 28,
       avatar: 'https://placehold.co/60x60',
     },
   },
   {
-    id: '2',
+    id: '3',
+    name: 'Оливер',
+    breed: 'Бигль',
+    avatar: 'https://placehold.co/350x240',
+    gender: 'male',
+    age: 2,
+    weight: 12,
+    isVaccinated: true,
+    isSterilized: false,
+    isTreatedForParasites: true,
+    description: 'Любопытный и энергичный. Любит исследовать новые места',
+    activityLevel: 'Активный',
+    compatibility: ['Комфортно с мальчиками', 'Комфортно с маленькими собаками'],
+    owner: {
+      id: 'owner3',
+      name: 'Анна',
+      age: 26,
+      avatar: 'https://placehold.co/60x60',
+    },
+  },
+  {
+    id: '4',
     name: 'Карл',
     breed: 'Джек-рассел-терьер',
-    avatar: 'https://placehold.co/60x60',
+    avatar: 'https://placehold.co/240x240',
     gender: 'male',
-    age: 12,
+    age: 5,
     weight: 8,
     isVaccinated: true,
     isSterilized: false,
@@ -38,7 +80,7 @@ export const mockDogs: Dog[] = [
     activityLevel: 'Активный',
     compatibility: ['Комфортно с мальчиками', 'Комфортно с маленькими собаками'],
     owner: {
-      id: 'owner2',
+      id: 'owner4',
       name: 'Мария',
       age: 32,
       avatar: 'https://placehold.co/60x60',
@@ -130,5 +172,54 @@ export const mockWalkClusters: WalkCluster[] = [
     ],
     walkCount: 8,
     center: [37.6000, 55.7300],
+  },
+];
+
+// Моковые данные собак рядом
+export interface NearbyDog {
+  id: string;
+  name: string;
+  photos: string[];
+  distance: number;
+}
+
+export const mockNearbyDogs: NearbyDog[] = [
+  {
+    id: '1',
+    name: mockDogs[0].name,
+    photos: [
+      'https://placehold.co/240x240',
+      'https://placehold.co/240x240',
+    ],
+    distance: 150,
+  },
+  {
+    id: '2',
+    name: mockDogs[1].name,
+    photos: [
+      'https://placehold.co/240x240',
+      'https://placehold.co/240x240',
+      'https://placehold.co/240x240',
+      'https://placehold.co/240x240',
+    ],
+    distance: 270,
+  },
+  {
+    id: '3',
+    name: mockDogs[2].name,
+    photos: [
+      'https://placehold.co/350x240',
+    ],
+    distance: 320,
+  },
+  {
+    id: '4',
+    name: mockDogs[3].name,
+    photos: [
+      'https://placehold.co/240x240',
+      'https://placehold.co/240x240',
+      'https://placehold.co/240x240',
+    ],
+    distance: 400,
   },
 ];

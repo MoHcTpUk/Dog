@@ -14,7 +14,7 @@ export const MainFooter: React.FC = () => {
   const getActiveTab = (): TabType => {
     if (location.pathname.includes("/profile")) return "profile";
     if (location.pathname.includes("/map")) return "map";
-    if (location.pathname.includes("/dogs")) return "dogs";
+    if (location.pathname === "/dog") return "dogs";
     return "list";
   };
 
@@ -25,7 +25,7 @@ export const MainFooter: React.FC = () => {
       profile: "/profile",
       map: "/map",
       list: "/home?tab=walks",
-      dogs: "/dogs",
+      dogs: "/dog",
     };
     history.push(routes[tab]);
   };
@@ -34,10 +34,7 @@ export const MainFooter: React.FC = () => {
     <div className="w-full px-[3px] pt-2.5 pb-5 bg-white/60 rounded-t-2xl shadow-[0px_0px_9.3px_0px_rgba(66,58,58,0.06)] backdrop-blur-[5.5px] flex justify-center items-center gap-10">
       <button
         onClick={() => handleTabClick("profile")}
-        className={classNames(
-          "p-3.5 rounded-full flex justify-start items-start transition-colors",
-          activeTab === "profile" ? "bg-white" : "bg-transparent"
-        )}
+        className="p-3.5 rounded-full flex justify-start items-start transition-colors"
       >
         <Avatar
           src={currentDog?.avatar || "https://placehold.co/28x28"}
@@ -51,20 +48,14 @@ export const MainFooter: React.FC = () => {
       <div className="p-[3px] rounded-full flex justify-start items-center gap-0">
         <button
           onClick={() => handleTabClick("map")}
-          className={classNames(
-            "p-3 rounded-full flex justify-start items-start transition-colors",
-            activeTab === "map" ? "bg-white" : "bg-transparent"
-          )}
+          className="p-3 rounded-full flex justify-start items-start transition-colors"
         >
           <Icon name={activeTab === "map" ? "pin-filled" : "pin-stroke"} size={24} />
         </button>
 
         <button
           onClick={() => handleTabClick("list")}
-          className={classNames(
-            "p-3 rounded-full flex justify-start items-start transition-colors",
-            activeTab === "list" ? "bg-white" : "bg-transparent"
-          )}
+          className="p-3 rounded-full flex justify-start items-start transition-colors"
         >
           <Icon name={activeTab === "list" ? "list-filled" : "list-stroke"} size={24} />
         </button>
@@ -72,10 +63,7 @@ export const MainFooter: React.FC = () => {
 
       <button
         onClick={() => handleTabClick("dogs")}
-        className={classNames(
-          "p-4 rounded-full flex justify-start items-start transition-colors",
-          activeTab === "dogs" ? "bg-white" : "bg-transparent"
-        )}
+        className="p-4 rounded-full flex justify-start items-start transition-colors"
       >
         <Icon name={activeTab === "dogs" ? "paw-filled" : "paw-stroke"} size={24} />
       </button>

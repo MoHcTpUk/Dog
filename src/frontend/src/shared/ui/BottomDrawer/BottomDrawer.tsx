@@ -22,7 +22,7 @@ export const BottomDrawer: React.FC<BottomDrawerProps> = ({
       handle={false}
     >
       <div className="w-full px-3 pt-4 pb-8 bg-zinc-100 rounded-t-[20px] flex flex-col gap-10">
-        <div className="w-12 h-1 bg-zinc-300 rounded-full mx-auto -mt-2 mb-2" />
+        <div className="w-12 h-1 bg-zinc-300 rounded-full mx-auto -mt-2 mb-[-16px]" />
         {children}
       </div>
     </IonModal>
