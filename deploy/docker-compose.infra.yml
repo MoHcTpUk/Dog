@@ -15,19 +15,6 @@ services:
       - "--entryPoints.websecure.address=:443"
       - "--providers.file.directory=/certs"
       - "--providers.file.watch=true"
-    ports:
-      - target: 80
-        published: 8000
-        protocol: tcp
-        mode: host
-      - target: 443
-        published: 8443
-        protocol: tcp
-        mode: host
-      - target: 8080
-        published: 9002
-        protocol: tcp
-        mode: host
     deploy:
       placement:
         constraints:
@@ -42,7 +29,6 @@ services:
       POSTGRES_PASSWORD: password
     volumes:
       - postgres_data:/var/lib/postgresql
-      - ./authentik/init-authentik.sql:/docker-entrypoint-initdb.d/01-init-authentik.sql
     ports:
       - target: 5432
         published: 4321
@@ -68,103 +54,16 @@ services:
       timeout: 5s
       retries: 5
 
-  authentik-server:
-    image: ghcr.io/goauthentik/server:latest
-    command: server
-    environment:
-      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:-PleaseChangeThisToASecureRandomString123456}
-      AUTHENTIK_REDIS__HOST: redis
-      AUTHENTIK_POSTGRESQL__HOST: postgres
-      AUTHENTIK_POSTGRESQL__USER: user
-      AUTHENTIK_POSTGRESQL__PASSWORD: password
-      AUTHENTIK_POSTGRESQL__NAME: authentik
-      AUTHENTIK_BOOTSTRAP_PASSWORD: ${AUTHENTIK_BOOTSTRAP_PASSWORD:-admin}
-      AUTHENTIK_BOOTSTRAP_EMAIL: ${AUTHENTIK_BOOTSTRAP_EMAIL:-admin@dogappa.com}
-      AUTHENTIK_BOOTSTRAP_TOKEN: ${AUTHENTIK_BOOTSTRAP_TOKEN:-72wy8CDoThVNCFJn9mqVBkX4xnag3P5jBbvbNXUKGW58VPdE5M8yUOYWibQb}
-      # Cookie configuration for cross-domain support
-      # Set cookie domain to .dogappa.local so cookies work across all subdomains
-      # Format: AUTHENTIK_<SECTION>__<KEY> (double underscore for nested config)
-      AUTHENTIK_COOKIE_DOMAIN: .dogappa.local
-      # Custom blueprints are mounted to /blueprints/custom (default Authentik scan path)
-    volumes:
-      - authentik_media:/media
-      - authentik_templates:/templates
-      - ./authentik/blueprints/local:/blueprints/custom
-    ports:
-      - "9000:9000"
-      - "9443:9443"
-    depends_on:
-      - postgres
-      - redis
-    networks:
-      - traefik
-    healthcheck:
-      test: ["CMD", "ak", "healthcheck"]
-      interval: 30s
-      timeout: 30s
-      retries: 5
-      start_period: 60s
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        # HTTP роутер (редирект на HTTPS)
-        - "traefik.http.routers.authentik.rule=Host(`auth.dogappa.local`)"
-        - "traefik.http.routers.authentik.entrypoints=web"
-        - "traefik.http.routers.authentik.middlewares=authentik-redirect"
-        - "traefik.http.middlewares.authentik-redirect.redirectscheme.scheme=https"
-        - "traefik.http.middlewares.authentik-redirect.redirectscheme.permanent=true"
-        # HTTPS роутер
-        - "traefik.http.routers.authentik-secure.rule=Host(`auth.dogappa.local`)"
-        - "traefik.http.routers.authentik-secure.entrypoints=websecure"
-        - "traefik.http.routers.authentik-secure.tls=true"
-        - "traefik.http.services.authentik.loadbalancer.server.port=9000"
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 10
-        window: 60s
-
-  authentik-worker:
-    image: ghcr.io/goauthentik/server:latest
-    command: worker
-    environment:
-      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:-PleaseChangeThisToASecureRandomString123456}
-      AUTHENTIK_REDIS__HOST: redis
-      AUTHENTIK_POSTGRESQL__HOST: postgres
-      AUTHENTIK_POSTGRESQL__USER: user
-      AUTHENTIK_POSTGRESQL__PASSWORD: password
-      AUTHENTIK_POSTGRESQL__NAME: authentik
-      AUTHENTIK_BOOTSTRAP_PASSWORD: ${AUTHENTIK_BOOTSTRAP_PASSWORD:-admin}
-      AUTHENTIK_BOOTSTRAP_EMAIL: ${AUTHENTIK_BOOTSTRAP_EMAIL:-admin@dogappa.com}
-      AUTHENTIK_BOOTSTRAP_TOKEN: ${AUTHENTIK_BOOTSTRAP_TOKEN:-72wy8CDoThVNCFJn9mqVBkX4xnag3P5jBbvbNXUKGW58VPdE5M8yUOYWibQb}
-      # Cookie configuration for cross-domain support (must match server settings)
-      # Format: AUTHENTIK_<SECTION>__<KEY> (double underscore for nested config)
-      AUTHENTIK_COOKIE_DOMAIN: .dogappa.local
-      # Custom blueprints are mounted to /blueprints/custom (default Authentik scan path)
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - authentik_media:/media
-      - authentik_templates:/templates
-      - authentik_certs:/certs
-      - ./authentik/blueprints/local:/blueprints/custom
-    depends_on:
-      - postgres
-      - redis
-    networks:
-      - traefik
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 10
-        window: 60s
-
   nats:
     image: nats:latest
     command: ["-js", "-m", "8222"]
     ports:
-      - "4222:4222"
-      - "8222:8222"
+      - target: 4222
+        published: 4223
+        mode: host
+      - target: 8222
+        published: 8223
+        mode: host
     volumes:
       - nats_data:/data
     deploy:
@@ -177,8 +76,12 @@ services:
   minio:
     image: minio/minio:latest
     ports:
-      - "9009:9000"     # API
-      - "9001:9001"     # Web UI
+      - target: 9000
+        published: 9009
+        mode: host
+      - target: 9001
+        published: 9001
+        mode: host
     environment:
       MINIO_ROOT_USER: adminadmin
       MINIO_ROOT_PASSWORD: adminadmin

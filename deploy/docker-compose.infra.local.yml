@@ -1,19 +1,8 @@
 services:
   traefik:
-    command:
-      - "--log.level=DEBUG"
-      - "--api.insecure=true"
-      - "--entryPoints.traefik.address=:8080"
-      - "--providers.swarm=true"
-      - "--providers.swarm.exposedbydefault=false"
-      - "--providers.swarm.network=infra_traefik"
-      - "--entryPoints.web.address=:80"
-      - "--entryPoints.websecure.address=:443"
-      - "--providers.file.directory=/certs"
-      - "--providers.file.watch=true"
     ports:
       - target: 80
-        published: 8000
+        published: 8181
         protocol: tcp
         mode: host
       - target: 443
@@ -22,5 +11,12 @@ services:
         mode: host
       - target: 8080
         published: 9002
+        protocol: tcp
+        mode: host
+
+  postgres:
+    ports:
+      - target: 5432
+        published: 6566
         protocol: tcp
         mode: host

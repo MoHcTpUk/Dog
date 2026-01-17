@@ -7,7 +7,7 @@ services:
         protocol: tcp
         mode: host
       - target: 8000
-        published: 8001
+        published: 8065
         protocol: tcp
         mode: host
     volumes:
