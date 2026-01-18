@@ -38,6 +38,7 @@ public static class Extensions
                     .AllowRefreshTokenFlow();
 
                 options.RegisterScopes(
+                    OpenIddictConstants.Scopes.OpenId,
                     OpenIddictConstants.Scopes.Email,
                     OpenIddictConstants.Scopes.Profile,
                     OpenIddictConstants.Scopes.Roles);

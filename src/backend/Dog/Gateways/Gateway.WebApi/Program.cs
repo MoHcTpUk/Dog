@@ -46,11 +46,6 @@ if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName =
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == Environments.Local)
-{
-    app.MapOpenApi();
-}
-
 if (app.Environment.IsProduction()) app.UseHttpsRedirection();
 
 if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == Environments.Local)
@@ -58,8 +53,18 @@ if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == Enviro
     app.UseCors("NoLocalCORS");
 }
 
+// Map OpenAPI before authentication middleware to ensure it's accessible
+if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == Environments.Local)
+{
+    app.MapOpenApi().AllowAnonymous();
+}
+
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Test endpoint to verify routing works
+app.MapGet("/test", () => "Hello from Gateway!").AllowAnonymous();
+
 app.MapControllers();
 
 app.Run();
