@@ -4,6 +4,6 @@ namespace Users.Api.Dtos;
 
 public record LoginUrlDto : Dto
 {
-    public required string LoginUrl { get; set; }
+    public string? AccessToken { get; set; }
 }
 

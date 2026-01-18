@@ -1,15 +1,21 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Shared.Messaging.Interfaces;
 using Users.Api.Commands.RegistrationRequest;
 using Users.Api.Dtos;
 using Users.Domain.Aggregates;
 using Users.Infrastructure.Repositories;
+using Identity.Api.Commands;
+using Identity.Api.Services;
 
 namespace Users.Application.Handlers;
 
 public class VerifyRegistrationRequestHandler(
     IRegistrationRequestRepository registrationRequestRepository,
-    IUserRepository userRepository
+    IUserRepository userRepository,
+    IIdentityService identityService,
+    ILogger<VerifyRegistrationRequestHandler> logger
 )
     : ICommandHandler<VerifyRegistrationRequestCommand, LoginUrlDto>
 {
@@ -24,7 +30,8 @@ public class VerifyRegistrationRequestHandler(
         if (registrationRequest == null || registrationRequest.ActivationCode != request.VerificationCode)
             return new LoginUrlDto
             {
-                LoginUrl = string.Empty
+                LoginUrl = string.Empty,
+                AccessToken = null
             };
 
         // Генерируем username из email (можно использовать часть до @)
@@ -33,7 +40,7 @@ public class VerifyRegistrationRequestHandler(
         // Генерируем временный пароль
         var password = GenerateTemporaryPassword();
         
-        // 2. Создаём пользователя в своей БД
+        // Создаём пользователя в своей БД
         var newUser = new UserAggregate
         {
             Email = registrationRequest.Email,
@@ -43,9 +50,55 @@ public class VerifyRegistrationRequestHandler(
         await userRepository.CreateAsync([newUser], cancellationToken);
         await userRepository.SaveChangesAsync();
 
+        // Создаём пользователя в Identity сервисе через NATS
+        string? token = null;
+        try
+        {
+            var createUserCommand = new CreateIdentityUserCommand
+            {
+                Email = registrationRequest.Email,
+                UserName = username,
+                Password = password
+            };
+
+            var createUserResult = await identityService.CreateUserAsync(createUserCommand);
+
+            if (createUserResult.Success)
+            {
+                // Получаем токен через NATS
+                var generateTokenCommand = new GenerateTokenCommand
+                {
+                    Email = registrationRequest.Email,
+                    Password = password,
+                    Scope = "openid profile email"
+                };
+
+                var tokenResult = await identityService.GenerateTokenAsync(generateTokenCommand);
+
+                if (tokenResult.Success && !string.IsNullOrEmpty(tokenResult.AccessToken))
+                {
+                    token = tokenResult.AccessToken;
+                }
+                else
+                {
+                    logger.LogWarning("Failed to generate token: {Error}", tokenResult.ErrorMessage);
+                }
+            }
+            else
+            {
+                var errorMessage = createUserResult?.ErrorMessage ?? "Unknown error";
+                logger.LogWarning("Failed to create user in Identity service: {Error}", errorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error creating user in Identity service or getting token");
+        }
+
         return new LoginUrlDto
         {
-            LoginUrl = ""
+            LoginUrl = "",
+            AccessToken = token
         };
     }
 

@@ -12,6 +12,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
 builder.Services.AddUsersApi(builder.Configuration);
+builder.Services.AddIdentityApi(builder.Configuration);
 
 builder.Services.AddHostedService<AppInitializer>();
 

@@ -43,6 +43,19 @@ services:
           max_attempts: 10
           window: 60s
 
+  identity-service:
+    image: ghcr.io/mohctpuk/dog-identity-service:latest
+    networks:
+      - infra_traefik
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 60s
+
   landing:
     image: ghcr.io/mohctpuk/dog-landing:latest
     deploy:

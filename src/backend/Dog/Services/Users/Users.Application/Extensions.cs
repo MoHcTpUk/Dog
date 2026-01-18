@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Shared.Application;
 using Users.Api.Services;
 using Users.Infrastructure;
+using Identity.Api;
 
 namespace Users.Application;
 
@@ -12,7 +13,9 @@ public static class Extensions
         IConfiguration configuration)
     {
         services.AddScoped<IUserService, UserService>();
+        services.AddHttpClient();
 
+        services.AddIdentityApi(configuration);
         services.AddUsersInfrastructure(configuration);
         services.AddSharedApplication(configuration);
 

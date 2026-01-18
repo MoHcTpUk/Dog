@@ -13,10 +13,16 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="OpenIddict.Server.AspNetCore" Version="5.7.0" />
+        <PackageReference Include="OpenIddict.Validation.AspNetCore" Version="5.7.0" />
+        <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="5.7.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\Api\Users.Api\Users.Api.csproj" />
+      <ProjectReference Include="..\..\Services\Identity\Identity.Application\Identity.Application.csproj" />
+      <ProjectReference Include="..\..\Services\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj" />
+      <ProjectReference Include="..\..\Shared\Shared.Api\Shared.Api.csproj" />
       <ProjectReference Include="..\..\Shared\Shared.WebApi\Shared.WebApi.csproj" />
     </ItemGroup>
 
