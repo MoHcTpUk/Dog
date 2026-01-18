@@ -1,13 +1,12 @@
+using Identity.Api.Commands;
+using Identity.Api.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Shared.Messaging.Interfaces;
 using Users.Api.Commands.RegistrationRequest;
 using Users.Api.Dtos;
 using Users.Domain.Aggregates;
 using Users.Infrastructure.Repositories;
-using Identity.Api.Commands;
-using Identity.Api.Services;
 
 namespace Users.Application.Handlers;
 
@@ -30,7 +29,6 @@ public class VerifyRegistrationRequestHandler(
         if (registrationRequest == null || registrationRequest.ActivationCode != request.VerificationCode)
             return new LoginUrlDto
             {
-                LoginUrl = string.Empty,
                 AccessToken = null
             };
 
@@ -39,12 +37,12 @@ public class VerifyRegistrationRequestHandler(
 
         // Генерируем временный пароль
         var password = GenerateTemporaryPassword();
-        
+
         // Создаём пользователя в своей БД
         var newUser = new UserAggregate
         {
             Email = registrationRequest.Email,
-            Id = Guid.NewGuid(),
+            Id = Guid.NewGuid()
         };
 
         await userRepository.CreateAsync([newUser], cancellationToken);
@@ -76,13 +74,9 @@ public class VerifyRegistrationRequestHandler(
                 var tokenResult = await identityService.GenerateTokenAsync(generateTokenCommand);
 
                 if (tokenResult.Success && !string.IsNullOrEmpty(tokenResult.AccessToken))
-                {
                     token = tokenResult.AccessToken;
-                }
                 else
-                {
                     logger.LogWarning("Failed to generate token: {Error}", tokenResult.ErrorMessage);
-                }
             }
             else
             {
@@ -97,7 +91,6 @@ public class VerifyRegistrationRequestHandler(
 
         return new LoginUrlDto
         {
-            LoginUrl = "",
             AccessToken = token
         };
     }
