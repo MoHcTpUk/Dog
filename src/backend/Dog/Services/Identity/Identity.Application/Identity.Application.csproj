@@ -11,6 +11,7 @@
         <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.8" />
         <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
+        <PackageReference Include="OpenIddict.Abstractions" Version="5.7.0" />
     </ItemGroup>
 
     <ItemGroup>

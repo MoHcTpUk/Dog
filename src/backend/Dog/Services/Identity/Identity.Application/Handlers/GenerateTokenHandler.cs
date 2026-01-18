@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Security.Cryptography;
 using Identity.Api.Commands;
 using Identity.Application.Services;
 using OpenIddict.Abstractions;
@@ -9,7 +10,8 @@ namespace Identity.Application.Handlers;
 
 public class GenerateTokenHandler(
     IIdentityService identityService,
-    ITokenService tokenService
+    ITokenService tokenService,
+    IOpenIddictTokenManager tokenManager
 ) : ICommandHandler<GenerateTokenCommand, GenerateTokenResult>
 {
     public async Task<GenerateTokenResult> Handle(GenerateTokenCommand request,
@@ -51,10 +53,46 @@ public class GenerateTokenHandler(
             
             if (!string.IsNullOrEmpty(token))
             {
+                // Генерируем RefreshToken через OpenIddict
+                string? refreshToken = null;
+                try
+                {
+                    // Генерируем случайную строку для refresh token
+                    var randomBytes = new byte[32];
+                    using (var rng = RandomNumberGenerator.Create())
+                    {
+                        rng.GetBytes(randomBytes);
+                    }
+                    refreshToken = Convert.ToBase64String(randomBytes)
+                        .Replace("+", "-")
+                        .Replace("/", "_")
+                        .Replace("=", "");
+
+                    var tokenDescriptor = new OpenIddictTokenDescriptor
+                    {
+                        Subject = user.Id.ToString(),
+                        Type = OpenIddictConstants.TokenTypeHints.RefreshToken,
+                        CreationDate = DateTimeOffset.UtcNow,
+                        ExpirationDate = DateTimeOffset.UtcNow.AddDays(30), // 30 дней для refresh token
+                        Status = OpenIddictConstants.Statuses.Valid,
+                        Principal = claimsPrincipal,
+                        ReferenceId = refreshToken // Используем ReferenceId для хранения строкового значения
+                    };
+                    
+                    await tokenManager.CreateAsync(tokenDescriptor, cancellationToken);
+                }
+                catch
+                {
+                    // Логируем ошибку, но не прерываем процесс, если refresh token не удалось создать
+                    // AccessToken все равно будет возвращен
+                    refreshToken = null;
+                }
+
                 return new GenerateTokenResult
                 {
                     Success = true,
                     AccessToken = token,
+                    RefreshToken = refreshToken,
                     TokenType = "Bearer",
                     ExpiresIn = 86400 // 24 часа
                 };

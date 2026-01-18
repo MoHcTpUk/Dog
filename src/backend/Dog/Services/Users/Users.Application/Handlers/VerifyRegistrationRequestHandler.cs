@@ -50,6 +50,7 @@ public class VerifyRegistrationRequestHandler(
 
         // Создаём пользователя в Identity сервисе через NATS
         string? token = null;
+        string? refreshToken = null;
         try
         {
             var createUserCommand = new CreateIdentityUserCommand
@@ -74,7 +75,10 @@ public class VerifyRegistrationRequestHandler(
                 var tokenResult = await identityService.GenerateTokenAsync(generateTokenCommand);
 
                 if (tokenResult.Success && !string.IsNullOrEmpty(tokenResult.AccessToken))
+                {
                     token = tokenResult.AccessToken;
+                    refreshToken = tokenResult.RefreshToken;
+                }
                 else
                     logger.LogWarning("Failed to generate token: {Error}", tokenResult.ErrorMessage);
             }
@@ -91,7 +95,8 @@ public class VerifyRegistrationRequestHandler(
 
         return new LoginUrlDto
         {
-            AccessToken = token
+            AccessToken = token,
+            RefreshToken = refreshToken
         };
     }
 
