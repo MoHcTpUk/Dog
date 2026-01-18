@@ -47,11 +47,12 @@ public static class Extensions
 
                 options.UseAspNetCore()
                     .EnableTokenEndpointPassthrough()
-                    .EnableUserinfoEndpointPassthrough();
+                    .EnableUserinfoEndpointPassthrough()
+                    .DisableTransportSecurityRequirement();
             })
             .AddValidation(options =>
             {
-                // options.UseLocalServer();
+                options.UseLocalServer();
                 options.UseAspNetCore();
             });
 

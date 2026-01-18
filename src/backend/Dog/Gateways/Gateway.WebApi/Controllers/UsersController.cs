@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Users.Api.Commands.RegistrationRequest;
 using Users.Api.Dtos;
@@ -11,6 +12,7 @@ public class UsersController(IUserService userService)
     : ControllerBase
 {
     [HttpPost(nameof(CreateRegistrationRequest))]
+    [AllowAnonymous]
     public Task<RegistrationRequestDto> CreateRegistrationRequest(CreateRegistrationRequestCommand requestCommand)
     {
         var result = userService.CreateRegistrationRequest(requestCommand);
@@ -19,6 +21,7 @@ public class UsersController(IUserService userService)
     }
 
     [HttpPost(nameof(VerifyRegistrationRequest))]
+    [AllowAnonymous]
     public Task<LoginUrlDto> VerifyRegistrationRequest(VerifyRegistrationRequestCommand requestCommand)
     {
         var result = userService.VerifyRegistrationRequest(requestCommand);
