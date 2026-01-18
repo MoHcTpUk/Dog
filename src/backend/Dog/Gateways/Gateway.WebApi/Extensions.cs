@@ -1,6 +1,5 @@
-using Identity.Application.Services;
+using Identity.Api.Services;
 using Identity.Infrastructure;
-using Microsoft.EntityFrameworkCore;
 using OpenIddict.Abstractions;
 using OpenIddict.Validation.AspNetCore;
 using Shared.Api;
@@ -13,9 +12,14 @@ public static class Extensions
         IConfiguration configuration)
     {
         services.AddSharedApi(configuration);
-        
-        services.AddScoped<IIdentityService, Identity.Application.Services.IdentityService>();
-        
+
+        // Регистрируем Identity.Application для доступа к сервисам
+        // services.AddIdentityApplication(configuration);
+
+        // Регистрируем Identity.Api.Services для работы через NATS
+        services.AddScoped<Identity.Api.Services.IIdentityService, Identity.Api.Services.IdentityService>();
+        services.AddScoped<Identity.Api.Services.ITokenService, Identity.Api.Services.TokenService>();
+
         services.AddIdentityInfrastructure(configuration);
 
         // Настройка OpenIddict
@@ -23,7 +27,7 @@ public static class Extensions
             .AddCore(options =>
             {
                 options.UseEntityFrameworkCore()
-                    .UseDbContext<Identity.Infrastructure.IdentityDbContext>();
+                    .UseDbContext<IdentityDbContext>();
             })
             .AddServer(options =>
             {

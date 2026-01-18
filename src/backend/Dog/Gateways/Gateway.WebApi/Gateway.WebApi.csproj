@@ -19,11 +19,14 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Api\Identity.Api\Identity.Api.csproj" />
       <ProjectReference Include="..\..\Api\Users.Api\Users.Api.csproj" />
-      <ProjectReference Include="..\..\Services\Identity\Identity.Application\Identity.Application.csproj" />
-      <ProjectReference Include="..\..\Services\Identity\Identity.Infrastructure\Identity.Infrastructure.csproj" />
       <ProjectReference Include="..\..\Shared\Shared.Api\Shared.Api.csproj" />
       <ProjectReference Include="..\..\Shared\Shared.WebApi\Shared.WebApi.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Services\" />
     </ItemGroup>
 
 </Project>

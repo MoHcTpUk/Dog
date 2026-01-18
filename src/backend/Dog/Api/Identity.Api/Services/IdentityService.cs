@@ -6,7 +6,6 @@ namespace Identity.Api.Services;
 public class IdentityService(ICommandBus commandBus) : IIdentityService
 {
     private const string IdentityServiceSubject = "IdentityService";
-    private const string GatewayServiceSubject = "GatewayService";
 
     public async Task<CreateIdentityUserResult> CreateUserAsync(CreateIdentityUserCommand command)
     {

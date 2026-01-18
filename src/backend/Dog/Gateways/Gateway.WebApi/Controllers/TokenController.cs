@@ -1,7 +1,7 @@
 using System.Security.Claims;
-using Identity.Application.Services;
+using Identity.Api.Commands;
+using Identity.Api.Services;
 using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
@@ -12,15 +12,15 @@ namespace Gateway.Api.Controllers;
 [Route("connect")]
 public class TokenController : ControllerBase
 {
-    private readonly IOpenIddictApplicationManager _applicationManager;
-    private readonly IIdentityService _identityService;
+    private readonly IOpenIddictTokenManager _tokenManager;
+    private readonly ITokenService _tokenService;
 
     public TokenController(
-        IIdentityService identityService,
-        IOpenIddictApplicationManager applicationManager)
+        ITokenService tokenService,
+        IOpenIddictTokenManager tokenManager)
     {
-        _identityService = identityService;
-        _applicationManager = applicationManager;
+        _tokenService = tokenService;
+        _tokenManager = tokenManager;
     }
 
     [HttpPost("token")]
@@ -56,62 +56,87 @@ public class TokenController : ControllerBase
                 ErrorDescription = "Username and password are required"
             });
 
-        // Проверяем учетные данные через IdentityService
-        var user = await _identityService.ValidateUserAsync(username, password, CancellationToken.None);
-        if (user == null)
+        var command = new CreateClaimsPrincipalForPasswordGrantCommand
+        {
+            Username = username,
+            Password = password,
+            Scopes = request.GetScopes()
+        };
+
+        var result = await _tokenService.CreateClaimsPrincipalForPasswordGrantAsync(command);
+
+        if (!result.Success || string.IsNullOrEmpty(result.Subject))
             return BadRequest(new OpenIddictResponse
             {
                 Error = OpenIddictConstants.Errors.InvalidGrant,
-                ErrorDescription = "Invalid username or password"
+                ErrorDescription = result.ErrorMessage ?? "Invalid username or password"
             });
 
-        // Создаем claims для пользователя
-        var identity = new ClaimsIdentity(
-            OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
-            OpenIddictConstants.Claims.Name,
-            OpenIddictConstants.Claims.Role);
-
-        identity.AddClaim(new Claim(OpenIddictConstants.Claims.Subject, user.Id.ToString()));
-        identity.AddClaim(new Claim(OpenIddictConstants.Claims.Email, user.Email));
-        identity.AddClaim(new Claim(OpenIddictConstants.Claims.Name, user.UserName));
-        identity.AddClaim(new Claim(OpenIddictConstants.Claims.PreferredUsername, user.UserName));
-
-        var claimsPrincipal = new ClaimsPrincipal(identity);
-
-        claimsPrincipal.SetScopes(request.GetScopes());
-        claimsPrincipal.SetResources(await GetResourcesAsync(request.GetScopes()));
+        var claimsPrincipal = CreateClaimsPrincipalFromResult(result);
 
         return SignIn(claimsPrincipal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
     }
 
     private async Task<IActionResult> HandleRefreshTokenGrant(OpenIddictRequest request)
     {
-        var result = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-        var claimsPrincipal = result.Principal;
-
-        if (claimsPrincipal == null)
+        var refreshToken = request.RefreshToken;
+        if (string.IsNullOrEmpty(refreshToken))
             return BadRequest(new OpenIddictResponse
             {
                 Error = OpenIddictConstants.Errors.InvalidGrant,
-                ErrorDescription = "Invalid refresh token"
+                ErrorDescription = "Refresh token is required"
             });
 
-        var identity = new ClaimsIdentity(claimsPrincipal.Claims,
+        var command = new CreateClaimsPrincipalForRefreshTokenCommand
+        {
+            RefreshToken = refreshToken,
+            RequestedScopes = request.GetScopes()
+        };
+
+        var result = await _tokenService.CreateClaimsPrincipalForRefreshTokenAsync(command);
+
+        if (!result.Success || string.IsNullOrEmpty(result.Subject))
+        {
+            return BadRequest(new OpenIddictResponse
+            {
+                Error = OpenIddictConstants.Errors.InvalidGrant,
+                ErrorDescription = result.ErrorMessage ?? "Invalid refresh token"
+            });
+        }
+
+        // Отзываем старый refresh token, если есть TokenId (ReferenceId)
+        if (!string.IsNullOrEmpty(result.TokenId))
+        {
+            var token = await _tokenManager.FindByReferenceIdAsync(result.TokenId, CancellationToken.None);
+            if (token != null)
+            {
+                await _tokenManager.TryRevokeAsync(token, CancellationToken.None);
+            }
+        }
+
+        var claimsPrincipal = CreateClaimsPrincipalFromResult(result);
+
+        // Возвращаем новый access token и refresh token через SignIn
+        // OpenIddict автоматически создаст новый refresh token и добавит его в ответ
+        return SignIn(claimsPrincipal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+    }
+
+    private ClaimsPrincipal CreateClaimsPrincipalFromResult(CreateClaimsPrincipalResult result)
+    {
+        var identity = new ClaimsIdentity(
             OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
             OpenIddictConstants.Claims.Name,
             OpenIddictConstants.Claims.Role);
 
-        var newClaimsPrincipal = new ClaimsPrincipal(identity);
+        identity.AddClaim(new Claim(OpenIddictConstants.Claims.Subject, result.Subject!));
+        identity.AddClaim(new Claim(OpenIddictConstants.Claims.Email, result.Email ?? string.Empty));
+        identity.AddClaim(new Claim(OpenIddictConstants.Claims.Name, result.UserName ?? string.Empty));
+        identity.AddClaim(new Claim(OpenIddictConstants.Claims.PreferredUsername, result.PreferredUsername ?? string.Empty));
 
-        newClaimsPrincipal.SetScopes(request.GetScopes());
-        newClaimsPrincipal.SetResources(await GetResourcesAsync(request.GetScopes()));
+        var claimsPrincipal = new ClaimsPrincipal(identity);
+        claimsPrincipal.SetScopes(result.Scopes);
+        claimsPrincipal.SetResources(result.Scopes);
 
-        return SignIn(newClaimsPrincipal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-    }
-
-    private async Task<IEnumerable<string>> GetResourcesAsync(IEnumerable<string> scopes)
-    {
-        // Возвращаем ресурсы на основе scopes
-        return scopes;
+        return claimsPrincipal;
     }
 }

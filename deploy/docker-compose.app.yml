@@ -43,8 +43,8 @@ services:
           max_attempts: 10
           window: 60s
 
-  identity-service:
-    image: ghcr.io/mohctpuk/dog-identity-service:latest
+  identity:
+    image: ghcr.io/mohctpuk/dog-identity:latest
     networks:
       - infra_traefik
     environment:

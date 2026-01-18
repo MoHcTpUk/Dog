@@ -1,4 +1,5 @@
-using Identity.Application.Services;
+using Identity.Api.Commands;
+using Identity.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Gateway.Api.Controllers;
@@ -20,11 +21,14 @@ public class IdentityController : ControllerBase
     {
         try
         {
-            var userId = await _identityService.CreateUserAsync(
-                request.Email,
-                request.UserName,
-                request.Password,
-                cancellationToken);
+            var command = new CreateIdentityUserCommand
+            {
+                Email = request.Email,
+                UserName = request.UserName,
+                Password = request.Password
+            };
+
+            var userId = await _identityService.CreateUserAsync(command);
 
             return Ok(new { UserId = userId });
         }

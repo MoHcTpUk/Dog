@@ -13,6 +13,7 @@ public static class Extensions
         services.AddSharedApi(configuration);
 
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<ITokenService, TokenService>();
 
         return services;
     }

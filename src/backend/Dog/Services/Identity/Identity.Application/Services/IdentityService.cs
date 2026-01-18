@@ -5,6 +5,7 @@ using Identity.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
+using OpenIddict.Abstractions;
 
 namespace Identity.Application.Services;
 
@@ -101,6 +102,34 @@ public class IdentityService(
             logger.LogError(ex, "Error generating token for user {Email}", email);
             return null;
         }
+    }
+
+    public async Task<ApplicationUser?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        return await userRepository.GetAsync(userId, cancellationToken);
+    }
+
+    public ClaimsPrincipal CreateClaimsPrincipal(ApplicationUser user, IEnumerable<string> scopes)
+    {
+        var identity = new ClaimsIdentity(
+            "Bearer",
+            OpenIddictConstants.Claims.Name,
+            OpenIddictConstants.Claims.Role);
+
+        identity.AddClaim(new Claim(OpenIddictConstants.Claims.Subject, user.Id.ToString()));
+        identity.AddClaim(new Claim(OpenIddictConstants.Claims.Email, user.Email));
+        identity.AddClaim(new Claim(OpenIddictConstants.Claims.Name, user.UserName ?? string.Empty));
+        identity.AddClaim(new Claim(OpenIddictConstants.Claims.PreferredUsername, user.UserName ?? string.Empty));
+
+        var claimsPrincipal = new ClaimsPrincipal(identity);
+        
+        // Устанавливаем scopes через extension method OpenIddict
+        if (scopes.Any())
+        {
+            claimsPrincipal.SetScopes(scopes);
+        }
+
+        return claimsPrincipal;
     }
 
     private class TokenResponse
