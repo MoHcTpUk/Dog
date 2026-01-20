@@ -27,10 +27,10 @@ export const Toggle = <T extends string = string>({
 
   const containerClasses = classNames(
     "inline-flex",
-    "p-1",
-    "bg-zinc-100",
-    "rounded-[59px]",
-    "gap-1",
+    "p-[3px]",
+    "bg-white/60",
+    "rounded-full",
+    "shadow-[0px_5px_9px_0px_rgba(66,58,58,0.06)]",
     {
       "w-full": fullWidth,
       "opacity-50 cursor-not-allowed": disabled,
@@ -40,9 +40,9 @@ export const Toggle = <T extends string = string>({
 
   const optionClasses = (isActive: boolean) =>
     classNames(
-      "px-6",
-      "py-2.5",
-      "rounded-[59px]",
+      "px-7",
+      "py-3.5",
+      "rounded-full",
       "transition-all",
       "duration-200",
       "cursor-pointer",
@@ -50,7 +50,7 @@ export const Toggle = <T extends string = string>({
       "items-center",
       "justify-center",
       {
-        "bg-white shadow-sm": isActive,
+        "bg-white": isActive,
         "bg-transparent": !isActive,
         "flex-1": fullWidth,
         "cursor-not-allowed": disabled,
@@ -69,10 +69,7 @@ export const Toggle = <T extends string = string>({
         className={optionClasses(value === leftOption.value)}
         onClick={() => handleClick(leftOption.value)}
       >
-        <Text
-          variant="medium-14"
-          color={value === leftOption.value ? "primary" : "muted"}
-        >
+        <Text variant="medium-16" className="text-gray-700">
           {leftOption.label}
         </Text>
       </div>
@@ -80,10 +77,7 @@ export const Toggle = <T extends string = string>({
         className={optionClasses(value === rightOption.value)}
         onClick={() => handleClick(rightOption.value)}
       >
-        <Text
-          variant="medium-14"
-          color={value === rightOption.value ? "primary" : "muted"}
-        >
+        <Text variant="medium-16" className="text-gray-700">
           {rightOption.label}
         </Text>
       </div>
