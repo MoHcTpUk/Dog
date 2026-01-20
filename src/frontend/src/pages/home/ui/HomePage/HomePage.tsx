@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
-import { WalkCard, NewWalkButton, Walk } from "@features/home";
-import { Toggle, Icon } from "@shared/ui";
+import { WalkCard, NewWalkButton, Walk, PlaceCard, NewPlaceButton, PlaceCategory } from "@features/home";
+import { Toggle, Icon, Tag } from "@shared/ui";
 import { Text } from "@shared/ui/Text";
 import { MainLayout } from "@app/layouts/MainLayout";
+import { mockPlaces, placeCategories } from "@shared/mocks/places.mock";
 
 const mockWalks: Walk[] = [
   {
@@ -124,6 +125,7 @@ export const HomePage: React.FC = () => {
     (searchParams.get("tab") as TabValue) || "walks"
   );
   const [notificationCount] = useState(2);
+  const [selectedCategory, setSelectedCategory] = useState<PlaceCategory | 'favorites' | null>(null);
 
   useEffect(() => {
     const newSearchParams = new URLSearchParams(location.search);
@@ -143,6 +145,19 @@ export const HomePage: React.FC = () => {
     history.push(`/walk/${walkId}`, { background: location });
   };
 
+  const handlePlaceClick = (placeId: string) => {
+    history.push(`/place/${placeId}`, { background: location });
+  };
+
+  const handleCategoryClick = (category: PlaceCategory | 'favorites') => {
+    setSelectedCategory(selectedCategory === category ? null : category);
+  };
+
+  const filteredPlaces = selectedCategory
+    ? selectedCategory === 'favorites'
+      ? mockPlaces.filter((p) => p.isFavorite)
+      : mockPlaces.filter((p) => p.category === selectedCategory)
+    : mockPlaces;
 
   return (
     <MainLayout>
@@ -176,10 +191,10 @@ export const HomePage: React.FC = () => {
         </div>
 
         <div className="self-stretch flex flex-col justify-start items-center gap-10">
-          <NewWalkButton />
-
           {activeTab === "walks" && (
             <>
+              <NewWalkButton />
+
               {mockMyWalks.length > 0 && (
                 <div className="self-stretch flex flex-col justify-start items-start gap-5">
                   <div className="self-stretch flex justify-center items-center gap-2.5">
@@ -219,22 +234,42 @@ export const HomePage: React.FC = () => {
           )}
 
           {activeTab === "places" && (
-            <div className="self-stretch flex flex-col justify-start items-start gap-5">
-              <div className="self-stretch flex justify-center items-center gap-2.5">
-                <Text
-                  variant="bold-24"
-                  color="primary"
-                  className="flex-1 leading-6"
-                >
-                  Места рядом
-                </Text>
+            <>
+              <NewPlaceButton />
+
+              <div className="self-stretch flex flex-col justify-start items-center gap-5">
+                <div className="self-stretch flex justify-center items-center gap-2.5">
+                  <Text
+                    variant="bold-24"
+                    color="primary"
+                    className="flex-1 leading-6"
+                  >
+                    Места рядом
+                  </Text>
+                </div>
+
+                <div className="self-stretch flex gap-1 overflow-x-auto scrollbar-hide -mx-3 px-3">
+                  {placeCategories.map((cat) => (
+                    <Tag
+                      key={cat.value}
+                      size="small"
+                      selected={selectedCategory === cat.value}
+                      onClick={() => handleCategoryClick(cat.value)}
+                      icon={cat.icon ? <Icon name={cat.icon as any} size={16} /> : undefined}
+                      className="flex-shrink-0"
+                    >
+                      {cat.label}
+                    </Tag>
+                  ))}
+                </div>
+
+                <div className="self-stretch flex flex-col justify-start items-start gap-1">
+                  {filteredPlaces.map((place) => (
+                    <PlaceCard key={place.id} place={place} onClick={handlePlaceClick} />
+                  ))}
+                </div>
               </div>
-              <div className="self-stretch flex justify-center items-center p-10">
-                <Text variant="regular-14" color="muted">
-                  Места пока не добавлены
-                </Text>
-              </div>
-            </div>
+            </>
           )}
         </div>
       </div>

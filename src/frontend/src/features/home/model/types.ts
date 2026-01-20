@@ -15,3 +15,18 @@ export interface Walk {
   kind?: WalkKind;
   requestCount?: number;
 }
+
+export type PlaceCategory = 'cafe' | 'restaurant' | 'shop' | 'mall' | 'park' | 'cocktail';
+
+export interface Place {
+  id: string;
+  name: string;
+  category: PlaceCategory;
+  categoryLabel: string;
+  distance: string;
+  address: string;
+  workingHours?: string;
+  description?: string;
+  photos?: string[];
+  isFavorite?: boolean;
+}

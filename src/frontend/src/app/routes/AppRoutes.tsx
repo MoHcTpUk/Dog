@@ -13,6 +13,7 @@ import { HomePage } from "@pages/home";
 import { MapPage } from "@pages/map";
 import { DogProfilePage } from "@pages/dog-profile";
 import { WalkDetailsPage } from "@pages/walk-details";
+import { PlaceDetailsPage } from "@pages/place-details";
 import { DogsPage } from "@pages/dogs";
 import { ProfilePage, EditProfilePage, PromocodesPage, SettingsPage, FeedbackPage, TermsPage, LocationAccessPage, NotificationsPage } from "@pages/profile";
 
@@ -52,7 +53,10 @@ const AppContent: FC = () => {
       </IonRouterOutlet>
 
       {background && (
-        <Route exact path="/walk/:id" component={WalkDetailsPage} />
+        <>
+          <Route exact path="/walk/:id" component={WalkDetailsPage} />
+          <Route exact path="/place/:id" component={PlaceDetailsPage} />
+        </>
       )}
     </>
   );

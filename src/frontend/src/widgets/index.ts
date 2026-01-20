@@ -1,5 +1,7 @@
 export { WalkDetailsDrawer } from './WalkDetailsDrawer';
 export type { WalkDetailsDrawerProps } from './WalkDetailsDrawer';
+export { PlaceDetailsDrawer } from './PlaceDetailsDrawer';
+export type { PlaceDetailsDrawerProps } from './PlaceDetailsDrawer';
 export { DogProfileModal } from './DogProfileModal';
 export type { DogProfileModalProps } from './DogProfileModal';
 export { ProfileTabSwitcher } from './ProfileTabSwitcher';
