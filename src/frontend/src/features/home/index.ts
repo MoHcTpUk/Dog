@@ -1,2 +1,2 @@
-export { WalkCard, NewWalkButton } from "./ui";
-export type { Walk } from "./model/types";
+export { WalkCard, NewWalkButton, WalkBadge } from "./ui";
+export type { Walk, WalkKind } from "./model/types";

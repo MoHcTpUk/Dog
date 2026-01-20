@@ -30,7 +30,6 @@ export const Tag: React.FC<TagProps> = ({
       "items-center",
       "justify-center",
       "rounded-[96px]",
-      "font-normal",
       "font-sans",
       "transition-all",
       "duration-200",
@@ -63,16 +62,16 @@ export const Tag: React.FC<TagProps> = ({
       if (variant === "outline") {
         baseClasses.push(
           "bg-transparent",
-          "text-text-muted",
+          "text-text-secondary",
           "outline",
           "outline-1",
           "outline-offset-[-1px]",
           "outline-border"
         );
       } else if (variant === "secondary") {
-        baseClasses.push("bg-background-secondary", "text-text-primary");
+        baseClasses.push("bg-background-secondary", "text-text-secondary");
       } else {
-        baseClasses.push("bg-white", "text-text-primary", "hover:bg-white");
+        baseClasses.push("bg-white", "text-text-secondary", "hover:bg-white");
       }
     }
 

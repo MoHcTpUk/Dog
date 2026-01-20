@@ -32,6 +32,9 @@ export type { ModalProps } from "./Modal";
 export { CenterModal } from "./CenterModal";
 export type { CenterModalProps } from "./CenterModal";
 
+export { ConfirmModal } from "./ConfirmModal";
+export type { ConfirmModalProps } from "./ConfirmModal";
+
 export { BottomDrawer } from "./BottomDrawer";
 export type { BottomDrawerProps } from "./BottomDrawer";
 

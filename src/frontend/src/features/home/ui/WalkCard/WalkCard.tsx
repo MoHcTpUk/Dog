@@ -1,7 +1,8 @@
 import React from "react";
-import { Avatar, Icon } from "@shared/ui";
+import { Avatar, Icon, Tag } from "@shared/ui";
 import { Text } from "@shared/ui/Text";
 import { Walk } from "../../model/types";
+import { WalkBadge } from "../WalkBadge/WalkBadge";
 
 export interface WalkCardProps {
   walk: Walk;
@@ -12,6 +13,8 @@ export const WalkCard: React.FC<WalkCardProps> = ({ walk, onClick }) => {
   const handleClick = () => {
     onClick?.(walk.id);
   };
+
+  const showBadge = walk.kind && (walk.kind === "request-sent" || walk.kind === "own-with-requests");
 
   return (
     <div
@@ -59,11 +62,13 @@ export const WalkCard: React.FC<WalkCardProps> = ({ walk, onClick }) => {
         </div>
       )}
 
-      <div className="px-3 py-2 rounded-[96px] border border-slate-200 inline-flex self-start justify-center items-center gap-2">
-        <Text variant="medium-14" color="muted" className="line-clamp-1">
+      {showBadge ? (
+        <WalkBadge kind={walk.kind!} requestCount={walk.requestCount} />
+      ) : (
+        <Tag variant="outline" size="small" className="self-start">
           {walk.address}
-        </Text>
-      </div>
+        </Tag>
+      )}
     </div>
   );
 };

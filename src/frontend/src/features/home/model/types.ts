@@ -1,3 +1,5 @@
+export type WalkKind = 'regular' | 'own' | 'own-with-requests' | 'request-sent';
+
 export interface Walk {
   id: string;
   organizerName: string;
@@ -10,4 +12,6 @@ export interface Walk {
     id: string;
     avatar: string;
   }>;
+  kind?: WalkKind;
+  requestCount?: number;
 }

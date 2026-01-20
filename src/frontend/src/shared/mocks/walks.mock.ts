@@ -158,7 +158,50 @@ export const mockWalks: Walk[] = [
     status: 'own-with-requests',
     coordinates: [37.5889, 55.7339],
   },
+  // Мои прогулки для главной страницы
+  {
+    id: 'my-1',
+    dogAvatar: 'https://placehold.co/40x40',
+    time: new Date(new Date(new Date().getTime() + 24 * 60 * 60 * 1000).setHours(12, 40, 0, 0)),
+    dogCount: 1,
+    status: 'own',
+    coordinates: [37.6100, 55.7400],
+    description: 'Привет! Ищем для прогулки девочек среднего размера',
+    location: 'Центральная 44',
+    distance: 250,
+    participants: [mockDogs[0]],
+  },
+  {
+    id: 'my-2',
+    dogAvatar: 'https://placehold.co/40x40',
+    time: new Date(new Date(new Date().getTime() + 24 * 60 * 60 * 1000).setHours(15, 0, 0, 0)),
+    dogCount: 1,
+    status: 'request-sent',
+    coordinates: [37.6200, 55.7500],
+    description: 'Привет! Ищем для прогулки девочек среднего размера',
+    location: 'Центральная 44',
+    distance: 250,
+    participants: [mockDogs[1]],
+  },
+  {
+    id: 'my-3',
+    dogAvatar: 'https://placehold.co/40x40',
+    time: new Date(new Date(new Date().getTime() + 24 * 60 * 60 * 1000).setHours(11, 0, 0, 0)),
+    dogCount: 1,
+    status: 'own-with-requests',
+    coordinates: [37.6300, 55.7600],
+    description: 'Привет! Ищем для прогулки девочек среднего размера',
+    location: 'Центральная 44',
+    distance: 250,
+    participants: [mockDogs[0]],
+  },
 ];
+
+// Моковые запросы на присоединение к прогулке
+export const mockWalkRequests: Record<string, Dog[]> = {
+  'my-3': [mockDogs[2], mockDogs[3]],
+  '7': [mockDogs[1]],
+};
 
 // Моковый кластер прогулок
 export const mockWalkClusters: WalkCluster[] = [

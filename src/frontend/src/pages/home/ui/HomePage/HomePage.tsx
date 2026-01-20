@@ -74,6 +74,46 @@ const mockWalks: Walk[] = [
   },
 ];
 
+// Мок данные для раздела "Мои прогулки"
+const mockMyWalks: Walk[] = [
+  {
+    id: "my-1",
+    organizerName: "Вы",
+    organizerAvatar: "https://i.pravatar.cc/150?img=20",
+    time: "Завтра в 12:40",
+    distance: "250 м от вас",
+    description: "Привет! Ищем для прогулки девочек среднего размера",
+    address: "Центральная 44",
+    kind: "own",
+    joinedDogs: [
+      { id: "my-d1", avatar: "https://placehold.co/40x40/FF6B9D/white?text=M1" },
+    ],
+  },
+  {
+    id: "my-2",
+    organizerName: "Вы",
+    organizerAvatar: "https://i.pravatar.cc/150?img=20",
+    time: "Завтра в 15:00",
+    distance: "250 м от вас",
+    description: "Привет! Ищем для прогулки девочек среднего размера",
+    address: "Центральная 44",
+    kind: "request-sent",
+    joinedDogs: [],
+  },
+  {
+    id: "my-3",
+    organizerName: "Вы",
+    organizerAvatar: "https://i.pravatar.cc/150?img=20",
+    time: "Завтра в 11:00",
+    distance: "250 м от вас",
+    description: "Привет! Ищем для прогулки девочек среднего размера",
+    address: "Центральная 44",
+    kind: "own-with-requests",
+    requestCount: 1,
+    joinedDogs: [],
+  },
+];
+
 type TabValue = "walks" | "places";
 
 export const HomePage: React.FC = () => {
@@ -139,22 +179,43 @@ export const HomePage: React.FC = () => {
           <NewWalkButton />
 
           {activeTab === "walks" && (
-            <div className="self-stretch flex flex-col justify-start items-start gap-5">
-              <div className="self-stretch flex justify-center items-center gap-2.5">
-                <Text
-                  variant="bold-24"
-                  color="primary"
-                  className="flex-1 leading-6"
-                >
-                  Прогулки рядом
-                </Text>
+            <>
+              {mockMyWalks.length > 0 && (
+                <div className="self-stretch flex flex-col justify-start items-start gap-5">
+                  <div className="self-stretch flex justify-center items-center gap-2.5">
+                    <Text
+                      variant="bold-24"
+                      color="primary"
+                      className="flex-1 leading-6"
+                    >
+                      Мои прогулки
+                    </Text>
+                  </div>
+                  <div className="self-stretch flex flex-col justify-start items-start gap-1">
+                    {mockMyWalks.map((walk) => (
+                      <WalkCard key={walk.id} walk={walk} onClick={handleWalkClick} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="self-stretch flex flex-col justify-start items-start gap-5">
+                <div className="self-stretch flex justify-center items-center gap-2.5">
+                  <Text
+                    variant="bold-24"
+                    color="primary"
+                    className="flex-1 leading-6"
+                  >
+                    Прогулки рядом
+                  </Text>
+                </div>
+                <div className="self-stretch flex flex-col justify-start items-start gap-1">
+                  {mockWalks.map((walk) => (
+                    <WalkCard key={walk.id} walk={walk} onClick={handleWalkClick} />
+                  ))}
+                </div>
               </div>
-              <div className="self-stretch flex flex-col justify-start items-start gap-1">
-                {mockWalks.map((walk) => (
-                  <WalkCard key={walk.id} walk={walk} onClick={handleWalkClick} />
-                ))}
-              </div>
-            </div>
+            </>
           )}
 
           {activeTab === "places" && (
