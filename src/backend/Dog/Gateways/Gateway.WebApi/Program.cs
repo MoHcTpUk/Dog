@@ -7,14 +7,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddAuthorization();
-
 builder.Services.AddControllers();
+
+// Настройка YARP для проксирования запросов к Identity.WebApi
+builder.Services.AddReverseProxy()
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
 builder.Services.AddUsersApi(builder.Configuration);
 builder.Services.AddIdentityApi(builder.Configuration);
-
-builder.Services.AddHostedService<AppInitializer>();
 
 if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName == Environments.Local)
     builder.Services.AddCors(options =>
@@ -59,12 +59,12 @@ if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == Enviro
     app.MapOpenApi().AllowAnonymous();
 }
 
-app.UseAuthentication();
-app.UseAuthorization();
-
 // Test endpoint to verify routing works
 app.MapGet("/test", () => "Hello from Gateway!").AllowAnonymous();
 
 app.MapControllers();
+
+// Настройка YARP проксирования (должно быть после MapControllers)
+app.MapReverseProxy();
 
 app.Run();

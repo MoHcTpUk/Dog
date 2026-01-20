@@ -27,7 +27,7 @@ public class IdentityService(ICommandBus commandBus) : IIdentityService
         return result ?? new GenerateTokenResult
         {
             Success = false,
-            ErrorMessage = "No response from GatewayService"
+            ErrorMessage = "No response from IdentityService"
         };
     }
 }

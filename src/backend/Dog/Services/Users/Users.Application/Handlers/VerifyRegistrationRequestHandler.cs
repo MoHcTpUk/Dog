@@ -31,14 +31,11 @@ public class VerifyRegistrationRequestHandler(
             {
                 AccessToken = null
             };
-
-        // Генерируем username из email (можно использовать часть до @)
+        
         var username = registrationRequest.Email.Split('@')[0].ToLowerInvariant();
-
-        // Генерируем временный пароль
+        
         var password = GenerateTemporaryPassword();
-
-        // Создаём пользователя в своей БД
+        
         var newUser = new UserAggregate
         {
             Email = registrationRequest.Email,
@@ -47,8 +44,7 @@ public class VerifyRegistrationRequestHandler(
 
         await userRepository.CreateAsync([newUser], cancellationToken);
         await userRepository.SaveChangesAsync();
-
-        // Создаём пользователя в Identity сервисе через NATS
+        
         string? token = null;
         string? refreshToken = null;
         try
@@ -64,7 +60,6 @@ public class VerifyRegistrationRequestHandler(
 
             if (createUserResult.Success)
             {
-                // Получаем токен через NATS
                 var generateTokenCommand = new GenerateTokenCommand
                 {
                     Email = registrationRequest.Email,

@@ -1,12 +1,13 @@
 using System.Security.Claims;
 using Identity.Api.Commands;
 using Identity.Api.Services;
+using Identity.WebApi.Services;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 
-namespace Gateway.Api.Controllers;
+namespace Identity.WebApi.Controllers;
 
 [ApiController]
 [Route("connect")]

@@ -9,13 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="OpenIddict.Server.AspNetCore" Version="5.7.0" />
-        <PackageReference Include="OpenIddict.Validation.AspNetCore" Version="5.7.0" />
-        <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="5.7.0" />
+        <PackageReference Include="Yarp.ReverseProxy" Version="2.2.0" />
     </ItemGroup>
 
     <ItemGroup>

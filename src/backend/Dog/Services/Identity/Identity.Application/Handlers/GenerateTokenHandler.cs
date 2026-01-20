@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using Identity.Api.Commands;
 using Identity.Application.Services;
+using Microsoft.Extensions.Configuration;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using Shared.Messaging.Interfaces;
@@ -11,7 +12,9 @@ namespace Identity.Application.Handlers;
 public class GenerateTokenHandler(
     IIdentityService identityService,
     ITokenService tokenService,
-    IOpenIddictTokenManager tokenManager
+    IOpenIddictTokenManager tokenManager,
+    IOpenIddictApplicationManager applicationManager,
+    IConfiguration configuration
 ) : ICommandHandler<GenerateTokenCommand, GenerateTokenResult>
 {
     public async Task<GenerateTokenResult> Handle(GenerateTokenCommand request,
@@ -30,23 +33,22 @@ public class GenerateTokenHandler(
                 };
             }
 
-            // Создаем claims для пользователя
+            // Получаем scopes из запроса
+            var scopes = request.Scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            // Создаем ClaimsPrincipal через IdentityService
+            var claimsPrincipal = identityService.CreateClaimsPrincipal(user, scopes);
+
+            // Устанавливаем правильную схему аутентификации для OpenIddict
             var identity = new ClaimsIdentity(
+                claimsPrincipal.Claims,
                 OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
                 OpenIddictConstants.Claims.Name,
                 OpenIddictConstants.Claims.Role);
 
-            identity.AddClaim(new Claim(OpenIddictConstants.Claims.Subject, user.Id.ToString()));
-            identity.AddClaim(new Claim(OpenIddictConstants.Claims.Email, user.Email));
-            identity.AddClaim(new Claim(OpenIddictConstants.Claims.Name, user.UserName));
-            identity.AddClaim(new Claim(OpenIddictConstants.Claims.PreferredUsername, user.UserName));
-
-            var claimsPrincipal = new ClaimsPrincipal(identity);
-
-            // Устанавливаем scopes
-            var scopes = request.Scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            claimsPrincipal = new ClaimsPrincipal(identity);
             claimsPrincipal.SetScopes(scopes);
-            claimsPrincipal.SetResources(scopes);
+            claimsPrincipal.SetResources(await tokenService.GetResourcesAsync(scopes));
 
             // Генерируем токен через TokenService
             var token = await tokenService.GenerateTokenAsync(claimsPrincipal, scopes, cancellationToken);
@@ -68,6 +70,18 @@ public class GenerateTokenHandler(
                         .Replace("/", "_")
                         .Replace("=", "");
 
+                    // Получаем ClientId из конфигурации и находим приложение
+                    var clientId = configuration["OpenIddict:ClientId"];
+                    string? applicationId = null;
+                    if (!string.IsNullOrEmpty(clientId))
+                    {
+                        var application = await applicationManager.FindByClientIdAsync(clientId, cancellationToken);
+                        if (application != null)
+                        {
+                            applicationId = await applicationManager.GetIdAsync(application, cancellationToken);
+                        }
+                    }
+
                     var tokenDescriptor = new OpenIddictTokenDescriptor
                     {
                         Subject = user.Id.ToString(),
@@ -76,7 +90,8 @@ public class GenerateTokenHandler(
                         ExpirationDate = DateTimeOffset.UtcNow.AddDays(30), // 30 дней для refresh token
                         Status = OpenIddictConstants.Statuses.Valid,
                         Principal = claimsPrincipal,
-                        ReferenceId = refreshToken // Используем ReferenceId для хранения строкового значения
+                        ReferenceId = refreshToken, // Используем ReferenceId для хранения строкового значения
+                        ApplicationId = applicationId // Привязываем токен к конкретному приложению
                     };
                     
                     await tokenManager.CreateAsync(tokenDescriptor, cancellationToken);

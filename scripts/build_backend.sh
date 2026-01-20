@@ -17,18 +17,18 @@ docker buildx build \
   --load \
   ../src/backend/Dog &
 
-docker buildx build \
-  --platform $PLATFORM \
-  -f ../build/backend/Users.Dockerfile \
-  -t ghcr.io/mohctpuk/dog-users:latest \
-  --load \
-  ../src/backend/Dog &
+# docker buildx build \
+#   --platform $PLATFORM \
+#   -f ../build/backend/Users.Dockerfile \
+#   -t ghcr.io/mohctpuk/dog-users:latest \
+#   --load \
+#   ../src/backend/Dog &
 
-docker buildx build \
-  --platform $PLATFORM \
-  -f ../build/backend/Identity.Dockerfile \
-  -t ghcr.io/mohctpuk/dog-identity:latest \
-  --load \
-  ../src/backend/Dog &
+# docker buildx build \
+#   --platform $PLATFORM \
+#   -f ../build/backend/Identity.Dockerfile \
+#   -t ghcr.io/mohctpuk/dog-identity:latest \
+#   --load \
+#   ../src/backend/Dog &
 
 wait
