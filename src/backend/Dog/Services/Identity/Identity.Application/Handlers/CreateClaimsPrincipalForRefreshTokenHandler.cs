@@ -14,8 +14,15 @@ public class CreateClaimsPrincipalForRefreshTokenHandler(
         CreateClaimsPrincipalForRefreshTokenCommand request,
         CancellationToken cancellationToken)
     {
-        // Находим токен по ReferenceId
+        // Сначала пытаемся найти токен по ReferenceId (для reference tokens)
         var token = await tokenManager.FindByReferenceIdAsync(request.RefreshToken, cancellationToken);
+        
+        // Если не найден по ReferenceId, пытаемся найти по ID (для обычных токенов)
+        if (token == null)
+        {
+            token = await tokenManager.FindByIdAsync(request.RefreshToken, cancellationToken);
+        }
+        
         if (token == null)
         {
             return new CreateClaimsPrincipalResult

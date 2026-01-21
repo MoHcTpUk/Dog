@@ -1,6 +1,7 @@
 using Identity.Application;
 using Identity.Infrastructure;
 using Identity.WebApi.Services;
+using Microsoft.AspNetCore.DataProtection;
 using OpenIddict.Abstractions;
 using OpenIddict.Validation.AspNetCore;
 using Shared.Api;
@@ -19,6 +20,18 @@ public static class Extensions
 
         // Регистрируем TokenService для использования в контроллере
         services.AddScoped<ITokenService, TokenService>();
+
+        // Настройка Data Protection для reference токенов OpenIddict
+        // Reference токены требуют Data Protection для шифрования/дешифрования payload
+        var dataProtectionKeysPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Dog",
+            "DataProtection-Keys");
+        Directory.CreateDirectory(dataProtectionKeysPath);
+        
+        services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysPath))
+            .SetApplicationName("dog-app");
 
         // Настройка OpenIddict
         services.AddOpenIddict()
@@ -43,6 +56,11 @@ public static class Extensions
 
                 options.AddDevelopmentEncryptionCertificate()
                     .AddDevelopmentSigningCertificate();
+
+                // Включаем reference refresh tokens
+                // Это позволяет OpenIddict хранить payload токена в базе данных
+                // и использовать случайную строку (ReferenceId) как идентификатор
+                options.UseReferenceRefreshTokens();
 
                 options.UseAspNetCore()
                     .EnableTokenEndpointPassthrough()

@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Security.Cryptography;
 using Identity.Api.Commands;
 using Identity.Application.Services;
 using Microsoft.Extensions.Configuration;
@@ -50,38 +49,26 @@ public class GenerateTokenHandler(
             claimsPrincipal.SetScopes(scopes);
             claimsPrincipal.SetResources(await tokenService.GetResourcesAsync(scopes));
 
-            // Генерируем токен через TokenService
-            var token = await tokenService.GenerateTokenAsync(claimsPrincipal, scopes, cancellationToken);
+            // Генерируем access token через TokenService
+            var accessToken = await tokenService.GenerateTokenAsync(claimsPrincipal, scopes, cancellationToken);
             
-            if (!string.IsNullOrEmpty(token))
+            if (!string.IsNullOrEmpty(accessToken))
             {
                 // Генерируем RefreshToken через OpenIddict
                 string? refreshToken = null;
                 try
                 {
-                    // Генерируем случайную строку для refresh token
-                    var randomBytes = new byte[32];
-                    using (var rng = RandomNumberGenerator.Create())
-                    {
-                        rng.GetBytes(randomBytes);
-                    }
-                    refreshToken = Convert.ToBase64String(randomBytes)
-                        .Replace("+", "-")
-                        .Replace("/", "_")
-                        .Replace("=", "");
-
                     // Получаем ClientId из конфигурации и находим приложение
-                    var clientId = configuration["OpenIddict:ClientId"];
+                    var clientId = configuration["OpenIddict:ClientId"] ?? "dog-app";
                     string? applicationId = null;
-                    if (!string.IsNullOrEmpty(clientId))
+                    var application = await applicationManager.FindByClientIdAsync(clientId, cancellationToken);
+                    if (application != null)
                     {
-                        var application = await applicationManager.FindByClientIdAsync(clientId, cancellationToken);
-                        if (application != null)
-                        {
-                            applicationId = await applicationManager.GetIdAsync(application, cancellationToken);
-                        }
+                        applicationId = await applicationManager.GetIdAsync(application, cancellationToken);
                     }
 
+                    // Создаем refresh token descriptor с полным Principal
+                    // OpenIddict автоматически сгенерирует ReferenceId, если включен UseReferenceRefreshTokens()
                     var tokenDescriptor = new OpenIddictTokenDescriptor
                     {
                         Subject = user.Id.ToString(),
@@ -90,23 +77,35 @@ public class GenerateTokenHandler(
                         ExpirationDate = DateTimeOffset.UtcNow.AddDays(30), // 30 дней для refresh token
                         Status = OpenIddictConstants.Statuses.Valid,
                         Principal = claimsPrincipal,
-                        ReferenceId = refreshToken, // Используем ReferenceId для хранения строкового значения
-                        ApplicationId = applicationId // Привязываем токен к конкретному приложению
+                        ApplicationId = applicationId
                     };
                     
-                    await tokenManager.CreateAsync(tokenDescriptor, cancellationToken);
+                    // Создаем токен через OpenIddict Token Manager
+                    // OpenIddict автоматически сериализует Principal в Payload
+                    var tokenObject = await tokenManager.CreateAsync(tokenDescriptor, cancellationToken);
+                    
+                    // UseReferenceRefreshTokens() работает автоматически только для SignIn flow
+                    // При ручном создании используем ReferenceId если есть, иначе - ID токена
+                    refreshToken = await tokenManager.GetReferenceIdAsync(tokenObject, cancellationToken);
+                    
+                    // Если ReferenceId null (нет автоматической генерации), используем ID токена
+                    if (string.IsNullOrEmpty(refreshToken))
+                    {
+                        refreshToken = await tokenManager.GetIdAsync(tokenObject, cancellationToken);
+                    }
                 }
-                catch
+                catch (Exception ex)
                 {
                     // Логируем ошибку, но не прерываем процесс, если refresh token не удалось создать
                     // AccessToken все равно будет возвращен
+                    Console.WriteLine($"Failed to create refresh token: {ex.Message}");
                     refreshToken = null;
                 }
 
                 return new GenerateTokenResult
                 {
                     Success = true,
-                    AccessToken = token,
+                    AccessToken = accessToken,
                     RefreshToken = refreshToken,
                     TokenType = "Bearer",
                     ExpiresIn = 86400 // 24 часа

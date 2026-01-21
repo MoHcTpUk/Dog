@@ -105,10 +105,16 @@ public class TokenController : ControllerBase
             });
         }
 
-        // Отзываем старый refresh token, если есть TokenId (ReferenceId)
+        // Отзываем старый refresh token, если есть TokenId
         if (!string.IsNullOrEmpty(result.TokenId))
         {
+            // Сначала пытаемся найти по ReferenceId, потом по ID
             var token = await _tokenManager.FindByReferenceIdAsync(result.TokenId, CancellationToken.None);
+            if (token == null)
+            {
+                token = await _tokenManager.FindByIdAsync(result.TokenId, CancellationToken.None);
+            }
+            
             if (token != null)
             {
                 await _tokenManager.TryRevokeAsync(token, CancellationToken.None);
