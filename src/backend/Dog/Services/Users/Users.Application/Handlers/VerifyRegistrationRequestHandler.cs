@@ -1,7 +1,7 @@
 using Identity.Api.Commands;
 using Identity.Api.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using OpenIddict.Abstractions;
 using Shared.Messaging.Interfaces;
 using Users.Api.Commands.RegistrationRequest;
 using Users.Api.Dtos;
@@ -13,8 +13,7 @@ namespace Users.Application.Handlers;
 public class VerifyRegistrationRequestHandler(
     IRegistrationRequestRepository registrationRequestRepository,
     IUserRepository userRepository,
-    IIdentityService identityService,
-    ILogger<VerifyRegistrationRequestHandler> logger
+    IIdentityService identityService
 )
     : ICommandHandler<VerifyRegistrationRequestCommand, LoginUrlDto>
 {
@@ -31,11 +30,11 @@ public class VerifyRegistrationRequestHandler(
             {
                 AccessToken = null
             };
-        
+
         var username = registrationRequest.Email.Split('@')[0].ToLowerInvariant();
-        
+
         var password = GenerateTemporaryPassword();
-        
+
         var newUser = new UserAggregate
         {
             Email = registrationRequest.Email,
@@ -44,54 +43,37 @@ public class VerifyRegistrationRequestHandler(
 
         await userRepository.CreateAsync([newUser], cancellationToken);
         await userRepository.SaveChangesAsync();
+
+        var createUserCommand = new CreateIdentityUserCommand
+        {
+            Email = registrationRequest.Email,
+            UserName = username,
+            Password = password
+        };
+
+        await identityService.CreateUserAsync(createUserCommand);
+
+        List<string> scopes =
+        [
+            OpenIddictConstants.Scopes.OpenId, 
+            OpenIddictConstants.Scopes.Profile,
+            OpenIddictConstants.Scopes.Email, 
+            OpenIddictConstants.Scopes.OfflineAccess
+        ];
         
-        string? token = null;
-        string? refreshToken = null;
-        try
+        var generateTokenCommand = new GenerateTokenCommand
         {
-            var createUserCommand = new CreateIdentityUserCommand
-            {
-                Email = registrationRequest.Email,
-                UserName = username,
-                Password = password
-            };
+            Email = registrationRequest.Email,
+            Password = password,
+            Scope = string.Join(" ", scopes)
+        };
 
-            var createUserResult = await identityService.CreateUserAsync(createUserCommand);
-
-            if (createUserResult.Success)
-            {
-                var generateTokenCommand = new GenerateTokenCommand
-                {
-                    Email = registrationRequest.Email,
-                    Password = password,
-                    Scope = "openid profile email"
-                };
-
-                var tokenResult = await identityService.GenerateTokenAsync(generateTokenCommand);
-
-                if (tokenResult.Success && !string.IsNullOrEmpty(tokenResult.AccessToken))
-                {
-                    token = tokenResult.AccessToken;
-                    refreshToken = tokenResult.RefreshToken;
-                }
-                else
-                    logger.LogWarning("Failed to generate token: {Error}", tokenResult.ErrorMessage);
-            }
-            else
-            {
-                var errorMessage = createUserResult?.ErrorMessage ?? "Unknown error";
-                logger.LogWarning("Failed to create user in Identity service: {Error}", errorMessage);
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error creating user in Identity service or getting token");
-        }
+        var tokenResult = await identityService.GenerateTokenAsync(generateTokenCommand);
 
         return new LoginUrlDto
         {
-            AccessToken = token,
-            RefreshToken = refreshToken
+            AccessToken = tokenResult.AccessToken,
+            RefreshToken = tokenResult.RefreshToken
         };
     }
 
@@ -106,16 +88,13 @@ public class VerifyRegistrationRequestHandler(
         var random = new Random();
         var password = new char[TemporaryPasswordLength];
 
-        // Гарантируем наличие хотя бы одного символа каждого типа
         password[0] = uppercase[random.Next(uppercase.Length)];
         password[1] = lowercase[random.Next(lowercase.Length)];
         password[2] = digits[random.Next(digits.Length)];
         password[3] = special[random.Next(special.Length)];
 
-        // Заполняем остальные позиции случайными символами
         for (var i = 4; i < TemporaryPasswordLength; i++) password[i] = allChars[random.Next(allChars.Length)];
 
-        // Перемешиваем символы
         for (var i = TemporaryPasswordLength - 1; i > 0; i--)
         {
             var j = random.Next(i + 1);
