@@ -42,6 +42,11 @@ public class IdentityService(
         return user;
     }
 
+    public async Task<ApplicationUser?> GetUserByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await userRepository.GetAsync(id, cancellationToken);
+    }
+
     public ClaimsPrincipal CreateClaimsPrincipal(ApplicationUser user, IEnumerable<string> scopes)
     {
         var identity = new ClaimsIdentity(
