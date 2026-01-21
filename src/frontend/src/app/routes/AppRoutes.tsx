@@ -13,8 +13,10 @@ import { HomePage } from "@pages/home";
 import { MapPage } from "@pages/map";
 import { DogProfilePage } from "@pages/dog-profile";
 import { WalkDetailsPage } from "@pages/walk-details";
+import { PlaceDetailsPage } from "@pages/place-details";
 import { DogsPage } from "@pages/dogs";
 import { ProfilePage, EditProfilePage, PromocodesPage, SettingsPage, FeedbackPage, TermsPage, LocationAccessPage, NotificationsPage } from "@pages/profile";
+import { MainFooter } from "@widgets/footer";
 
 interface LocationState {
   background?: Location;
@@ -23,6 +25,15 @@ interface LocationState {
 const AppContent: FC = () => {
   const location = useLocation<LocationState>();
   const background = location.state?.background;
+
+  const pagesWithFooter = ['/home', '/map', '/dog', '/profile'];
+  const currentPath = background ? background.pathname : location.pathname;
+  const showFooter = pagesWithFooter.some(path => {
+    if (path === '/dog') {
+      return currentPath === '/dog';
+    }
+    return currentPath.startsWith(path);
+  });
 
   return (
     <>
@@ -52,7 +63,16 @@ const AppContent: FC = () => {
       </IonRouterOutlet>
 
       {background && (
-        <Route exact path="/walk/:id" component={WalkDetailsPage} />
+        <>
+          <Route exact path="/walk/:id" component={WalkDetailsPage} />
+          <Route exact path="/place/:id" component={PlaceDetailsPage} />
+        </>
+      )}
+
+      {showFooter && (
+        <div className="fixed bottom-0 left-0 right-0 z-50">
+          <MainFooter />
+        </div>
       )}
     </>
   );

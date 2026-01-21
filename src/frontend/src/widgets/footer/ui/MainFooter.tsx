@@ -2,7 +2,6 @@ import React from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { Avatar, Icon } from "@shared/ui";
 import { useAppStore } from "@shared/store/app.store";
-import classNames from "classnames";
 
 type TabType = "profile" | "map" | "list" | "dogs";
 

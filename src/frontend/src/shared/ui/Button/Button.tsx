@@ -129,13 +129,13 @@ export const Button: React.FC<ButtonProps> = ({
       return iconPosition === "left" ? (
         <>
           {icon}
-          <Text variant="medium-16" color={textColor} className="px-[5px]">
+          <Text variant="medium-16" color={textColor} >
             {children}
           </Text>
         </>
       ) : (
         <>
-          <Text variant="medium-16" color={textColor} className="px-[5px]">
+          <Text variant="medium-16" color={textColor} >
             {children}
           </Text>
           {icon}
@@ -145,7 +145,7 @@ export const Button: React.FC<ButtonProps> = ({
 
     return (
       icon || (
-        <Text variant="medium-16" color={textColor} className="px-[5px]">
+        <Text variant="medium-16" color={textColor} >
           {children}
         </Text>
       )

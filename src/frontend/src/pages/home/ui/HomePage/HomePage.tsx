@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useHistory, useLocation } from "react-router-dom";
-import { WalkCard, NewWalkButton, Walk } from "@features/home";
-import { Toggle, Icon } from "@shared/ui";
+import { WalkCard, NewWalkButton, Walk, PlaceCard, NewPlaceButton, PlaceCategory } from "@features/home";
+import { Toggle, Icon, Tag, IconName } from "@shared/ui";
 import { Text } from "@shared/ui/Text";
 import { MainLayout } from "@app/layouts/MainLayout";
+import { mockPlaces, placeCategories } from "@shared/mocks/places.mock";
 
 const mockWalks: Walk[] = [
   {
@@ -74,6 +75,46 @@ const mockWalks: Walk[] = [
   },
 ];
 
+// Мок данные для раздела "Мои прогулки"
+const mockMyWalks: Walk[] = [
+  {
+    id: "my-1",
+    organizerName: "Вы",
+    organizerAvatar: "https://i.pravatar.cc/150?img=20",
+    time: "Завтра в 12:40",
+    distance: "250 м от вас",
+    description: "Привет! Ищем для прогулки девочек среднего размера",
+    address: "Центральная 44",
+    kind: "own",
+    joinedDogs: [
+      { id: "my-d1", avatar: "https://placehold.co/40x40/FF6B9D/white?text=M1" },
+    ],
+  },
+  {
+    id: "my-2",
+    organizerName: "Вы",
+    organizerAvatar: "https://i.pravatar.cc/150?img=20",
+    time: "Завтра в 15:00",
+    distance: "250 м от вас",
+    description: "Привет! Ищем для прогулки девочек среднего размера",
+    address: "Центральная 44",
+    kind: "request-sent",
+    joinedDogs: [],
+  },
+  {
+    id: "my-3",
+    organizerName: "Вы",
+    organizerAvatar: "https://i.pravatar.cc/150?img=20",
+    time: "Завтра в 11:00",
+    distance: "250 м от вас",
+    description: "Привет! Ищем для прогулки девочек среднего размера",
+    address: "Центральная 44",
+    kind: "own-with-requests",
+    requestCount: 1,
+    joinedDogs: [],
+  },
+];
+
 type TabValue = "walks" | "places";
 
 export const HomePage: React.FC = () => {
@@ -84,16 +125,21 @@ export const HomePage: React.FC = () => {
     (searchParams.get("tab") as TabValue) || "walks"
   );
   const [notificationCount] = useState(2);
+  const [selectedCategory, setSelectedCategory] = useState<PlaceCategory | 'favorites' | null>(null);
+
+  const touchStartX = useRef<number>(0);
+  const touchStartY = useRef<number>(0);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isHorizontalSwipe, setIsHorizontalSwipe] = useState(false);
 
   useEffect(() => {
-    const newSearchParams = new URLSearchParams(location.search);
-    newSearchParams.set("tab", activeTab);
-
-    const newSearch = newSearchParams.toString();
-    if (location.search !== `?${newSearch}`) {
-      history.replace({ search: newSearch });
-    }
-  }, [activeTab, history, location.search]);
+    const currentState = history.location.state;
+    history.replace({
+      search: `?tab=${activeTab}`,
+      state: currentState
+    });
+  }, [activeTab, history]);
 
   const handleNotificationClick = () => {
     history.push("/notifications");
@@ -103,6 +149,85 @@ export const HomePage: React.FC = () => {
     history.push(`/walk/${walkId}`, { background: location });
   };
 
+  const handlePlaceClick = (placeId: string) => {
+    history.push(`/place/${placeId}`, { background: location });
+  };
+
+  const handleCategoryClick = (category: PlaceCategory | 'favorites') => {
+    setSelectedCategory(selectedCategory === category ? null : category);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchStartX.current = touch.clientX;
+    touchStartY.current = touch.clientY;
+    setIsHorizontalSwipe(false);
+
+    // Проверяем, не начинается ли свайп с левого края (зона жеста назад)
+    const EDGE_THRESHOLD = 50;
+    const isNearLeftEdge = touch.clientX < EDGE_THRESHOLD;
+
+    // Если свайп начинается с левого края или открыто модальное окно - не обрабатываем
+    const isModalOpen = document.querySelector('ion-modal.show-modal') !== null;
+    if (isNearLeftEdge || isModalOpen) {
+      touchStartX.current = -1; // Маркер, что не нужно обрабатывать этот touch
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    // Если touch не должен обрабатываться (начался с края или при открытом модале)
+    if (touchStartX.current === -1) return;
+
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStartX.current;
+    const deltaY = touch.clientY - touchStartY.current;
+
+    if (!isHorizontalSwipe && Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+      setIsHorizontalSwipe(true);
+    }
+
+    if (isHorizontalSwipe) {
+      const canSwipeRight = activeTab === "places" && deltaX > 0;
+      const canSwipeLeft = activeTab === "walks" && deltaX < 0;
+
+      if (canSwipeRight || canSwipeLeft) {
+        setSwipeOffset(deltaX);
+      }
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    // Если touch не должен обрабатываться (начался с края или при открытом модале)
+    if (touchStartX.current === -1) {
+      touchStartX.current = 0;
+      setSwipeOffset(0);
+      setIsHorizontalSwipe(false);
+      return;
+    }
+
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartX.current;
+    const deltaY = touch.clientY - touchStartY.current;
+
+    const SWIPE_THRESHOLD = 80;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
+      if (deltaX > 0 && activeTab === "places") {
+        setActiveTab("walks");
+      } else if (deltaX < 0 && activeTab === "walks") {
+        setActiveTab("places");
+      }
+    }
+
+    setSwipeOffset(0);
+    setIsHorizontalSwipe(false);
+  };
+
+  const filteredPlaces = selectedCategory
+    ? selectedCategory === 'favorites'
+      ? mockPlaces.filter((p) => p.isFavorite)
+      : mockPlaces.filter((p) => p.category === selectedCategory)
+    : mockPlaces;
 
   return (
     <MainLayout>
@@ -135,46 +260,95 @@ export const HomePage: React.FC = () => {
           </div>
         </div>
 
-        <div className="self-stretch flex flex-col justify-start items-center gap-10">
-          <NewWalkButton />
+        <div className="self-stretch overflow-hidden">
+          <div
+            ref={contentRef}
+            className="flex gap-5"
+            style={{
+              transform: `translateX(calc(${activeTab === "walks" ? '0px' : 'calc(-100vw + 4px)'} + ${swipeOffset}px))`,
+              transition: swipeOffset === 0 ? 'transform 0.3s ease-out' : 'none'
+            }}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="flex-shrink-0 flex flex-col justify-start items-center gap-10" style={{ width: 'calc(100vw - 24px)' }}>
+              <NewWalkButton />
 
-          {activeTab === "walks" && (
-            <div className="self-stretch flex flex-col justify-start items-start gap-5">
-              <div className="self-stretch flex justify-center items-center gap-2.5">
-                <Text
-                  variant="bold-24"
-                  color="primary"
-                  className="flex-1 leading-6"
-                >
-                  Прогулки рядом
-                </Text>
-              </div>
-              <div className="self-stretch flex flex-col justify-start items-start gap-1">
-                {mockWalks.map((walk) => (
-                  <WalkCard key={walk.id} walk={walk} onClick={handleWalkClick} />
-                ))}
+              {mockMyWalks.length > 0 && (
+                <div className="self-stretch flex flex-col justify-start items-start gap-5">
+                  <div className="self-stretch flex justify-center items-center gap-2.5">
+                    <Text
+                      variant="bold-24"
+                      color="primary"
+                      className="flex-1 leading-6"
+                    >
+                      Мои прогулки
+                    </Text>
+                  </div>
+                  <div className="self-stretch flex flex-col justify-start items-start gap-1">
+                    {mockMyWalks.map((walk) => (
+                      <WalkCard key={walk.id} walk={walk} onClick={handleWalkClick} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="self-stretch flex flex-col justify-start items-start gap-5">
+                <div className="self-stretch flex justify-center items-center gap-2.5">
+                  <Text
+                    variant="bold-24"
+                    color="primary"
+                    className="flex-1 leading-6"
+                  >
+                    Прогулки рядом
+                  </Text>
+                </div>
+                <div className="self-stretch flex flex-col justify-start items-start gap-1">
+                  {mockWalks.map((walk) => (
+                    <WalkCard key={walk.id} walk={walk} onClick={handleWalkClick} />
+                  ))}
+                </div>
               </div>
             </div>
-          )}
 
-          {activeTab === "places" && (
-            <div className="self-stretch flex flex-col justify-start items-start gap-5">
-              <div className="self-stretch flex justify-center items-center gap-2.5">
-                <Text
-                  variant="bold-24"
-                  color="primary"
-                  className="flex-1 leading-6"
-                >
-                  Места рядом
-                </Text>
-              </div>
-              <div className="self-stretch flex justify-center items-center p-10">
-                <Text variant="regular-14" color="muted">
-                  Места пока не добавлены
-                </Text>
+            <div className="flex-shrink-0 flex flex-col justify-start items-center gap-10" style={{ width: 'calc(100vw - 24px)' }}>
+              <NewPlaceButton />
+
+              <div className="self-stretch flex flex-col justify-start items-center gap-5">
+                <div className="self-stretch flex justify-center items-center gap-2.5">
+                  <Text
+                    variant="bold-24"
+                    color="primary"
+                    className="flex-1 leading-6"
+                  >
+                    Места рядом
+                  </Text>
+                </div>
+
+                <div className="self-stretch flex gap-1 overflow-x-auto scrollbar-hide -mx-3 px-3">
+                  {placeCategories.map((cat) => (
+                    <Tag
+                      key={cat.value}
+                      size="small"
+                      selected={selectedCategory === cat.value}
+                      onClick={() => handleCategoryClick(cat.value)}
+                      icon={cat.icon ? <Icon name={cat.icon as IconName} size={16} /> : undefined}
+                      className="flex-shrink-0"
+                    >
+                      {cat.label}
+                    </Tag>
+                  ))}
+                </div>
+
+                <div className="self-stretch flex flex-col justify-start items-start gap-1">
+                  {filteredPlaces.map((place) => (
+                    <PlaceCard key={place.id} place={place} onClick={handlePlaceClick} />
+                  ))}
+                </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </MainLayout>

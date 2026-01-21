@@ -15,8 +15,8 @@ export const NewWalkButton: React.FC = () => {
       onClick={handleClick}
       className="w-full p-5 bg-pink-300 rounded-3xl flex flex-col justify-end items-center gap-5 cursor-pointer active:opacity-90 transition-opacity"
     >
-      <div className="self-stretch flex justify-start items-start gap-5">
-        <div className="flex-1 flex flex-col justify-center items-start gap-2.5">
+      <div className="self-stretch flex justify-between items-start gap-5">
+        <div className="flex-1 flex flex-col justify-center items-start gap-2.5 max-w-[266px]">
           <Text variant="extra-bold-28" color="white" className="leading-6">
             Новая прогулка
           </Text>

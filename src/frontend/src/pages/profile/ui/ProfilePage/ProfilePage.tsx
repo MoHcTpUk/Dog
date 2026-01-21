@@ -48,8 +48,8 @@ export const ProfilePage: React.FC = () => {
           setIsThankYouModalOpen(true);
         }, 300);
       }
-    } catch (err: any) {
-      if (err.name !== 'AbortError') {
+    } catch (err) {
+      if (err && typeof err === 'object' && 'name' in err && err.name !== 'AbortError') {
         console.log('Error sharing:', err);
       }
     }

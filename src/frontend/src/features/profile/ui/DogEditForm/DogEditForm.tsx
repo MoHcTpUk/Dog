@@ -23,9 +23,34 @@ import {
   getSizeComfortOptions,
 } from '@features/profile/lib/constants';
 
+interface DogData {
+  photos?: string[];
+  gender?: string;
+  name?: string;
+  weight?: number;
+  breed?: string;
+  birthDate?: string;
+  health?: {
+    sterilized?: boolean;
+    vaccinated?: boolean;
+    parasite_treated?: boolean;
+  };
+  character?: {
+    activity?: string;
+    comfortable_with?: {
+      males?: boolean;
+      females?: boolean;
+      big_dogs?: boolean;
+      small_dogs?: boolean;
+      same_size?: boolean;
+    };
+  };
+  comment?: string;
+}
+
 interface DogEditFormProps {
-  initialData?: any;
-  onSave?: (data: any) => void;
+  initialData?: DogData;
+  onSave?: (data: DogData) => void;
 }
 
 export const DogEditForm: React.FC<DogEditFormProps> = ({
@@ -43,20 +68,30 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
   const [birthDate, setBirthDate] = useState<string>(
     initialData?.birthDate || '01.09.2023'
   );
-  const [health, setHealth] = useState({
-    sterilized: initialData?.health?.sterilized || false,
-    vaccinated: initialData?.health?.vaccinated || true,
-    parasite_treated: initialData?.health?.parasite_treated || true,
+  const [health, setHealth] = useState<{
+    sterilized: boolean;
+    vaccinated: boolean;
+    parasite_treated: boolean;
+  }>({
+    sterilized: initialData?.health?.sterilized ?? false,
+    vaccinated: initialData?.health?.vaccinated ?? true,
+    parasite_treated: initialData?.health?.parasite_treated ?? true,
   });
   const [activity, setActivity] = useState<string>(
     initialData?.character?.activity || 'medium'
   );
-  const [comfortableWith, setComfortableWith] = useState({
-    males: initialData?.character?.comfortable_with?.males || true,
-    females: initialData?.character?.comfortable_with?.females || false,
-    big_dogs: initialData?.character?.comfortable_with?.big_dogs || true,
-    small_dogs: initialData?.character?.comfortable_with?.small_dogs || false,
-    same_size: initialData?.character?.comfortable_with?.same_size || false,
+  const [comfortableWith, setComfortableWith] = useState<{
+    males: boolean;
+    females: boolean;
+    big_dogs: boolean;
+    small_dogs: boolean;
+    same_size: boolean;
+  }>({
+    males: initialData?.character?.comfortable_with?.males ?? true,
+    females: initialData?.character?.comfortable_with?.females ?? false,
+    big_dogs: initialData?.character?.comfortable_with?.big_dogs ?? true,
+    small_dogs: initialData?.character?.comfortable_with?.small_dogs ?? false,
+    same_size: initialData?.character?.comfortable_with?.same_size ?? false,
   });
   const [comment, setComment] = useState<string>(
     initialData?.comment ||
@@ -84,7 +119,7 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
       if (image.dataUrl) {
         setPhotos([...photos, image.dataUrl]);
       }
-    } catch (error) {
+    } catch {
       if (fileInputRef.current) {
         fileInputRef.current.click();
       }
