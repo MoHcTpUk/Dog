@@ -27,12 +27,13 @@ const AppContent: FC = () => {
   const background = location.state?.background;
 
   const pagesWithFooter = ['/home', '/map', '/dog', '/profile'];
+  const currentPath = background ? background.pathname : location.pathname;
   const showFooter = pagesWithFooter.some(path => {
     if (path === '/dog') {
-      return location.pathname === '/dog';
+      return currentPath === '/dog';
     }
-    return location.pathname.startsWith(path);
-  }) && !background;
+    return currentPath.startsWith(path);
+  });
 
   return (
     <>
