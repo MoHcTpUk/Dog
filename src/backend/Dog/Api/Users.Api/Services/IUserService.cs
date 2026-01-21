@@ -10,5 +10,5 @@ public interface IUserService : IService<CreateUserCommand, UpdateUserCommand, D
 {
     Task<RegistrationRequestDto> CreateRegistrationRequest(CreateRegistrationRequestCommand requestCommand);
 
-    Task<LoginUrlDto> VerifyRegistrationRequest(VerifyRegistrationRequestCommand requestCommand);
+    Task<UserDto> VerifyRegistrationRequest(VerifyRegistrationRequestCommand requestCommand);
 }

@@ -1,4 +1,5 @@
 using Identity.WebApi;
+using Identity.WebApi.Middleware;
 using Environments = Shared.Environments;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,6 +55,10 @@ if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == Enviro
 {
     app.MapOpenApi().AllowAnonymous();
 }
+
+// Allows issuing tokens from /Users/VerifyRegistrationRequest by translating the request
+// to an internal /connect/token password grant flow within the same HTTP request.
+app.UseMiddleware<VerifyRegistrationToTokenMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

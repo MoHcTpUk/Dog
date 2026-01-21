@@ -19,13 +19,4 @@ public class UsersController(IUserService userService)
 
         return result;
     }
-
-    [HttpPost(nameof(VerifyRegistrationRequest))]
-    [AllowAnonymous]
-    public Task<LoginUrlDto> VerifyRegistrationRequest(VerifyRegistrationRequestCommand requestCommand)
-    {
-        var result = userService.VerifyRegistrationRequest(requestCommand);
-
-        return result;
-    }
 }

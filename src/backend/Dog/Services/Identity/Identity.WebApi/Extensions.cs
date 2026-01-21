@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.DataProtection;
 using OpenIddict.Abstractions;
 using OpenIddict.Validation.AspNetCore;
 using Shared.Api;
+using Users.Api.Services;
 
 namespace Identity.WebApi;
 
@@ -15,6 +16,10 @@ public static class Extensions
         services.AddSharedApi(configuration);
 
         services.AddIdentityApplication(configuration);
+        
+        // Identity.WebApi уже регистрирует Shared.Api (NATS + CommandBus).
+        // Поэтому Users.Api подключаем только как сервисы поверх CommandBus, без повторного AddSharedApi().
+        services.AddScoped<IUserService, UserService>();
 
         var dataProtectionKeysPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),

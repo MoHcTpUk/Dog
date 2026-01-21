@@ -1,7 +1,6 @@
 using Identity.Api.Commands;
 using Identity.Api.Services;
 using Microsoft.EntityFrameworkCore;
-using OpenIddict.Abstractions;
 using Shared.Messaging.Interfaces;
 using Users.Api.Commands.RegistrationRequest;
 using Users.Api.Dtos;
@@ -15,21 +14,15 @@ public class VerifyRegistrationRequestHandler(
     IUserRepository userRepository,
     IIdentityService identityService
 )
-    : ICommandHandler<VerifyRegistrationRequestCommand, LoginUrlDto>
+    : ICommandHandler<VerifyRegistrationRequestCommand, UserDto>
 {
     private const int TemporaryPasswordLength = 20;
 
-    public async Task<LoginUrlDto> Handle(VerifyRegistrationRequestCommand request,
+    public async Task<UserDto> Handle(VerifyRegistrationRequestCommand request,
         CancellationToken cancellationToken)
     {
         var registrationRequest = await registrationRequestRepository.AsQueryable()
             .FirstOrDefaultAsync(item => item.Id == Guid.Parse(request.Id), cancellationToken);
-
-        if (registrationRequest == null || registrationRequest.ActivationCode != request.VerificationCode)
-            return new LoginUrlDto
-            {
-                AccessToken = null
-            };
 
         var username = registrationRequest.Email.Split('@')[0].ToLowerInvariant();
 
@@ -53,27 +46,14 @@ public class VerifyRegistrationRequestHandler(
 
         await identityService.CreateUserAsync(createUserCommand);
 
-        List<string> scopes =
-        [
-            OpenIddictConstants.Scopes.OpenId, 
-            OpenIddictConstants.Scopes.Profile,
-            OpenIddictConstants.Scopes.Email, 
-            OpenIddictConstants.Scopes.OfflineAccess
-        ];
-        
-        var generateTokenCommand = new GenerateTokenCommand
+        return new UserDto
         {
             Email = registrationRequest.Email,
+            Id = newUser.Id,
+            UserName = username,
             Password = password,
-            Scope = string.Join(" ", scopes)
-        };
-
-        var tokenResult = await identityService.GenerateTokenAsync(generateTokenCommand);
-
-        return new LoginUrlDto
-        {
-            AccessToken = tokenResult.AccessToken,
-            RefreshToken = tokenResult.RefreshToken
+            FirstName = string.Empty,
+            LastName = string.Empty
         };
     }
 

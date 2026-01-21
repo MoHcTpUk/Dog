@@ -21,10 +21,10 @@ public class UserService(ICommandBus commandBus)
         return result;
     }
 
-    public async Task<LoginUrlDto> VerifyRegistrationRequest(VerifyRegistrationRequestCommand command)
+    public async Task<UserDto> VerifyRegistrationRequest(VerifyRegistrationRequestCommand command)
     {
         var result =
-            await _commandBus.SendAsync<VerifyRegistrationRequestCommand, LoginUrlDto>(
+            await _commandBus.SendAsync<VerifyRegistrationRequestCommand, UserDto>(
                 command, Subject);
 
         return result;
