@@ -12,8 +12,7 @@ public class TokenService(
     IIdentityService identityService,
     IOpenIddictTokenManager tokenManager) : ITokenService
 {
-    public async Task<string?> GenerateTokenAsync(ClaimsPrincipal principal, IEnumerable<string> scopes,
-        CancellationToken cancellationToken)
+    public async Task<string?> GenerateTokenAsync(ClaimsPrincipal principal)
     {
         var signingKey = configuration["OpenIddict:SigningKey"] ??
                          "your-secret-signing-key-change-in-production-minimum-32-characters";

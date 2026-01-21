@@ -35,7 +35,7 @@ public class GenerateTokenHandler(
         claimsPrincipal.SetScopes(scopes);
         claimsPrincipal.SetResources(scopes);
 
-        var accessToken = await tokenService.GenerateTokenAsync(claimsPrincipal, scopes, cancellationToken);
+        var accessToken = await tokenService.GenerateTokenAsync(claimsPrincipal);
 
         return new GenerateTokenResult
         {
