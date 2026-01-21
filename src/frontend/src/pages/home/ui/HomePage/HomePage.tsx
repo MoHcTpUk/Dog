@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { WalkCard, NewWalkButton, Walk, PlaceCard, NewPlaceButton, PlaceCategory } from "@features/home";
-import { Toggle, Icon, Tag } from "@shared/ui";
+import { Toggle, Icon, Tag, IconName } from "@shared/ui";
 import { Text } from "@shared/ui/Text";
 import { MainLayout } from "@app/layouts/MainLayout";
 import { mockPlaces, placeCategories } from "@shared/mocks/places.mock";
@@ -127,15 +127,19 @@ export const HomePage: React.FC = () => {
   const [notificationCount] = useState(2);
   const [selectedCategory, setSelectedCategory] = useState<PlaceCategory | 'favorites' | null>(null);
 
-  useEffect(() => {
-    const newSearchParams = new URLSearchParams(location.search);
-    newSearchParams.set("tab", activeTab);
+  const touchStartX = useRef<number>(0);
+  const touchStartY = useRef<number>(0);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isHorizontalSwipe, setIsHorizontalSwipe] = useState(false);
 
-    const newSearch = newSearchParams.toString();
-    if (location.search !== `?${newSearch}`) {
-      history.replace({ search: newSearch });
-    }
-  }, [activeTab, history, location.search]);
+  useEffect(() => {
+    const currentState = history.location.state;
+    history.replace({
+      search: `?tab=${activeTab}`,
+      state: currentState
+    });
+  }, [activeTab, history]);
 
   const handleNotificationClick = () => {
     history.push("/notifications");
@@ -151,6 +155,72 @@ export const HomePage: React.FC = () => {
 
   const handleCategoryClick = (category: PlaceCategory | 'favorites') => {
     setSelectedCategory(selectedCategory === category ? null : category);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchStartX.current = touch.clientX;
+    touchStartY.current = touch.clientY;
+    setIsHorizontalSwipe(false);
+
+    // Проверяем, не начинается ли свайп с левого края (зона жеста назад)
+    const EDGE_THRESHOLD = 50;
+    const isNearLeftEdge = touch.clientX < EDGE_THRESHOLD;
+
+    // Если свайп начинается с левого края или открыто модальное окно - не обрабатываем
+    const isModalOpen = document.querySelector('ion-modal.show-modal') !== null;
+    if (isNearLeftEdge || isModalOpen) {
+      touchStartX.current = -1; // Маркер, что не нужно обрабатывать этот touch
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    // Если touch не должен обрабатываться (начался с края или при открытом модале)
+    if (touchStartX.current === -1) return;
+
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStartX.current;
+    const deltaY = touch.clientY - touchStartY.current;
+
+    if (!isHorizontalSwipe && Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+      setIsHorizontalSwipe(true);
+    }
+
+    if (isHorizontalSwipe) {
+      const canSwipeRight = activeTab === "places" && deltaX > 0;
+      const canSwipeLeft = activeTab === "walks" && deltaX < 0;
+
+      if (canSwipeRight || canSwipeLeft) {
+        setSwipeOffset(deltaX);
+      }
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    // Если touch не должен обрабатываться (начался с края или при открытом модале)
+    if (touchStartX.current === -1) {
+      touchStartX.current = 0;
+      setSwipeOffset(0);
+      setIsHorizontalSwipe(false);
+      return;
+    }
+
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartX.current;
+    const deltaY = touch.clientY - touchStartY.current;
+
+    const SWIPE_THRESHOLD = 80;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
+      if (deltaX > 0 && activeTab === "places") {
+        setActiveTab("walks");
+      } else if (deltaX < 0 && activeTab === "walks") {
+        setActiveTab("places");
+      }
+    }
+
+    setSwipeOffset(0);
+    setIsHorizontalSwipe(false);
   };
 
   const filteredPlaces = selectedCategory
@@ -190,9 +260,19 @@ export const HomePage: React.FC = () => {
           </div>
         </div>
 
-        <div className="self-stretch flex flex-col justify-start items-center gap-10">
-          {activeTab === "walks" && (
-            <>
+        <div className="self-stretch overflow-hidden">
+          <div
+            ref={contentRef}
+            className="flex gap-5"
+            style={{
+              transform: `translateX(calc(${activeTab === "walks" ? '0px' : 'calc(-100vw + 4px)'} + ${swipeOffset}px))`,
+              transition: swipeOffset === 0 ? 'transform 0.3s ease-out' : 'none'
+            }}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="flex-shrink-0 flex flex-col justify-start items-center gap-10" style={{ width: 'calc(100vw - 24px)' }}>
               <NewWalkButton />
 
               {mockMyWalks.length > 0 && (
@@ -230,11 +310,9 @@ export const HomePage: React.FC = () => {
                   ))}
                 </div>
               </div>
-            </>
-          )}
+            </div>
 
-          {activeTab === "places" && (
-            <>
+            <div className="flex-shrink-0 flex flex-col justify-start items-center gap-10" style={{ width: 'calc(100vw - 24px)' }}>
               <NewPlaceButton />
 
               <div className="self-stretch flex flex-col justify-start items-center gap-5">
@@ -255,7 +333,7 @@ export const HomePage: React.FC = () => {
                       size="small"
                       selected={selectedCategory === cat.value}
                       onClick={() => handleCategoryClick(cat.value)}
-                      icon={cat.icon ? <Icon name={cat.icon as any} size={16} /> : undefined}
+                      icon={cat.icon ? <Icon name={cat.icon as IconName} size={16} /> : undefined}
                       className="flex-shrink-0"
                     >
                       {cat.label}
@@ -269,8 +347,8 @@ export const HomePage: React.FC = () => {
                   ))}
                 </div>
               </div>
-            </>
-          )}
+            </div>
+          </div>
         </div>
       </div>
     </MainLayout>

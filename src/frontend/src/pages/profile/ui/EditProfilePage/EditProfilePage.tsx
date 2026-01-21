@@ -6,6 +6,37 @@ import { DogEditForm } from '@features/profile/ui/DogEditForm';
 import { OwnerEditForm } from '@features/profile/ui/OwnerEditForm';
 import { ProfileTabSwitcher, ProfileTab } from '@widgets/ProfileTabSwitcher';
 
+interface DogData {
+  photos?: string[];
+  gender?: string;
+  name?: string;
+  weight?: number;
+  breed?: string;
+  birthDate?: string;
+  health?: {
+    sterilized?: boolean;
+    vaccinated?: boolean;
+    parasite_treated?: boolean;
+  };
+  character?: {
+    activity?: string;
+    comfortable_with?: {
+      males?: boolean;
+      females?: boolean;
+      big_dogs?: boolean;
+      small_dogs?: boolean;
+      same_size?: boolean;
+    };
+  };
+  comment?: string;
+}
+
+interface OwnerData {
+  photo?: string | null;
+  name?: string;
+  birth_date?: string;
+}
+
 export const EditProfilePage: React.FC = () => {
   const history = useHistory();
   const [activeTab, setActiveTab] = useState<ProfileTab>('dog');
@@ -19,12 +50,12 @@ export const EditProfilePage: React.FC = () => {
     history.goBack();
   };
 
-  const handleSaveDog = (data: any) => {
+  const handleSaveDog = (data: DogData) => {
     console.log('Save dog profile:', data);
     history.goBack();
   };
 
-  const handleSaveOwner = (data: any) => {
+  const handleSaveOwner = (data: OwnerData) => {
     console.log('Save owner profile:', data);
     history.goBack();
   };

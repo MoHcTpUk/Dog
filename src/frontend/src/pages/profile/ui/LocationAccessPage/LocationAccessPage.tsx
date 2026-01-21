@@ -25,7 +25,7 @@ export const LocationAccessPage: React.FC = () => {
           setPermissionStatus(result.state as PermissionStatus);
         });
       }
-    } catch (error) {
+    } catch {
       console.log('Permission API not supported');
     }
   };
@@ -46,8 +46,8 @@ export const LocationAccessPage: React.FC = () => {
 
       setPermissionStatus('granted');
       console.log('Location permission granted', position);
-    } catch (error: any) {
-      if (error.code === error.PERMISSION_DENIED) {
+    } catch (error) {
+      if (error && typeof error === 'object' && 'code' in error && 'PERMISSION_DENIED' in error && error.code === error.PERMISSION_DENIED) {
         setPermissionStatus('denied');
       }
       console.log('Location permission denied', error);

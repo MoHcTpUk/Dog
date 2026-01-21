@@ -12,9 +12,15 @@ import {
 } from '@shared/ui';
 import { getMonthNames } from '@shared/lib/constants';
 
+interface OwnerData {
+  photo?: string | null;
+  name?: string;
+  birth_date?: string;
+}
+
 interface OwnerEditFormProps {
-  initialData?: any;
-  onSave?: (data: any) => void;
+  initialData?: OwnerData;
+  onSave?: (data: OwnerData) => void;
 }
 
 export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
@@ -51,7 +57,7 @@ export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
       if (image.dataUrl) {
         setPhoto(image.dataUrl);
       }
-    } catch (error) {
+    } catch {
       if (fileInputRef.current) {
         fileInputRef.current.click();
       }
