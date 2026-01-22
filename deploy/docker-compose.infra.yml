@@ -13,6 +13,8 @@ services:
       - "--providers.swarm.network=infra_traefik"
       - "--entryPoints.web.address=:80"
       - "--entryPoints.websecure.address=:443"
+      - "--entryPoints.websecure.http3=true"
+      - "--entryPoints.websecure.http3.advertisedPort=8443"
       - "--providers.file.directory=/certs"
       - "--providers.file.watch=true"
     deploy:
