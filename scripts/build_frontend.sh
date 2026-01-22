@@ -15,4 +15,4 @@ docker buildx build \
   -f ../build/frontend/DogFrontend.Dockerfile \
   -t ghcr.io/mohctpuk/dog-frontend:latest \
   --load \
-  ../src/frontend
+  ..
