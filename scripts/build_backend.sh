@@ -10,19 +10,19 @@ else
   fi
 fi
 
-# docker buildx build \
-#   --platform $PLATFORM \
-#   -f ../build/backend/Gateway.Dockerfile \
-#   -t ghcr.io/mohctpuk/dog-gateway:latest \
-#   --load \
-#   ../src/backend/Dog &
+docker buildx build \
+  --platform $PLATFORM \
+  -f ../build/backend/Gateway.Dockerfile \
+  -t ghcr.io/mohctpuk/dog-gateway:latest \
+  --load \
+  ../src/backend/Dog &
 
-# docker buildx build \
-#   --platform $PLATFORM \
-#   -f ../build/backend/Users.Dockerfile \
-#   -t ghcr.io/mohctpuk/dog-users:latest \
-#   --load \
-#   ../src/backend/Dog &
+docker buildx build \
+  --platform $PLATFORM \
+  -f ../build/backend/Users.Dockerfile \
+  -t ghcr.io/mohctpuk/dog-users:latest \
+  --load \
+  ../src/backend/Dog &
 
 docker buildx build \
   --platform $PLATFORM \
@@ -31,11 +31,11 @@ docker buildx build \
   --load \
   ../src/backend/Dog &
 
-# docker buildx build \
-#   --platform $PLATFORM \
-#   -f ../build/backend/Identity.WebApi.Dockerfile \
-#   -t ghcr.io/mohctpuk/dog-identity-webapi:latest \
-#   --load \
-#   ../src/backend/Dog &
+docker buildx build \
+  --platform $PLATFORM \
+  -f ../build/backend/Identity.WebApi.Dockerfile \
+  -t ghcr.io/mohctpuk/dog-identity-webapi:latest \
+  --load \
+  ../src/backend/Dog &
 
 wait
