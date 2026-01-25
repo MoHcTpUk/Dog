@@ -1,15 +1,18 @@
 using Gateway.Api;
 using Users.Api;
 using Environments = Shared.Environments;
+using Microsoft.AspNetCore.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<OpenApiDocumentTransformer>();
+});
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddControllers();
 
-// Настройка YARP для проксирования запросов к Identity.WebApi
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
@@ -53,18 +56,15 @@ if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == Enviro
     app.UseCors("NoLocalCORS");
 }
 
-// Map OpenAPI before authentication middleware to ensure it's accessible
 if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == Environments.Local)
 {
     app.MapOpenApi().AllowAnonymous();
 }
 
-// Test endpoint to verify routing works
 app.MapGet("/test", () => "Hello from Gateway!").AllowAnonymous();
 
 app.MapControllers();
 
-// Настройка YARP проксирования (должно быть после MapControllers)
 app.MapReverseProxy();
 
 app.Run();

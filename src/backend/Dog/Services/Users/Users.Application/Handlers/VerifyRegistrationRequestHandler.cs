@@ -22,7 +22,7 @@ public class VerifyRegistrationRequestHandler(
         CancellationToken cancellationToken)
     {
         var registrationRequest = await registrationRequestRepository.AsQueryable()
-            .FirstOrDefaultAsync(item => item.Id == Guid.Parse(request.Id), cancellationToken);
+            .FirstOrDefaultAsync(item => item.Id == request.Id, cancellationToken);
 
         var username = registrationRequest.Email.Split('@')[0].ToLowerInvariant();
 

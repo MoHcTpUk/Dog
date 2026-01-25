@@ -1,4 +1,4 @@
-namespace Activities.Domain;
+namespace Shared;
 
 public enum ContactType
 {

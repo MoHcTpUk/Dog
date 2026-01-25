@@ -23,36 +23,32 @@ public sealed class VerifyRegistrationToTokenMiddleware(RequestDelegate next)
             await next(context);
             return;
         }
-
-        // ReadFormAsync() читает тело запроса. Если следующий обработчик читает тело повторно,
-        // он может увидеть пустой stream. Поэтому включаем буферизацию и откатываем позицию.
+        
         context.Request.EnableBuffering();
 
         var incomingForm = await context.Request.ReadFormAsync();
-
-        // Гарантируем, что downstream сможет снова прочитать body (если он этого ожидает).
+        
         if (context.Request.Body.CanSeek)
             context.Request.Body.Position = 0;
 
-        // И дополнительно закрепляем форму в features, чтобы модельный биндинг точно её видел.
         context.Request.Form = incomingForm;
         context.Features.Set<IFormFeature>(new FormFeature(incomingForm));
-        StringValues isVerificationValue;
-        var hasIsVerification = incomingForm.TryGetValue("isVerification", out isVerificationValue);
-        var isVerification = hasIsVerification && bool.Parse(isVerificationValue!);
+
+        var hasVerificationCode = incomingForm.TryGetValue("verificationCode", out var verificationCodeValue);
+        var verificationCode = hasVerificationCode ? verificationCodeValue.ToString() : string.Empty;
+
+        var hasVerificationId = incomingForm.TryGetValue("id", out var verificationIdValue);
+        var verificationId = hasVerificationId ? Guid.Parse(verificationIdValue!) : Guid.Empty;
         
-        if (!isVerification)
+        if (!hasVerificationCode || !hasVerificationId)
         {
             await next(context);
             return;
         }
         
-        var id = incomingForm["id"].ToString();
-        var verificationCode = incomingForm["verificationCode"].ToString();
-
         var command = new VerifyRegistrationRequestCommand
         {
-            Id = id,
+            Id = verificationId,
             VerificationCode = verificationCode
         };
 
