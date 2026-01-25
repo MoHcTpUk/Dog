@@ -1,10 +1,10 @@
 import Axios, { AxiosRequestConfig } from "axios";
+import Cookies from "js-cookie";
 
-// Использовать явное значение для URL API
 const API_BASE_URL =
   process.env.NODE_ENV === "production"
-    ? "https://api.yourapp.com" // TODO: заменить
-    : "http://localhost/api";
+    ? "https://api.dogappa.local:8443"
+    : "https://api.dogappa.local:8443";
 
 export const AXIOS_INSTANCE = Axios.create({
   baseURL: API_BASE_URL,
@@ -14,11 +14,9 @@ export const AXIOS_INSTANCE = Axios.create({
   },
 });
 
-// Интерцептор для добавления JWT токена
 AXIOS_INSTANCE.interceptors.request.use(
   (config) => {
-    // Получаем токен из localStorage или Zustand store
-    const token = localStorage.getItem("auth_token");
+    const token = Cookies.get("auth_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

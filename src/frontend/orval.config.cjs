@@ -1,9 +1,9 @@
-import { defineConfig } from "orval";
+const { defineConfig } = require("orval");
 
-export default defineConfig({
-  activities: {
+module.exports = defineConfig({
+  gateway: {
     input: {
-      target: "http://localhost/api/openapi/v1.json",
+      target: "https://api.dogappa.local:8443/openapi/v1.json",
     },
 
     output: {
@@ -11,6 +11,7 @@ export default defineConfig({
       target: "./src/shared/api/generated",
       schemas: "./src/shared/api/generated/types",
       client: "react-query",
+      packageJson: false,
       override: {
         mutator: {
           path: "./src/shared/api/client.ts",
@@ -23,13 +24,6 @@ export default defineConfig({
           useMutation: true,
         },
 
-        // TODO: убрать когда апи будет работаь
-        mock: {
-          type: "msw",
-          delay: 1000,
-        },
-
-        // Настройки компонентов и хуков
         components: {
           schemas: {
             suffix: "Type",
@@ -44,11 +38,10 @@ export default defineConfig({
       },
     },
 
-    // Хуки для пост-обработки
     hooks: {
       afterAllFilesWrite: [
-        "prettier --write ./src/shared/api/generated/**/*.ts", // Форматирование сгенерированных файлов
-        "eslint --fix ./src/shared/api/generated/**/*.ts", // Исправление линтинга
+        "prettier --write ./src/shared/api/generated/**/*.ts",
+        "eslint --fix ./src/shared/api/generated/**/*.ts",
       ],
     },
   },
