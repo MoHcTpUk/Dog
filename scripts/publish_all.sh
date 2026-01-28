@@ -2,13 +2,27 @@
 if [ -n "$1" ]; then
   PLATFORMS="$1"
 else
-  PLATFORMS="linux/amd64,linux/arm64"
+  PLATFORMS="linux/amd64"
 fi
 
 docker buildx build \
   --platform $PLATFORMS \
   -f ../build/backend/Gateway.Dockerfile \
   -t ghcr.io/mohctpuk/dog-gateway:latest \
+  --push \
+  ../src/backend/Dog &
+
+docker buildx build \
+  --platform $PLATFORMS \
+  -f ../build/backend/Identity.Dockerfile \
+  -t ghcr.io/mohctpuk/dog-identity:latest \
+  --push \
+  ../src/backend/Dog &
+
+docker buildx build \
+  --platform $PLATFORMS \
+  -f ../build/backend/Identity.WebApi.Dockerfile \
+  -t ghcr.io/mohctpuk/dog-identity-webapi:latest \
   --push \
   ../src/backend/Dog &
 
