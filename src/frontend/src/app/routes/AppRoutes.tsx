@@ -17,6 +17,8 @@ import { PlaceDetailsPage } from "@pages/place-details";
 import { DogsPage } from "@pages/dogs";
 import { ProfilePage, EditProfilePage, PromocodesPage, SettingsPage, FeedbackPage, TermsPage, LocationAccessPage, NotificationsPage } from "@pages/profile";
 import { MainFooter } from "@widgets/footer";
+import { PersistentMapLayer } from "@app/providers/PersistentMapLayer";
+import { MapUIOverlay } from "@app/providers/MapUIOverlay";
 
 interface LocationState {
   background?: Location;
@@ -37,6 +39,8 @@ const AppContent: FC = () => {
 
   return (
     <>
+      <PersistentMapLayer />
+      <MapUIOverlay />
       <IonRouterOutlet animated={true}>
         <Switch location={background || location}>
           <Route exact path="/welcome" component={WelcomePage} />

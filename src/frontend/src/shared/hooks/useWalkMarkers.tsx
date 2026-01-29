@@ -14,6 +14,7 @@ interface UseWalkMarkersProps {
   hasClusteringChanged: () => boolean;
   onClusterClick: (center: [number, number]) => void;
   onWalkClick?: (walkId: string) => void;
+  isPaused?: boolean;
 }
 
 interface WalkMarkerData {
@@ -30,6 +31,7 @@ export const useWalkMarkers = ({
   hasClusteringChanged,
   onClusterClick,
   onWalkClick,
+  isPaused = false,
 }: UseWalkMarkersProps) => {
   const walkMarkersRef = useRef<WalkMarkerData[]>([]);
   const onClusterClickRef = useRef(onClusterClick);
@@ -45,9 +47,13 @@ export const useWalkMarkers = ({
   }, [hasClusteringChanged]);
 
   useEffect(() => {
+    if (isPaused) return;
+
     if (!mapInstance || !mapglAPI) return;
 
-    if (!shouldUpdate && walkMarkersRef.current.length > 0) return;
+    // Всегда обновляем если количество walks изменилось с ненулевого на ноль или наоборот
+    const hasWalksCountChanged = (walks.length === 0) !== (walkMarkersRef.current.length === 0);
+    if (!shouldUpdate && !hasWalksCountChanged && walkMarkersRef.current.length > 0) return;
 
     if (cleanupTimeoutRef.current) {
       clearTimeout(cleanupTimeoutRef.current);
@@ -154,7 +160,7 @@ export const useWalkMarkers = ({
         clearTimeout(createTimeoutRef.current);
       }
     };
-  }, [walks, mapglAPI, mapInstance, clusterZoomLevel, shouldUpdate]);
+  }, [isPaused, walks, mapglAPI, mapInstance, clusterZoomLevel, shouldUpdate]);
 
   useEffect(() => {
     return () => {

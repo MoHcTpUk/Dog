@@ -1,15 +1,10 @@
-import React, { useState, useRef, useMemo, useCallback } from "react";
-import { useIonRouter } from "@ionic/react";
+import React, { useRef, useMemo, useCallback, useEffect } from "react";
 import { useLocation, useHistory } from "react-router-dom";
-import { Toggle, Icon, Button } from "@shared/ui";
-import { Text } from "@shared/ui/Text";
 import { MainLayout } from "@app/layouts/MainLayout";
-import { MapView, type Place } from "@features/map";
+import { type Place, useMapGL } from "@features/map/context";
 import type { MapInstance } from "@features/map/types/map.types";
-import { Geolocation } from "@capacitor/geolocation";
 import { mockWalks } from "@shared/mocks/walks.mock";
 
-type TabValue = "walks" | "places";
 
 const mockPlaces: Place[] = [
   {
@@ -39,15 +34,11 @@ const mockPlaces: Place[] = [
 ];
 
 export const MapPage: React.FC = () => {
-  const router = useIonRouter();
   const location = useLocation();
   const history = useHistory();
-  const searchParams = new URLSearchParams(location.search);
-  const [activeTab, setActiveTab] = useState<TabValue>(
-    (searchParams.get("tab") as TabValue) || "walks"
-  );
-  const [notificationCount] = useState(2);
   const mapRef = useRef<MapInstance | null>(null);
+
+  const { setDisplayedWalks, setDisplayedPlaces, setWalkClickHandler, mapInstance, activeTab } = useMapGL();
 
   const displayedPlaces = useMemo(() => {
     return activeTab === "places"
@@ -59,97 +50,38 @@ export const MapPage: React.FC = () => {
     return activeTab === "walks" ? mockWalks : [];
   }, [activeTab]);
 
-  const handleNotificationClick = useCallback(() => {
-    router.push("/notifications", "forward", "push");
-  }, [router]);
-
-  const handleCenterLocation = useCallback(async () => {
-    try {
-      const position = await Geolocation.getCurrentPosition();
-      const { latitude, longitude } = position.coords;
-
-      if (mapRef.current) {
-        mapRef.current.setCenter([longitude, latitude]);
-        mapRef.current.setZoom(15);
-      }
-    } catch {
-      // Silently handle geolocation errors
-    }
-  }, []);
-
-  const handleNewWalk = useCallback(() => {
-    router.push("/walk/new", "forward", "push");
-  }, [router]);
-
-  const handleMapReady = useCallback((map: MapInstance) => {
-    mapRef.current = map;
-  }, []);
-
   const handleWalkClick = useCallback((walkId: string) => {
-    history.push(`/walk/${walkId}`, { background: location });
+    // Передаём background без query параметров, чтобы избежать переноса ?tab=walks
+    const cleanLocation = {
+      ...location,
+      search: '',
+    };
+    history.push(`/walk/${walkId}`, { background: cleanLocation });
   }, [location, history]);
+
+  // Update map context when tab or data changes
+  useEffect(() => {
+    setDisplayedWalks(displayedWalks);
+    setDisplayedPlaces(displayedPlaces);
+  }, [displayedWalks, displayedPlaces, setDisplayedWalks, setDisplayedPlaces]);
+
+  // Update walk click handler
+  useEffect(() => {
+    setWalkClickHandler(handleWalkClick);
+  }, [handleWalkClick, setWalkClickHandler]);
+
+  // Update mapRef when mapInstance changes
+  useEffect(() => {
+    if (mapInstance) {
+      mapRef.current = mapInstance;
+    }
+  }, [mapInstance]);
 
   return (
     <MainLayout>
       <div className="absolute inset-0">
-        {/* Карта на весь экран */}
-        <MapView
-          onMapReady={handleMapReady}
-          places={displayedPlaces}
-          walks={displayedWalks}
-          onWalkClick={handleWalkClick}
-        />
-
-        {/* Верхняя панель поверх карты */}
-        <div className="absolute top-0 left-0 right-0 px-3 pt-5 flex justify-between items-center z-10">
-          <Toggle
-            options={[
-              { value: "walks", label: "Прогулки" },
-              { value: "places", label: "Места" },
-            ]}
-            value={activeTab}
-            onChange={setActiveTab}
-          />
-          <div
-            className="relative cursor-pointer"
-            onClick={handleNotificationClick}
-          >
-            <div className="p-3 -rotate-90 bg-white rounded-full shadow-[0px_5px_9px_0px_rgba(66,58,58,0.06)] flex flex-col justify-center items-center">
-              <div className="rotate-90">
-                <Icon name="bell" size={24} />
-              </div>
-            </div>
-            {notificationCount > 0 && (
-              <div className="absolute min-w-5 px-1.5 py-0.5 left-[29px] top-[-9px] bg-pink-300 rounded-full flex flex-col justify-center items-center">
-                <Text variant="medium-14" color="white">
-                  {notificationCount}
-                </Text>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Нижние кнопки поверх карты - 12px выше футера */}
-        <div className="absolute bottom-[100px] left-0 right-0 px-3 flex justify-between items-center gap-3 z-10">
-          <Button
-            variant="primary"
-            size="M"
-            onClick={handleNewWalk}
-            icon={<Icon name="plus" size={24} color="white" />}
-            iconPosition="left"
-          >
-            Прогулка
-          </Button>
-
-          <button
-            onClick={handleCenterLocation}
-            className="p-3 -rotate-90 bg-white rounded-full shadow-[0px_5px_9px_0px_rgba(66,58,58,0.06)] inline-flex flex-col justify-center items-center gap-2.5 overflow-hidden"
-          >
-            <div className="rotate-90">
-              <Icon name="plane" size={24} />
-            </div>
-          </button>
-        </div>
+        {/* Карта рендерится через PersistentMapLayer в AppRoutes.tsx */}
+        {/* UI элементы рендерятся через MapUIOverlay в AppRoutes.tsx */}
       </div>
     </MainLayout>
   );

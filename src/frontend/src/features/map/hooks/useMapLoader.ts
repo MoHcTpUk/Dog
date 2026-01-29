@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useMapGL } from "../context/MapGLContext";
+import { useMapGL } from "../context";
 import type { MapInstance, MapGLAPI } from "../types/map.types";
 
 interface UseMapLoaderProps {
