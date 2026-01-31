@@ -47,12 +47,12 @@ docker buildx build \
   --push \
   ../src/landing &
 
-  docker buildx build \
-  --platform $PLATFORMS \
-  -f ../build/telegrambot/TelegramBot.Dockerfile \
-  -t ghcr.io/mohctpuk/dog-telegram-bot:latest \
-  --push \
-  ../src/telegrambot &
+docker buildx build \
+--platform $PLATFORMS \
+-f ../build/telegrambot/TelegramBot.Dockerfile \
+-t ghcr.io/mohctpuk/dog-telegram-bot:latest \
+--push \
+../src/telegrambot &
 
 wait
 echo "All builds completed!"

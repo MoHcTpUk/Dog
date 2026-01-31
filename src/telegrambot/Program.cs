@@ -17,7 +17,7 @@ class Program
         ?? "8424101909:AAGZr21FDh69fk6ZdDQZqA4bpwOI0ZBjoqQ";
     
     private static readonly string DbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") 
-        ?? "Host=app_postgres;Port=5432;Database=telegrambot;Username=user;Password=password";
+        ?? "Host=infra_postgres;Port=5432;Database=telegrambot;Username=user;Password=password";
 
     private static readonly string ForumGroupIdStr = Environment.GetEnvironmentVariable("FORUM_GROUP_ID") ?? "-1003237672235";
     private static readonly long? ForumGroupId = string.IsNullOrEmpty(ForumGroupIdStr) ? null : long.Parse(ForumGroupIdStr);
