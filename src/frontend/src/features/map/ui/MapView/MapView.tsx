@@ -1,8 +1,7 @@
 import React, { memo } from "react";
 import { useMapLoader } from "../../hooks/useMapLoader";
-import type { Walk } from "@shared/types/walk";
+import { useMapGL } from "../../context";
 import { useMapZoom, usePlaceMarkers, useWalkMarkers } from "@shared/hooks";
-import type { MapInstance, MapGLAPI } from "../../types/map.types";
 
 export interface Place {
   id: string;
@@ -12,44 +11,57 @@ export interface Place {
 }
 
 interface MapViewProps {
-  onMapReady?: (map: MapInstance, mapglAPI: MapGLAPI) => void;
-  places?: Place[];
-  walks?: Walk[];
+  isPaused?: boolean;
   center?: [number, number];
   zoom?: number;
-  onWalkClick?: (walkId: string) => void;
 }
 
 const MapViewComponent: React.FC<MapViewProps> = ({
-  onMapReady,
-  places = [],
-  walks = [],
+  isPaused = false,
   center = [37.573856, 55.751574],
   zoom = 13,
-  onWalkClick,
 }) => {
+  const { displayedWalks, displayedPlaces, onWalkClick } = useMapGL();
+
   const { mapglAPI, mapInstance, isLoading } = useMapLoader({
     center,
     zoom,
-    onMapReady,
   });
+
+  console.log('[MapView] Rendering, isPaused:', isPaused, 'isLoading:', isLoading, 'mapInstance:', !!mapInstance);
 
   const { clusterZoomLevel, handleClusterClick, hasClusteringChanged } = useMapZoom({
     mapInstance,
     initialZoom: zoom,
   });
 
-  usePlaceMarkers({ mapInstance, mapglAPI, places });
+  usePlaceMarkers({
+    mapInstance,
+    mapglAPI,
+    places: displayedPlaces,
+    isPaused,
+  });
 
   useWalkMarkers({
     mapInstance,
     mapglAPI,
-    walks,
+    walks: displayedWalks,
     clusterZoomLevel,
     hasClusteringChanged,
     onClusterClick: handleClusterClick,
-    onWalkClick,
+    onWalkClick: onWalkClick || undefined,
+    isPaused,
   });
+
+  // Пересчитываем размер карты когда она становится видимой
+  React.useEffect(() => {
+    if (!isPaused && mapInstance) {
+      console.log('[MapView] Map became visible, calling invalidateSize');
+      setTimeout(() => {
+        mapInstance.invalidateSize?.();
+      }, 100);
+    }
+  }, [isPaused, mapInstance]);
 
   return (
     <div className="relative w-full h-full">

@@ -146,11 +146,21 @@ export const HomePage: React.FC = () => {
   };
 
   const handleWalkClick = (walkId: string) => {
-    history.push(`/walk/${walkId}`, { background: location });
+    // Передаём background без query параметров
+    const cleanLocation = {
+      ...location,
+      search: '',
+    };
+    history.push(`/walk/${walkId}`, { background: cleanLocation });
   };
 
   const handlePlaceClick = (placeId: string) => {
-    history.push(`/place/${placeId}`, { background: location });
+    // Передаём background без query параметров
+    const cleanLocation = {
+      ...location,
+      search: '',
+    };
+    history.push(`/place/${placeId}`, { background: cleanLocation });
   };
 
   const handleCategoryClick = (category: PlaceCategory | 'favorites') => {

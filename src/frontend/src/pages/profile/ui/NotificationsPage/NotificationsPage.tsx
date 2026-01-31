@@ -92,7 +92,12 @@ export const NotificationsPage: React.FC = () => {
 
   const handleNotificationClick = (notification: Notification) => {
     if (notification.walkId) {
-      history.push(`/walk/${notification.walkId}`, { background: location });
+      // Передаём background без query параметров
+      const cleanLocation = {
+        ...location,
+        search: '',
+      };
+      history.push(`/walk/${notification.walkId}`, { background: cleanLocation });
     }
   };
 

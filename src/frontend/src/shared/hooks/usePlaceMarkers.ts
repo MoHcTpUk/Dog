@@ -6,6 +6,7 @@ interface UsePlaceMarkersProps {
   mapInstance: MapInstance | null;
   mapglAPI: MapGLAPI | null;
   places: Place[];
+  isPaused?: boolean;
 }
 
 interface PlaceMarkerData {
@@ -13,10 +14,12 @@ interface PlaceMarkerData {
   placeId: string;
 }
 
-export const usePlaceMarkers = ({ mapInstance, mapglAPI, places }: UsePlaceMarkersProps) => {
+export const usePlaceMarkers = ({ mapInstance, mapglAPI, places, isPaused = false }: UsePlaceMarkersProps) => {
   const markersRef = useRef<PlaceMarkerData[]>([]);
 
   useEffect(() => {
+    if (isPaused) return;
+
     if (!mapInstance || !mapglAPI) return;
 
     const newPlacesMap = new Map(places.map(place => [place.id, place]));
@@ -42,5 +45,5 @@ export const usePlaceMarkers = ({ mapInstance, mapglAPI, places }: UsePlaceMarke
       markersRef.current.forEach(({ marker }) => marker.destroy());
       markersRef.current = [];
     };
-  }, [places, mapglAPI, mapInstance]);
+  }, [isPaused, places, mapglAPI, mapInstance]);
 };

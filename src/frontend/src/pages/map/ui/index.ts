@@ -1,1 +1,1 @@
-export { MapPage } from "./MapPage/MapPage.lazy";
+export { MapPage } from "./MapPage/MapPage";
