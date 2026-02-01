@@ -1,5 +1,7 @@
 services:
   gateway:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Stage
     deploy:
       labels:
         - "traefik.enable=true"
@@ -15,6 +17,31 @@ services:
         - "traefik.http.routers.gateway-secure.tls=true"
         - "traefik.http.routers.gateway-secure.tls.certresolver=letsencrypt"
         - "traefik.http.services.gateway.loadbalancer.server.port=8080"
+
+  users:
+    environment:
+      - DOTNET_ENVIRONMENT=Stage
+
+  identity:
+    environment:
+      - DOTNET_ENVIRONMENT=Stage
+  identity-webapi:
+    environment:
+      - DOTNET_ENVIRONMENT=Stage
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        # HTTP роутер (редирект на HTTPS)
+        - "traefik.http.routers.identity-webapi.rule=Host(`identity.dogappa.com`)"
+        - "traefik.http.routers.identity-webapi.entrypoints=web"
+        - "traefik.http.routers.identity-webapi.middlewares=identity-webapi-redirect"
+        - "traefik.http.middlewares.identity-webapi-redirect.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.identity-webapi-redirect.redirectscheme.permanent=true"
+        # HTTPS роутер
+        - "traefik.http.routers.identity-webapi-secure.rule=Host(`identity.dogappa.com`)"
+        - "traefik.http.routers.identity-webapi-secure.entrypoints=websecure"
+        - "traefik.http.routers.identity-webapi-secure.tls=true"
+        - "traefik.http.services.identity-webapi.loadbalancer.server.port=8080"
 
   frontend:
     deploy:
