@@ -1,11 +1,20 @@
 services:
   gateway:
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`api.dogappa.com`)"
-      - "traefik.http.routers.backend.entrypoints=websecure"
-      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
-      - "traefik.http.services.backend.loadbalancer.server.port=8080"
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        # HTTP роутер (редирект на HTTPS)
+        - "traefik.http.routers.gateway.rule=Host(`api.dogappa.com`)"
+        - "traefik.http.routers.gateway.entrypoints=web"
+        - "traefik.http.routers.gateway.middlewares=gateway-redirect"
+        - "traefik.http.middlewares.gateway-redirect.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.gateway-redirect.redirectscheme.permanent=true"
+        # HTTPS роутер (HTTP/3 включён на entrypoint websecure в Traefik)
+        - "traefik.http.routers.gateway-secure.rule=Host(`api.dogappa.com`)"
+        - "traefik.http.routers.gateway-secure.entrypoints=websecure"
+        - "traefik.http.routers.gateway-secure.tls=true"
+        - "traefik.http.routers.gateway-secure.tls.certresolver=letsencrypt"
+        - "traefik.http.services.gateway.loadbalancer.server.port=8080"
 
   frontend:
     deploy:
