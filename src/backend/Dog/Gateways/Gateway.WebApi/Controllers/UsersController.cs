@@ -13,10 +13,11 @@ public class UsersController(IUserService userService)
 {
     [HttpPost(nameof(CreateRegistrationRequest))]
     [AllowAnonymous]
-    public Task<RegistrationRequestDto> CreateRegistrationRequest(CreateRegistrationRequestCommand requestCommand)
+    [Produces("application/json", "application/problem+json")]
+    public async Task<ActionResult<RegistrationRequestDto>> CreateRegistrationRequest(
+        CreateRegistrationRequestCommand requestCommand)
     {
-        var result = userService.CreateRegistrationRequest(requestCommand);
-
+        var result = await userService.CreateRegistrationRequest(requestCommand);
         return result;
     }
 }

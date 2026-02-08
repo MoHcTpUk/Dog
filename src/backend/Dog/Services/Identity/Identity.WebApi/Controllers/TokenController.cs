@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Diagnostics;
 using Identity.Application.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -17,109 +18,134 @@ public class TokenController(
 {
     [HttpPost("token")]
     [AllowAnonymous]
-    [Produces("application/json")]
-    // Пример получения токена по паролю (обязательно запросить offline_access, чтобы получить refresh_token):
-    // curl -X POST "https://localhost:5001/connect/token" ^
-    //   -H "Content-Type: application/x-www-form-urlencoded" ^
-    //   -d "grant_type=password&client_id=dog-app&username=user%40mail.com&password=Passw0rd!&scope=openid%20profile%20email%20offline_access"
-    //
-    // Пример обновления (refresh):
-    // curl -X POST "https://localhost:5001/connect/token" ^
-    //   -H "Content-Type: application/x-www-form-urlencoded" ^
-    //   -d "grant_type=refresh_token&client_id=dog-app&refresh_token=REFRESH_TOKEN_VALUE"
+    [Produces("application/json", "application/problem+json")]
+
     public async Task<IActionResult> Exchange(CancellationToken cancellationToken)
     {
-        // В token endpoint passthrough OpenIddict сам парсит запрос (из form/json/etc.) и кладёт его в HttpContext.
-        // Поэтому не полагаемся на Request.Form/[FromForm], которые могут быть уже прочитаны middleware.
-        var request = HttpContext.Features.Get<OpenIddictServerAspNetCoreFeature>()?.Transaction?.Request
-                      ?? throw new InvalidOperationException("The OpenIddict request cannot be retrieved.");
-
-        if (request.IsPasswordGrantType())
+        try
         {
-            var user = await identityService.ValidateUserAsync(
-                request.Username ?? string.Empty,
-                request.Password ?? string.Empty,
-                cancellationToken);
-            if (user is null)
-            {
-                return Forbid(
-                    new AuthenticationProperties(new Dictionary<string, string?>
-                    {
-                        [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
-                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "Invalid username/password."
-                    }),
-                    OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-            }
+            var request = HttpContext.Features.Get<OpenIddictServerAspNetCoreFeature>()?.Transaction?.Request
+                          ?? throw new InvalidOperationException("The OpenIddict request cannot be retrieved.");
 
-            var principal = identityService.CreateClaimsPrincipal(user, request.GetScopes());
-            principal.SetScopes(request.GetScopes());
+            if (request.IsPasswordGrantType())
+                return await ExchangePasswordAsync(request, cancellationToken);
 
-            foreach (var claim in principal.Claims) claim.SetDestinations(GetDestinations(claim, principal));
+            if (request.IsRefreshTokenGrantType())
+                return await ExchangeRefreshTokenAsync(request, cancellationToken);
 
-            return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+            return Forbid(
+                new AuthenticationProperties(new Dictionary<string, string?>
+                {
+                    [OpenIddictServerAspNetCoreConstants.Properties.Error] =
+                        OpenIddictConstants.Errors.UnsupportedGrantType,
+                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                        "The specified grant type is not supported."
+                }),
+                OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+        }
+        catch (InvalidOperationException e)
+        {
+            return ToProblemDetailsResult(statusCode: StatusCodes.Status400BadRequest, title: "Bad Request", detail: e.Message);
+        }
+        catch (Exception e)
+        {
+            return ToProblemDetailsResult(statusCode: StatusCodes.Status500InternalServerError, title: "Internal Server Error", detail: e.Message);
+        }
+    }
+
+    private async Task<IActionResult> ExchangePasswordAsync(OpenIddictRequest request, CancellationToken cancellationToken)
+    {
+        var user = await identityService.ValidateUserAsync(
+            request.Username ?? string.Empty,
+            request.Password ?? string.Empty,
+            cancellationToken);
+        if (user is null)
+        {
+            return Forbid(
+                new AuthenticationProperties(new Dictionary<string, string?>
+                {
+                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
+                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "Invalid username/password."
+                }),
+                OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
 
-        if (request.IsRefreshTokenGrantType())
+        var principal = identityService.CreateClaimsPrincipal(user, request.GetScopes());
+        principal.SetScopes(request.GetScopes());
+
+        foreach (var claim in principal.Claims) claim.SetDestinations(GetDestinations(claim, principal));
+
+        return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+    }
+
+    private async Task<IActionResult> ExchangeRefreshTokenAsync(OpenIddictRequest request, CancellationToken cancellationToken)
+    {
+        var authenticateResult =
+            await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+
+        var principal = authenticateResult.Principal;
+        if (principal is null)
         {
-            var authenticateResult =
-                await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-
-            var principal = authenticateResult.Principal;
-            if (principal is null)
-            {
-                return Forbid(
-                    new AuthenticationProperties(new Dictionary<string, string?>
-                    {
-                        [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
-                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "Invalid refresh token."
-                    }),
-                    OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-            }
-
-            // Доп. валидация: пользователь должен всё ещё существовать.
-            var subject = principal.GetClaim(OpenIddictConstants.Claims.Subject);
-            if (!Guid.TryParse(subject, out var userId))
-            {
-                return Forbid(
-                    new AuthenticationProperties(new Dictionary<string, string?>
-                    {
-                        [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
-                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "Invalid refresh token subject."
-                    }),
-                    OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-            }
-
-            var user = await identityService.GetUserByIdAsync(userId, cancellationToken);
-            if (user is null)
-            {
-                return Forbid(
-                    new AuthenticationProperties(new Dictionary<string, string?>
-                    {
-                        [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
-                        [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The refresh token is no longer valid."
-                    }),
-                    OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-            }
-
-            // В refresh-запросе scopes обычно не передают: берём те, что были выданы ранее.
-            var scopes = principal.GetScopes();
-            principal = identityService.CreateClaimsPrincipal(user, scopes);
-            principal.SetScopes(scopes);
-
-            foreach (var claim in principal.Claims) claim.SetDestinations(GetDestinations(claim, principal));
-
-            return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+            return Forbid(
+                new AuthenticationProperties(new Dictionary<string, string?>
+                {
+                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
+                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "Invalid refresh token."
+                }),
+                OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
 
-        return Forbid(
-            new AuthenticationProperties(new Dictionary<string, string?>
-            {
-                [OpenIddictServerAspNetCoreConstants.Properties.Error] =
-                    OpenIddictConstants.Errors.UnsupportedGrantType,
-                [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
-                    "The specified grant type is not supported."
-            }),
-            OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+        var subject = principal.GetClaim(OpenIddictConstants.Claims.Subject);
+        if (!Guid.TryParse(subject, out var userId))
+        {
+            return Forbid(
+                new AuthenticationProperties(new Dictionary<string, string?>
+                {
+                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
+                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "Invalid refresh token subject."
+                }),
+                OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+        }
+
+        var user = await identityService.GetUserByIdAsync(userId, cancellationToken);
+        if (user is null)
+        {
+            return Forbid(
+                new AuthenticationProperties(new Dictionary<string, string?>
+                {
+                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidGrant,
+                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The refresh token is no longer valid."
+                }),
+                OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+        }
+
+        var scopes = principal.GetScopes();
+        principal = identityService.CreateClaimsPrincipal(user, scopes);
+        principal.SetScopes(scopes);
+
+        foreach (var claim in principal.Claims) claim.SetDestinations(GetDestinations(claim, principal));
+
+        return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+    }
+
+    private ObjectResult ToProblemDetailsResult(int statusCode, string title, string detail)
+    {
+        var problem = new ProblemDetails
+        {
+            Type = $"https://httpstatuses.com/{statusCode}",
+            Title = title,
+            Status = statusCode,
+            Detail = detail,
+            Instance = HttpContext.Request.Path
+        };
+
+        problem.Extensions["traceId"] = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+
+        return new ObjectResult(problem)
+        {
+            StatusCode = statusCode,
+            ContentTypes = { "application/problem+json" }
+        };
     }
 
     private static IEnumerable<string> GetDestinations(Claim claim, ClaimsPrincipal principal)

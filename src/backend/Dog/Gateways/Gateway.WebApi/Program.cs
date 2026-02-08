@@ -1,4 +1,5 @@
 using Gateway.Api;
+using Gateway.Api.Filters;
 using Users.Api;
 using Environments = Shared.Environments;
 using Microsoft.AspNetCore.OpenApi;
@@ -11,7 +12,10 @@ builder.Services.AddOpenApi(options =>
 });
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<RemoteProblemDetailsExceptionFilter>();
+});
 
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));

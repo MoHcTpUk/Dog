@@ -24,6 +24,9 @@ public class VerifyRegistrationRequestHandler(
         var registrationRequest = await registrationRequestRepository.AsQueryable()
             .FirstOrDefaultAsync(item => item.Id == request.Id, cancellationToken);
 
+        if (registrationRequest is null || !registrationRequest.ActivationCode.Equals(request.VerificationCode))
+            throw new Exception("Invalid verification code");
+        
         var username = registrationRequest.Email.Split('@')[0].ToLowerInvariant();
 
         var password = GenerateTemporaryPassword();

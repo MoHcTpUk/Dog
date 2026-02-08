@@ -182,12 +182,91 @@ public static class OpenApiConfiguration
                             },
                             ["400"] = new OpenApiResponse
                             {
-                                Description = "Bad request (invalid credentials or parameters)"
+                                Description = "Bad request (invalid credentials or parameters)",
+                                Content = new Dictionary<string, OpenApiMediaType>
+                                {
+                                    ["application/problem+json"] = new()
+                                    {
+                                        Schema = Rfc7807SchemaRef()
+                                    }
+                                }
+                            },
+                            ["500"] = new OpenApiResponse
+                            {
+                                Description = "Internal server error",
+                                Content = new Dictionary<string, OpenApiMediaType>
+                                {
+                                    ["application/problem+json"] = new()
+                                    {
+                                        Schema = Rfc7807SchemaRef()
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
         };
+
+        // ── Register Rfc7807ProblemDetails schema ─────────────────────
+        document.Components.Schemas ??= new Dictionary<string, OpenApiSchema>();
+        document.Components.Schemas.TryAdd("Rfc7807ProblemDetails", new OpenApiSchema
+        {
+            Type = "object",
+            Properties = new Dictionary<string, OpenApiSchema>
+            {
+                { "type", new OpenApiSchema { Type = "string", Nullable = true } },
+                { "title", new OpenApiSchema { Type = "string", Nullable = true } },
+                { "status", new OpenApiSchema { Type = "integer", Format = "int32", Nullable = true } },
+                { "detail", new OpenApiSchema { Type = "string", Nullable = true } },
+                { "instance", new OpenApiSchema { Type = "string", Nullable = true } },
+                {
+                    "errors", new OpenApiSchema
+                    {
+                        Type = "object",
+                        Nullable = true,
+                        AdditionalProperties = new OpenApiSchema
+                        {
+                            Type = "array",
+                            Items = new OpenApiSchema { Type = "string" }
+                        }
+                    }
+                },
+                {
+                    "extensions", new OpenApiSchema
+                    {
+                        Type = "object",
+                        Nullable = true,
+                        AdditionalProperties = new OpenApiSchema()
+                    }
+                }
+            }
+        });
+
+        // ── Add 500 problem+json response to every operation ─────────
+        foreach (var pathItem in document.Paths.Values)
+        foreach (var operation in pathItem.Operations.Values)
+        {
+            operation.Responses.TryAdd("500", new OpenApiResponse
+            {
+                Description = "Internal server error",
+                Content = new Dictionary<string, OpenApiMediaType>
+                {
+                    ["application/problem+json"] = new()
+                    {
+                        Schema = Rfc7807SchemaRef()
+                    }
+                }
+            });
+        }
     }
+
+    private static OpenApiSchema Rfc7807SchemaRef() => new()
+    {
+        Reference = new OpenApiReference
+        {
+            Type = ReferenceType.Schema,
+            Id = "Rfc7807ProblemDetails"
+        }
+    };
 }

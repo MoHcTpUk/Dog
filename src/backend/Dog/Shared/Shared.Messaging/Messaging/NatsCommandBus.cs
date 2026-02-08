@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using MediatR;
@@ -39,22 +40,36 @@ public class NatsCommandBus : ICommandBus
         };
 
         var payload = JsonSerializer.SerializeToUtf8Bytes(envelope, _jsonOpts);
-        try
+
+        var msg = await _connection.RequestAsync($"{subject}.default", payload, TimeoutMs);
+
+        var json = Encoding.UTF8.GetString(msg.Data);
+
+        var responseEnvelope = JsonSerializer.Deserialize<NatsResponseEnvelope>(json, _jsonOpts);
+
+        switch (responseEnvelope)
         {
-            var msg = await _connection.RequestAsync($"{subject}.default", payload, TimeoutMs);
-
-            var json = Encoding.UTF8.GetString(msg.Data);
-            var resultEnvelope = JsonSerializer.Deserialize<TResult>(json, _jsonOpts);
-
-            if (resultEnvelope == null) throw new Exception("No response");
-
-            return resultEnvelope;
+            case { Ok: false, Problem: null }:
+                throw new Exception("No response");
+            case null:
+                throw new Exception("Response envelope is null");
         }
-        catch (Exception e)
-        {
-            Console.WriteLine($"Requested stream: {subject} Error: {e}");
-            throw;
-        }
+
+        if (!responseEnvelope.Ok)
+            throw new RemoteProblemDetailsException(responseEnvelope.Problem
+                                                    ?? new Rfc7807ProblemDetails
+                                                    {
+                                                        Status = 500,
+                                                        Title = "Remote error",
+                                                        Detail =
+                                                            "Remote service returned an unknown error shape."
+                                                    });
+
+        var result = responseEnvelope.Data.HasValue
+            ? responseEnvelope.Data.Value.Deserialize<TResult>(_jsonOpts)
+            : default;
+
+        return result ?? throw new Exception("No response");
     }
 
 
@@ -89,33 +104,91 @@ public class NatsCommandBus : ICommandBus
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                throw;
+                // Do not rethrow: handler errors must not crash the subscription loop.
             }
         });
     }
 
     private async Task Handle(MsgHandlerEventArgs args)
     {
-        using var scope = _serviceProvider.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var hasReply = !string.IsNullOrWhiteSpace(args.Message.Reply);
+        try
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-        var json = Encoding.UTF8.GetString(args.Message.Data);
-        var envelope = JsonSerializer.Deserialize<RawEnvelope>(json, _jsonOpts);
+            var json = Encoding.UTF8.GetString(args.Message.Data);
+            var envelope = JsonSerializer.Deserialize<RawEnvelope>(json, _jsonOpts);
 
-        if (envelope is null || !_commandTypes.TryGetValue(envelope.Type, out var commandType))
-            throw new Exception("Unknown command type");
+            if (envelope is null || !_commandTypes.TryGetValue(envelope.Type, out var commandType))
+                throw new InvalidOperationException("Unknown command type");
 
-        var command = envelope.Data.Deserialize(commandType, _jsonOpts);
+            var command = envelope.Data.Deserialize(commandType, _jsonOpts);
+            if (command is null)
+                throw new InvalidOperationException($"Failed to deserialize command of type {envelope.Type}");
 
-        if (command is null)
-            throw new Exception($"Failed to deserialize command of type {envelope.Type}");
+            var result = await mediator.Send(command);
 
-        var result = await mediator.Send(command);
+            if (!hasReply) return;
 
-        var resultJson = JsonSerializer.Serialize(result);
+            var response = NatsResponseEnvelope.Success(result, _jsonOpts);
+            var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(response, _jsonOpts));
+            _connection.Publish(args.Message.Reply, bytes);
+        }
+        catch (Exception ex)
+        {
+            if (!hasReply)
+            {
+                Console.WriteLine(ex);
+                return;
+            }
 
-        var bytes = Encoding.UTF8.GetBytes(resultJson);
+            var problem = CreateProblemDetails(ex, args.Message.Subject);
+            var response = NatsResponseEnvelope.Failure(problem);
+            var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(response, _jsonOpts));
+            _connection.Publish(args.Message.Reply, bytes);
+        }
+    }
 
-        _connection.Publish(args.Message.Reply, bytes);
+    private static Rfc7807ProblemDetails CreateProblemDetails(Exception exception, string? instance)
+    {
+        var ex = exception is AggregateException { InnerException: not null } agg ? agg.InnerException! : exception;
+
+        var status = ex switch
+        {
+            UnauthorizedAccessException => 401,
+            KeyNotFoundException => 404,
+            TimeoutException => 504,
+            JsonException => 400,
+            ArgumentException => 400,
+            InvalidOperationException ioe when ioe.Message.Contains("already exists",
+                StringComparison.OrdinalIgnoreCase) => 409,
+            InvalidOperationException => 400,
+            _ => 500
+        };
+
+        var traceId = Activity.Current?.Id ?? Guid.NewGuid().ToString("n");
+
+        return new Rfc7807ProblemDetails
+        {
+            Type = $"https://httpstatuses.com/{status}",
+            Title = status switch
+            {
+                400 => "Bad Request",
+                401 => "Unauthorized",
+                404 => "Not Found",
+                409 => "Conflict",
+                504 => "Gateway Timeout",
+                _ => "Internal Server Error"
+            },
+            Status = status,
+            Detail = ex.Message,
+            Instance = instance,
+            Extensions = new Dictionary<string, object?>
+            {
+                ["traceId"] = traceId,
+                ["exceptionType"] = ex.GetType().FullName
+            }
+        };
     }
 }
