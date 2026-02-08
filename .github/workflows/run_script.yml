@@ -21,7 +21,7 @@ jobs:
       - name: Add remote host to known_hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H dogappa.com >> ~/.ssh/known_hosts
+          ssh-keyscan -p 2222 -H dogappa.com >> ~/.ssh/known_hosts
 
       - name: Make scripts executable
         run: chmod +x ./scripts/publish_all.sh ./scripts/deploy_all_stage.sh
