@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useCallback, useMemo } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import { getDaysInMonth, getMonthsList } from "@shared/utils/date.utils";
 import { usePlatform } from "@shared/hooks/usePlatform";
 
@@ -50,6 +56,11 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     day: false,
     month: false,
     year: false,
+  });
+  const [scrollTops, setScrollTops] = useState<{ [key: string]: number }>({
+    day: 0,
+    month: 0,
+    year: 0,
   });
 
   const valueRef = useRef(value);
@@ -158,6 +169,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       if (isRecentering.current[type]) return;
       isUserScrollingRef.current[type] = true;
 
+      setScrollTops((prev) => ({ ...prev, [type]: element.scrollTop }));
+
       if (scrollTimeoutRefs.current[type]) {
         window.clearTimeout(scrollTimeoutRefs.current[type]!);
       }
@@ -195,7 +208,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       if (Math.abs(currentScrollTop - targetScrollTop) > 2) {
         element.scrollTo({
           top: targetScrollTop,
-          behavior: isInitializedRef.current ? "smooth" : "auto",
+          behavior: "auto",
         });
       }
     };
@@ -205,8 +218,20 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       scrollToValue("month");
       scrollToValue("year");
       isInitializedRef.current = true;
+      requestAnimationFrame(() => {
+        const newTops: { [key: string]: number } = {};
+        (["day", "month", "year"] as const).forEach((t) => {
+          const el = scrollRefs.current[t];
+          if (el) newTops[t] = el.scrollTop;
+        });
+        setScrollTops(newTops);
+      });
     } else {
       scrollToValue("day");
+      requestAnimationFrame(() => {
+        const el = scrollRefs.current["day"];
+        if (el) setScrollTops((prev) => ({ ...prev, day: el.scrollTop }));
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [daysInSelectedMonth]);
@@ -216,18 +241,9 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     items: (string | number)[],
     width: string,
   ) => {
-    const getCurrentValue = () => {
-      switch (type) {
-        case "day":
-          return value.day;
-        case "month":
-          return value.month;
-        case "year":
-          return value.year;
-      }
-    };
-    const currentValue = getCurrentValue();
     const inf = isInfinite(type);
+    const scrollTop = scrollTops[type] || 0;
+    const activeIndex = Math.round(scrollTop / ITEM_HEIGHT);
     const renderItems = inf
       ? Array.from(
           { length: items.length * REPEATS },
@@ -243,7 +259,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           ref={(el) => {
             scrollRefs.current[type] = el;
           }}
-          className="h-full overflow-y-scroll scrollbar-hide"
+          className="h-full overflow-y-scroll scrollbar-hide relative z-10"
           style={{
             scrollSnapType: "y proximity",
             WebkitOverflowScrolling: "touch",
@@ -253,22 +269,16 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         >
           {!isTop && <div className="h-28" />}
           {renderItems.map((item, index) => {
-            const realIndex = inf ? index % items.length : index;
-            let isActive = false;
-            if (type === "month") {
-              isActive = realIndex === currentValue - 1;
-            } else {
-              isActive = +item === +currentValue;
-            }
+            const isActivePosition = index === activeIndex;
             return (
               <div
                 key={`${type}-${index}`}
-                className="h-14 flex items-center justify-center relative z-20"
+                className="h-14 flex items-center justify-center relative"
                 style={{ scrollSnapAlign: isTop ? "start" : "center" }}
               >
                 <span
                   className={`${width} text-center text-base transition-all duration-100 font-['Golos_Text'] ${
-                    isActive
+                    isActivePosition
                       ? "font-semibold text-text-primary"
                       : "text-text-muted"
                   }`}
@@ -301,12 +311,12 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       </div>
       {isTop ? (
         <>
-          <div className="absolute top-0 left-0 right-0 h-14 bg-white rounded-2xl pointer-events-none z-10" />
+          <div className="absolute top-0 left-0 right-0 h-14 bg-white rounded-2xl pointer-events-none z-0" />
           <div className="absolute bottom-0 left-0 w-full h-14 bg-gradient-to-b from-zinc-100/0 to-zinc-100 pointer-events-none z-30" />
         </>
       ) : (
         <>
-          <div className="absolute top-1/2 left-0 right-0 h-14 -translate-y-1/2 bg-white rounded-2xl pointer-events-none z-10" />
+          <div className="absolute top-1/2 left-0 right-0 h-14 -translate-y-1/2 bg-white rounded-2xl pointer-events-none z-0" />
           <div className="absolute top-0 left-0 w-full h-14 bg-gradient-to-b from-zinc-100 to-zinc-100/0 pointer-events-none z-30" />
           <div className="absolute bottom-0 left-0 w-full h-14 bg-gradient-to-b from-zinc-100/0 to-zinc-100 pointer-events-none z-30" />
         </>
