@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { MainLayout } from '@app/layouts/MainLayout';
-import { Icon, Text, MenuItem, BottomDrawer, CenterModal, Button } from '@shared/ui';
-import { useAppStore } from '@shared/store/app.store';
+import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { MainLayout } from "@app/layouts/MainLayout";
+import {
+  Icon,
+  Text,
+  MenuItem,
+  BottomDrawer,
+  CenterModal,
+  Button,
+} from "@shared/ui";
+import { useAppStore } from "@shared/store/app.store";
 
 interface MenuItemConfig {
   labelKey: string;
@@ -19,14 +26,15 @@ export const ProfilePage: React.FC = () => {
   const [isReferralDrawerOpen, setIsReferralDrawerOpen] = useState(false);
   const [isThankYouModalOpen, setIsThankYouModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] = useState(false);
+  const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] =
+    useState(false);
 
   const handleNotificationClick = () => {
-    history.push('/notifications');
+    history.push("/notifications");
   };
 
   const handleEditProfile = () => {
-    history.push('/profile/edit');
+    history.push("/profile/edit");
   };
 
   const handleReferralClick = () => {
@@ -35,9 +43,9 @@ export const ProfilePage: React.FC = () => {
 
   const handleShareLink = async () => {
     const shareData = {
-      title: 'Dog&Co',
-      text: 'Присоединяйся к Dog&Co и получи скидку!',
-      url: window.location.origin + '/invite',
+      title: "Dog&Co",
+      text: "Присоединяйся к Dog&Co и получи скидку!",
+      url: window.location.origin + "/invite",
     };
 
     try {
@@ -49,28 +57,33 @@ export const ProfilePage: React.FC = () => {
         }, 300);
       }
     } catch (err) {
-      if (err && typeof err === 'object' && 'name' in err && err.name !== 'AbortError') {
-        console.log('Error sharing:', err);
+      if (
+        err &&
+        typeof err === "object" &&
+        "name" in err &&
+        err.name !== "AbortError"
+      ) {
+        console.log("Error sharing:", err);
       }
     }
   };
 
   const menuItems: MenuItemConfig[] = [
-    { labelKey: 'My Promocodes', route: '/profile/promocodes' },
-    { labelKey: 'Feedback', route: '/profile/feedback' },
-    { labelKey: 'Notification Settings', route: '/profile/settings' },
-    { labelKey: 'Terms and Privacy', route: '/profile/terms' },
-    { labelKey: 'Location Access', route: '/profile/location' },
+    { labelKey: "My Promocodes", route: "/profile/promocodes" },
+    { labelKey: "Feedback", route: "/profile/feedback" },
+    { labelKey: "Notification Settings", route: "/profile/settings" },
+    { labelKey: "Terms and Privacy", route: "/profile/terms" },
+    { labelKey: "Location Access", route: "/profile/location" },
     {
-      labelKey: 'Log Out',
-      route: '/welcome',
-      action: () => setIsLogoutModalOpen(true)
+      labelKey: "Log Out",
+      route: "/welcome",
+      action: () => setIsLogoutModalOpen(true),
     },
     {
-      labelKey: 'Delete Account',
-      route: '/profile/delete',
-      action: () => setIsDeleteAccountModalOpen(true)
-    }
+      labelKey: "Delete Account",
+      route: "/profile/delete",
+      action: () => setIsDeleteAccountModalOpen(true),
+    },
   ];
 
   const handleMenuClick = (item: MenuItemConfig) => {
@@ -84,20 +97,20 @@ export const ProfilePage: React.FC = () => {
   const handleLogout = () => {
     logout();
     setIsLogoutModalOpen(false);
-    history.push('/welcome');
+    history.push("/welcome");
   };
 
   const handleDeleteAccount = () => {
-    console.log('Deleting account...');
+    console.log("Deleting account...");
     setIsDeleteAccountModalOpen(false);
   };
 
   return (
-    <MainLayout>
+    <MainLayout withFooter>
       <div className="self-stretch px-3 py-5 inline-flex flex-col justify-start items-start gap-8 w-full">
         <div className="self-stretch h-14 pl-2.5 inline-flex justify-between items-center">
           <Text variant="bold-24" color="primary" className="flex-1 leading-6">
-            {t('Profile')}
+            {t("Profile")}
           </Text>
           <div
             className="relative cursor-pointer"
@@ -123,17 +136,24 @@ export const ProfilePage: React.FC = () => {
             <div className="self-stretch inline-flex justify-start items-center gap-3.5">
               <img
                 className="size-12 rounded-xl object-cover"
-                src={currentDog?.avatar || 'https://placehold.co/50x50'}
-                alt={currentDog?.name || 'Dog'}
+                src={currentDog?.avatar || "https://placehold.co/50x50"}
+                alt={currentDog?.name || "Dog"}
               />
-              <div className="flex-1 pr-2.5 flex justify-start items-center gap-2.5 cursor-pointer" onClick={handleEditProfile}>
+              <div
+                className="flex-1 pr-2.5 flex justify-start items-center gap-2.5 cursor-pointer"
+                onClick={handleEditProfile}
+              >
                 <div className="flex-1 inline-flex flex-col justify-center items-start gap-[5px]">
                   <Text variant="semibold-18" color="primary">
-                    {currentDog?.name || t('Name')}
+                    {currentDog?.name || t("Name")}
                   </Text>
                   <div className="self-stretch flex flex-col justify-center items-start gap-[5px]">
-                    <Text variant="regular-14" color="muted" className="leading-4">
-                      {t('Owner')} {user?.firstName || ''}
+                    <Text
+                      variant="regular-14"
+                      color="muted"
+                      className="leading-4"
+                    >
+                      {t("Owner")} {user?.firstName || ""}
                     </Text>
                   </div>
                 </div>
@@ -151,17 +171,26 @@ export const ProfilePage: React.FC = () => {
             <div
               className="w-full h-[476px] left-0 top-[-50px] absolute bg-cover bg-center"
               style={{
-                backgroundImage: 'url(https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400)',
-                filter: 'brightness(0.7)'
+                backgroundImage:
+                  "url(https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400)",
+                filter: "brightness(0.7)",
               }}
             />
             <div className="self-stretch inline-flex justify-start items-start gap-2.5 relative z-10">
               <div className="flex-1 inline-flex flex-col justify-center items-start gap-2.5">
-                <Text variant="bold-24" color="white" className="self-stretch leading-6">
-                  {t('10% Discount at Dog&Co')}
+                <Text
+                  variant="bold-24"
+                  color="white"
+                  className="self-stretch leading-6"
+                >
+                  {t("10% Discount at Dog&Co")}
                 </Text>
-                <Text variant="medium-16" color="white" className="self-stretch">
-                  {t('Invite a friend to the app')}
+                <Text
+                  variant="medium-16"
+                  color="white"
+                  className="self-stretch"
+                >
+                  {t("Invite a friend to the app")}
                 </Text>
               </div>
               <div className="p-2 -rotate-90 bg-white rounded-full inline-flex flex-col justify-start items-start overflow-hidden">
@@ -192,22 +221,22 @@ export const ProfilePage: React.FC = () => {
           <div className="self-stretch p-5 bg-white rounded-3xl flex flex-col justify-center items-start gap-5">
             <div className="self-stretch inline-flex justify-start items-start gap-[5px]">
               <div className="flex-1 inline-flex flex-col justify-start items-start gap-[5px]">
-                <Text variant="extra-bold-28" color="primary" className="self-stretch leading-6">
+                <Text
+                  variant="extra-bold-28"
+                  color="primary"
+                  className="self-stretch leading-6"
+                >
                   Скидка 10% в магазине Dog&Co
                 </Text>
               </div>
             </div>
             <Text variant="regular-14" color="primary" className="self-stretch">
-              За друга, который зарегистрируется и заполнит инфо о своей собаке, вы получите промокод на скидку
+              За друга, который зарегистрируется и заполнит инфо о своей собаке,
+              вы получите промокод на скидку
             </Text>
           </div>
         </div>
-        <Button
-          variant="primary"
-          size="L"
-          fullWidth
-          onClick={handleShareLink}
-        >
+        <Button variant="primary" size="L" fullWidth onClick={handleShareLink}>
           Поделиться ссылкой
         </Button>
       </BottomDrawer>
@@ -222,7 +251,8 @@ export const ProfilePage: React.FC = () => {
               Спасибо, что делитесь!
             </Text>
             <Text variant="regular-14" color="muted">
-              Когда друг заполнит профиль собаки, промокод появится в разделе «Мои промокоды»
+              Когда друг заполнит профиль собаки, промокод появится в разделе
+              «Мои промокоды»
             </Text>
           </div>
           <Button

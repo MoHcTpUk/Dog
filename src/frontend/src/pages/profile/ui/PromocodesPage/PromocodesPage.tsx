@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { MainLayout } from '@app/layouts/MainLayout';
-import { Icon, Text, PromoCodeCard } from '@shared/ui';
+import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
+import { MainLayout } from "@app/layouts/MainLayout";
+import { Icon, Text, PromoCodeCard } from "@shared/ui";
 
 interface PromoCode {
   id: string;
@@ -17,7 +17,7 @@ export const PromocodesPage: React.FC = () => {
   const [notificationCount] = useState(2);
 
   const handleNotificationClick = () => {
-    history.push('/notifications');
+    history.push("/notifications");
   };
 
   const handleBack = () => {
@@ -26,25 +26,27 @@ export const PromocodesPage: React.FC = () => {
 
   const promoCodes: PromoCode[] = [
     {
-      id: '1',
-      title: 'Dog&CO',
-      discount: '10%',
-      validUntil: '13.06.25',
-      description: 'За приглашённого друга вы получили скидку 10% в Dog&Co. В Dog&Co вы найдёте игрушки и стильные аксессуары для собак',
-      code: 'Dog&COpromo134',
+      id: "1",
+      title: "Dog&CO",
+      discount: "10%",
+      validUntil: "13.06.25",
+      description:
+        "За приглашённого друга вы получили скидку 10% в Dog&Co. В Dog&Co вы найдёте игрушки и стильные аксессуары для собак",
+      code: "Dog&COpromo134",
     },
     {
-      id: '2',
-      title: '4 лапы',
-      discount: '5%',
-      validUntil: '13.06.25',
-      description: 'Ваш подарок за регистрацию – 5% скидка на первый заказ в магазин 4 лапы',
-      code: '4lapyandAppa',
+      id: "2",
+      title: "4 лапы",
+      discount: "5%",
+      validUntil: "13.06.25",
+      description:
+        "Ваш подарок за регистрацию – 5% скидка на первый заказ в магазин 4 лапы",
+      code: "4lapyandAppa",
     },
   ];
 
   return (
-    <MainLayout>
+    <MainLayout withFooter>
       <div className="self-stretch px-3 py-5 inline-flex flex-col justify-start items-start gap-8 w-full">
         <div className="self-stretch h-14 inline-flex justify-start items-center gap-3.5">
           <div

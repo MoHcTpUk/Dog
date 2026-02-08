@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { Icon, Text } from '@shared/ui';
-import { MainLayout } from '@app/layouts/MainLayout';
-import { mockNearbyDogs, NearbyDog } from '@shared/mocks/walks.mock';
+import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
+import { Icon, Text } from "@shared/ui";
+import { MainLayout } from "@app/layouts/MainLayout";
+import { mockNearbyDogs, NearbyDog } from "@shared/mocks/walks.mock";
 
 interface DogCardProps {
   dog: NearbyDog;
@@ -28,20 +28,22 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
         <div
           className="hide-scrollbar self-stretch flex justify-start items-start gap-1 overflow-x-auto"
           style={{
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch'
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+            WebkitOverflowScrolling: "touch",
           }}
         >
           {dog.photos.map((photo, index) => (
             <div
               key={index}
               className={`relative rounded-2xl overflow-hidden flex-shrink-0 ${
-                isSinglePhoto ? 'flex-1 h-60' : 'size-60'
+                isSinglePhoto ? "flex-1 h-60" : "size-60"
               }`}
             >
               <img
-                className={`${isSinglePhoto ? 'w-full' : 'size-60'} h-60 object-cover`}
+                className={`${
+                  isSinglePhoto ? "w-full" : "size-60"
+                } h-60 object-cover`}
                 src={photo}
                 alt={`${dog.name} ${index + 1}`}
               />
@@ -73,7 +75,7 @@ export const DogsPage: React.FC = () => {
   const [notificationCount] = useState(2);
 
   const handleNotificationClick = () => {
-    history.push('/notifications');
+    history.push("/notifications");
   };
 
   const handleDogClick = (dogId: string) => {
@@ -81,7 +83,7 @@ export const DogsPage: React.FC = () => {
   };
 
   return (
-    <MainLayout>
+    <MainLayout withFooter>
       <div className="px-3 py-5 flex flex-col justify-start items-start gap-8">
         <div className="self-stretch h-14 pl-2.5 inline-flex justify-between items-center">
           <Text variant="bold-24" color="primary" className="flex-1 leading-6">

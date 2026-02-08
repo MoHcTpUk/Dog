@@ -22,8 +22,8 @@ export const mockPlaces: Place[] = [
     workingHours: '10:00-22:00',
     description: 'Просторный ТЦ с зоной для собак на первом этаже',
     photos: [
-      'https://placehold.co/240x160/E8E8E8/666666?text=Mall+1',
-      'https://placehold.co/240x160/E8E8E8/666666?text=Mall+2',
+      'https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?w=240&h=160&fit=crop',
+      'https://images.unsplash.com/photo-1567958451986-2de427a4a0be?w=240&h=160&fit=crop',
     ],
     isFavorite: true,
   },
@@ -37,8 +37,8 @@ export const mockPlaces: Place[] = [
     workingHours: '09:00-23:00',
     description: 'Уютная кофейня с летней террасой, где рады питомцам',
     photos: [
-      'https://placehold.co/240x160/E8E8E8/666666?text=Cafe+1',
-      'https://placehold.co/240x160/E8E8E8/666666?text=Cafe+2',
+      'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=240&h=160&fit=crop',
+      'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=240&h=160&fit=crop',
     ],
     isFavorite: false,
   },
@@ -51,8 +51,8 @@ export const mockPlaces: Place[] = [
     address: 'Крымский Вал 9',
     description: 'Большой парк с выделенной зоной для выгула собак',
     photos: [
-      'https://placehold.co/240x160/E8E8E8/666666?text=Park+1',
-      'https://placehold.co/240x160/E8E8E8/666666?text=Park+2',
+      'https://images.unsplash.com/photo-1568393691622-c7ba131d63b4?w=240&h=160&fit=crop',
+      'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=240&h=160&fit=crop',
     ],
     isFavorite: true,
   },

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { MainLayout } from '@app/layouts/MainLayout';
-import { Icon, Text, Switch } from '@shared/ui';
+import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
+import { MainLayout } from "@app/layouts/MainLayout";
+import { Icon, Text, Switch } from "@shared/ui";
 
 interface NotificationSetting {
   id: string;
@@ -15,15 +15,15 @@ export const SettingsPage: React.FC = () => {
   const [allNotificationsEnabled, setAllNotificationsEnabled] = useState(true);
 
   const [settings, setSettings] = useState<NotificationSetting[]>([
-    { id: 'walk-invites', label: 'Приглашения на прогулки', enabled: true },
-    { id: 'walks-nearby', label: 'Прогулки рядом', enabled: true },
-    { id: 'walk-reminders', label: 'Напоминания о прогулках', enabled: true },
-    { id: 'team-updates', label: 'Обновления от команды', enabled: false },
-    { id: 'new-places', label: 'Новое дог-френдли место', enabled: true },
+    { id: "walk-invites", label: "Приглашения на прогулки", enabled: true },
+    { id: "walks-nearby", label: "Прогулки рядом", enabled: true },
+    { id: "walk-reminders", label: "Напоминания о прогулках", enabled: true },
+    { id: "team-updates", label: "Обновления от команды", enabled: false },
+    { id: "new-places", label: "Новое дог-френдли место", enabled: true },
   ]);
 
   const handleNotificationClick = () => {
-    history.push('/notifications');
+    history.push("/notifications");
   };
 
   const handleBack = () => {
@@ -34,8 +34,8 @@ export const SettingsPage: React.FC = () => {
     if (!allNotificationsEnabled) return;
     setSettings((prev) =>
       prev.map((setting) =>
-        setting.id === id ? { ...setting, enabled: !setting.enabled } : setting
-      )
+        setting.id === id ? { ...setting, enabled: !setting.enabled } : setting,
+      ),
     );
   };
 
@@ -44,7 +44,7 @@ export const SettingsPage: React.FC = () => {
   };
 
   return (
-    <MainLayout>
+    <MainLayout withFooter>
       <div className="self-stretch px-3 py-5 inline-flex flex-col justify-start items-start gap-8 w-full">
         <div className="self-stretch h-14 inline-flex justify-start items-center gap-3.5">
           <div
@@ -90,8 +90,8 @@ export const SettingsPage: React.FC = () => {
             </div>
             <Text variant="regular-14" color="muted" className="leading-4">
               {allNotificationsEnabled
-                ? 'Вы получаете все уведомления'
-                : 'Уведомления отключены'}
+                ? "Вы получаете все уведомления"
+                : "Уведомления отключены"}
             </Text>
           </div>
 
@@ -104,7 +104,7 @@ export const SettingsPage: React.FC = () => {
                 <div className="self-stretch inline-flex justify-start items-center gap-3.5">
                   <Text
                     variant="medium-16"
-                    color={allNotificationsEnabled ? 'primary' : 'muted'}
+                    color={allNotificationsEnabled ? "primary" : "muted"}
                     className="flex-1"
                   >
                     {setting.label}

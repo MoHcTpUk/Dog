@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { MainLayout } from '@app/layouts/MainLayout';
-import { Icon, Text } from '@shared/ui';
+import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
+import { MainLayout } from "@app/layouts/MainLayout";
+import { Icon, Text } from "@shared/ui";
 
 interface Document {
   id: string;
@@ -14,7 +14,7 @@ export const TermsPage: React.FC = () => {
   const [notificationCount] = useState(2);
 
   const handleNotificationClick = () => {
-    history.push('/notifications');
+    history.push("/notifications");
   };
 
   const handleBack = () => {
@@ -22,17 +22,17 @@ export const TermsPage: React.FC = () => {
   };
 
   const documents: Document[] = [
-    { id: 'privacy', title: 'Политика конфиденциальности' },
-    { id: 'terms', title: 'Пользовательское соглашение' },
-    { id: 'license', title: 'Лицензионное соглашение' },
+    { id: "privacy", title: "Политика конфиденциальности" },
+    { id: "terms", title: "Пользовательское соглашение" },
+    { id: "license", title: "Лицензионное соглашение" },
   ];
 
   const handleDocumentClick = (doc: Document) => {
-    console.log('Open document:', doc.id);
+    console.log("Open document:", doc.id);
   };
 
   return (
-    <MainLayout>
+    <MainLayout withFooter>
       <div className="self-stretch px-3 py-5 inline-flex flex-col justify-start items-start gap-8 w-full">
         <div className="self-stretch h-14 inline-flex justify-start items-center gap-3.5">
           <div

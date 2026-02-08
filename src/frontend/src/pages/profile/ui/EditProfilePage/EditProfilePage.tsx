@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { MainLayout } from '@app/layouts/MainLayout';
-import { Icon, Text } from '@shared/ui';
-import { DogEditForm } from '@features/profile/ui/DogEditForm';
-import { OwnerEditForm } from '@features/profile/ui/OwnerEditForm';
-import { ProfileTabSwitcher, ProfileTab } from '@widgets/ProfileTabSwitcher';
+import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
+import { MainLayout } from "@app/layouts/MainLayout";
+import { Icon, Text } from "@shared/ui";
+import { DogEditForm } from "@features/profile/ui/DogEditForm";
+import { OwnerEditForm } from "@features/profile/ui/OwnerEditForm";
+import { ProfileTabSwitcher, ProfileTab } from "@widgets/ProfileTabSwitcher";
 
 interface DogData {
   photos?: string[];
@@ -39,11 +39,11 @@ interface OwnerData {
 
 export const EditProfilePage: React.FC = () => {
   const history = useHistory();
-  const [activeTab, setActiveTab] = useState<ProfileTab>('dog');
+  const [activeTab, setActiveTab] = useState<ProfileTab>("dog");
   const [notificationCount] = useState(2);
 
   const handleNotificationClick = () => {
-    history.push('/notifications');
+    history.push("/notifications");
   };
 
   const handleBack = () => {
@@ -51,17 +51,17 @@ export const EditProfilePage: React.FC = () => {
   };
 
   const handleSaveDog = (data: DogData) => {
-    console.log('Save dog profile:', data);
+    console.log("Save dog profile:", data);
     history.goBack();
   };
 
   const handleSaveOwner = (data: OwnerData) => {
-    console.log('Save owner profile:', data);
+    console.log("Save owner profile:", data);
     history.goBack();
   };
 
   return (
-    <MainLayout>
+    <MainLayout withFooter>
       <div className="self-stretch px-3 py-5 inline-flex flex-col justify-start items-start gap-8 w-full">
         <div className="self-stretch h-14 inline-flex justify-between items-center">
           <div
@@ -97,14 +97,18 @@ export const EditProfilePage: React.FC = () => {
         <div className="self-stretch relative">
           <div
             className={`transition-opacity duration-300 ${
-              activeTab === 'dog' ? 'opacity-100' : 'opacity-0 pointer-events-none absolute top-0 left-0 right-0'
+              activeTab === "dog"
+                ? "opacity-100"
+                : "opacity-0 pointer-events-none absolute top-0 left-0 right-0"
             }`}
           >
             <DogEditForm onSave={handleSaveDog} />
           </div>
           <div
             className={`transition-opacity duration-300 ${
-              activeTab === 'owner' ? 'opacity-100' : 'opacity-0 pointer-events-none absolute top-0 left-0 right-0'
+              activeTab === "owner"
+                ? "opacity-100"
+                : "opacity-0 pointer-events-none absolute top-0 left-0 right-0"
             }`}
           >
             <OwnerEditForm onSave={handleSaveOwner} />

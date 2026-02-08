@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useHistory, useLocation } from "react-router-dom";
-import { WalkCard, NewWalkButton, Walk, PlaceCard, NewPlaceButton, PlaceCategory } from "@features/home";
+import {
+  WalkCard,
+  NewWalkButton,
+  Walk,
+  PlaceCard,
+  NewPlaceButton,
+  PlaceCategory,
+} from "@features/home";
 import { Toggle, Icon, Tag, IconName } from "@shared/ui";
 import { Text } from "@shared/ui/Text";
 import { MainLayout } from "@app/layouts/MainLayout";
@@ -87,7 +94,10 @@ const mockMyWalks: Walk[] = [
     address: "Центральная 44",
     kind: "own",
     joinedDogs: [
-      { id: "my-d1", avatar: "https://placehold.co/40x40/FF6B9D/white?text=M1" },
+      {
+        id: "my-d1",
+        avatar: "https://placehold.co/40x40/FF6B9D/white?text=M1",
+      },
     ],
   },
   {
@@ -122,10 +132,12 @@ export const HomePage: React.FC = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const [activeTab, setActiveTab] = useState<TabValue>(
-    (searchParams.get("tab") as TabValue) || "walks"
+    (searchParams.get("tab") as TabValue) || "walks",
   );
   const [notificationCount] = useState(2);
-  const [selectedCategory, setSelectedCategory] = useState<PlaceCategory | 'favorites' | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<
+    PlaceCategory | "favorites" | null
+  >(null);
 
   const touchStartX = useRef<number>(0);
   const touchStartY = useRef<number>(0);
@@ -137,7 +149,7 @@ export const HomePage: React.FC = () => {
     const currentState = history.location.state;
     history.replace({
       search: `?tab=${activeTab}`,
-      state: currentState
+      state: currentState,
     });
   }, [activeTab, history]);
 
@@ -149,7 +161,7 @@ export const HomePage: React.FC = () => {
     // Передаём background без query параметров
     const cleanLocation = {
       ...location,
-      search: '',
+      search: "",
     };
     history.push(`/walk/${walkId}`, { background: cleanLocation });
   };
@@ -158,12 +170,12 @@ export const HomePage: React.FC = () => {
     // Передаём background без query параметров
     const cleanLocation = {
       ...location,
-      search: '',
+      search: "",
     };
     history.push(`/place/${placeId}`, { background: cleanLocation });
   };
 
-  const handleCategoryClick = (category: PlaceCategory | 'favorites') => {
+  const handleCategoryClick = (category: PlaceCategory | "favorites") => {
     setSelectedCategory(selectedCategory === category ? null : category);
   };
 
@@ -178,7 +190,7 @@ export const HomePage: React.FC = () => {
     const isNearLeftEdge = touch.clientX < EDGE_THRESHOLD;
 
     // Если свайп начинается с левого края или открыто модальное окно - не обрабатываем
-    const isModalOpen = document.querySelector('ion-modal.show-modal') !== null;
+    const isModalOpen = document.querySelector("ion-modal.show-modal") !== null;
     if (isNearLeftEdge || isModalOpen) {
       touchStartX.current = -1; // Маркер, что не нужно обрабатывать этот touch
     }
@@ -192,7 +204,11 @@ export const HomePage: React.FC = () => {
     const deltaX = touch.clientX - touchStartX.current;
     const deltaY = touch.clientY - touchStartY.current;
 
-    if (!isHorizontalSwipe && Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+    if (
+      !isHorizontalSwipe &&
+      Math.abs(deltaX) > Math.abs(deltaY) &&
+      Math.abs(deltaX) > 10
+    ) {
       setIsHorizontalSwipe(true);
     }
 
@@ -221,7 +237,10 @@ export const HomePage: React.FC = () => {
 
     const SWIPE_THRESHOLD = 80;
 
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
+    if (
+      Math.abs(deltaX) > Math.abs(deltaY) &&
+      Math.abs(deltaX) > SWIPE_THRESHOLD
+    ) {
       if (deltaX > 0 && activeTab === "places") {
         setActiveTab("walks");
       } else if (deltaX < 0 && activeTab === "walks") {
@@ -234,13 +253,13 @@ export const HomePage: React.FC = () => {
   };
 
   const filteredPlaces = selectedCategory
-    ? selectedCategory === 'favorites'
+    ? selectedCategory === "favorites"
       ? mockPlaces.filter((p) => p.isFavorite)
       : mockPlaces.filter((p) => p.category === selectedCategory)
     : mockPlaces;
 
   return (
-    <MainLayout>
+    <MainLayout withFooter>
       <div className="px-3 py-5 flex flex-col justify-start items-start gap-8">
         <div className="self-stretch h-14 flex justify-between items-center">
           <Toggle
@@ -275,14 +294,20 @@ export const HomePage: React.FC = () => {
             ref={contentRef}
             className="flex gap-5"
             style={{
-              transform: `translateX(calc(${activeTab === "walks" ? '0px' : 'calc(-100vw + 4px)'} + ${swipeOffset}px))`,
-              transition: swipeOffset === 0 ? 'transform 0.3s ease-out' : 'none'
+              transform: `translateX(calc(${
+                activeTab === "walks" ? "0px" : "calc(-100vw + 4px)"
+              } + ${swipeOffset}px))`,
+              transition:
+                swipeOffset === 0 ? "transform 0.3s ease-out" : "none",
             }}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <div className="flex-shrink-0 flex flex-col justify-start items-center gap-10" style={{ width: 'calc(100vw - 24px)' }}>
+            <div
+              className="flex-shrink-0 flex flex-col justify-start items-center gap-10"
+              style={{ width: "calc(100vw - 24px)" }}
+            >
               <NewWalkButton />
 
               {mockMyWalks.length > 0 && (
@@ -298,7 +323,11 @@ export const HomePage: React.FC = () => {
                   </div>
                   <div className="self-stretch flex flex-col justify-start items-start gap-1">
                     {mockMyWalks.map((walk) => (
-                      <WalkCard key={walk.id} walk={walk} onClick={handleWalkClick} />
+                      <WalkCard
+                        key={walk.id}
+                        walk={walk}
+                        onClick={handleWalkClick}
+                      />
                     ))}
                   </div>
                 </div>
@@ -316,13 +345,20 @@ export const HomePage: React.FC = () => {
                 </div>
                 <div className="self-stretch flex flex-col justify-start items-start gap-1">
                   {mockWalks.map((walk) => (
-                    <WalkCard key={walk.id} walk={walk} onClick={handleWalkClick} />
+                    <WalkCard
+                      key={walk.id}
+                      walk={walk}
+                      onClick={handleWalkClick}
+                    />
                   ))}
                 </div>
               </div>
             </div>
 
-            <div className="flex-shrink-0 flex flex-col justify-start items-center gap-10" style={{ width: 'calc(100vw - 24px)' }}>
+            <div
+              className="flex-shrink-0 flex flex-col justify-start items-center gap-10"
+              style={{ width: "calc(100vw - 24px)" }}
+            >
               <NewPlaceButton />
 
               <div className="self-stretch flex flex-col justify-start items-center gap-5">
@@ -343,7 +379,11 @@ export const HomePage: React.FC = () => {
                       size="small"
                       selected={selectedCategory === cat.value}
                       onClick={() => handleCategoryClick(cat.value)}
-                      icon={cat.icon ? <Icon name={cat.icon as IconName} size={16} /> : undefined}
+                      icon={
+                        cat.icon ? (
+                          <Icon name={cat.icon as IconName} size={16} />
+                        ) : undefined
+                      }
                       className="flex-shrink-0"
                     >
                       {cat.label}
@@ -353,7 +393,11 @@ export const HomePage: React.FC = () => {
 
                 <div className="self-stretch flex flex-col justify-start items-start gap-1">
                   {filteredPlaces.map((place) => (
-                    <PlaceCard key={place.id} place={place} onClick={handlePlaceClick} />
+                    <PlaceCard
+                      key={place.id}
+                      place={place}
+                      onClick={handlePlaceClick}
+                    />
                   ))}
                 </div>
               </div>

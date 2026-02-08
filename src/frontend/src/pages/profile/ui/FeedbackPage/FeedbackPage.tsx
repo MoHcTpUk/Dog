@@ -1,18 +1,18 @@
-import React, { useState, useRef } from 'react';
-import { useHistory } from 'react-router-dom';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { MainLayout } from '@app/layouts/MainLayout';
-import { Icon, Text, Textarea, Button } from '@shared/ui';
+import React, { useState, useRef } from "react";
+import { useHistory } from "react-router-dom";
+import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { MainLayout } from "@app/layouts/MainLayout";
+import { Icon, Text, Textarea, Button } from "@shared/ui";
 
 export const FeedbackPage: React.FC = () => {
   const history = useHistory();
   const [notificationCount] = useState(2);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [screenshots, setScreenshots] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleNotificationClick = () => {
-    history.push('/notifications');
+    history.push("/notifications");
   };
 
   const handleBack = () => {
@@ -32,7 +32,7 @@ export const FeedbackPage: React.FC = () => {
         setScreenshots([...screenshots, image.dataUrl]);
       }
     } catch (error) {
-      console.error('Camera not available, falling back to file input:', error);
+      console.error("Camera not available, falling back to file input:", error);
       if (fileInputRef.current) {
         fileInputRef.current.click();
       }
@@ -51,7 +51,7 @@ export const FeedbackPage: React.FC = () => {
         }
       };
       reader.readAsDataURL(file);
-      event.target.value = '';
+      event.target.value = "";
     }
   };
 
@@ -60,11 +60,11 @@ export const FeedbackPage: React.FC = () => {
   };
 
   const handleSubmit = () => {
-    console.log('Feedback:', { message, screenshots });
+    console.log("Feedback:", { message, screenshots });
   };
 
   return (
-    <MainLayout>
+    <MainLayout withFooter>
       <div className="self-stretch flex flex-col justify-start items-start w-full">
         <div className="self-stretch px-3 py-5 flex flex-col justify-start items-start gap-8">
           <div className="self-stretch h-14 inline-flex justify-start items-center gap-3.5">
@@ -76,7 +76,11 @@ export const FeedbackPage: React.FC = () => {
                 <Icon name="arrow-left" size={24} />
               </div>
             </div>
-            <Text variant="bold-24" color="primary" className="flex-1 leading-6">
+            <Text
+              variant="bold-24"
+              color="primary"
+              className="flex-1 leading-6"
+            >
               Обратная связь
             </Text>
             <div
@@ -101,14 +105,23 @@ export const FeedbackPage: React.FC = () => {
 
         <div className="self-stretch p-5 inline-flex flex-col justify-start items-start gap-8 w-full">
           <div className="self-stretch p-5 bg-zinc-100 rounded-2xl outline outline-1 outline-offset-[-1px] outline-slate-200 inline-flex justify-start items-center gap-3">
-            <Text variant="regular-16" color="primary" className="flex-1 leading-5">
-              Если что-то не работает, непонятно или если есть идея, как сделать лучше
+            <Text
+              variant="regular-16"
+              color="primary"
+              className="flex-1 leading-5"
+            >
+              Если что-то не работает, непонятно или если есть идея, как сделать
+              лучше
             </Text>
           </div>
 
           <div className="self-stretch flex flex-col justify-start items-start gap-8">
             <div className="self-stretch flex flex-col justify-start items-center gap-3.5">
-              <Text variant="medium-16" color="primary" className="self-stretch">
+              <Text
+                variant="medium-16"
+                color="primary"
+                className="self-stretch"
+              >
                 Напишите команде
               </Text>
               <div className="self-stretch h-28 p-5 bg-white rounded-2xl flex flex-col justify-start items-center gap-5 overflow-hidden">
@@ -123,7 +136,11 @@ export const FeedbackPage: React.FC = () => {
             </div>
 
             <div className="self-stretch flex flex-col justify-start items-start gap-3.5">
-              <Text variant="medium-16" color="primary" className="self-stretch">
+              <Text
+                variant="medium-16"
+                color="primary"
+                className="self-stretch"
+              >
                 Добавьте скрин
               </Text>
               <div className="self-stretch inline-flex justify-start items-start gap-1 flex-wrap">
