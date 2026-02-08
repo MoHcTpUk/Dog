@@ -7,43 +7,75 @@ npm install
 npm run dev
 ```
 
-### Docker Deployment Scripts
+### Scripts (build / deploy)
 
-All scripts are located in the `scripts/` directory. Run them from the scripts folder:
+Most scripts in `scripts/` must be run from that folder:
+
 ```bash
 cd scripts
-bash <script-name>.sh
+bash <script>.sh [args]
 ```
 
-#### 🚀 Full Deployment Scripts
+#### Build (local images, `--load`)
 
-| Script | Description |
-|--------|-------------|
-| `redeploy_all_local.sh` | **Complete redeploy**: removes all services, rebuilds all containers, and deploys everything |
-| `deploy_all_local.sh` | Deploys all services (management, infrastructure, app) without rebuilding containers |
-| `remove_all_local.sh` | Removes all Docker stacks, leaves swarm, and cleans up volumes |
+| Script | What it does |
+|--------|--------------|
+| `build_all.sh [platform]` | Builds frontend + backend + landing + telegram bot in parallel |
+| `build_backend.sh [platform]` | Builds: Gateway, Users, Identity, Identity.WebApi |
+| `build_frontend.sh [platform]` | Builds frontend image |
+| `build_landing.sh [platform]` | Builds landing image |
+| `build_telegram_bot.sh [platform]` | Builds telegram-bot image |
 
-#### 🔨 Build Scripts
+`platform` defaults to your CPU (`linux/amd64` or `linux/arm64`).
 
-| Script | Description |
-|--------|-------------|
-| `build_all_local.sh` | Builds all containers: frontend, backend (gateway + users), and landing |
-| `build_backend.sh` | Builds backend services (gateway and users service) |
-| `build_frontend.sh` | Builds frontend container |
-| `build_landing.sh` | Builds landing page container |
+#### Publish (push to GHCR)
 
-#### ♻️ Update Scripts
+| Script | What it does |
+|--------|--------------|
+| `publish_all.sh [platforms]` | Builds & pushes all images to GitHub Container Registry |
 
-| Script | Description |
-|--------|-------------|
-| `update_backend.sh` | Rebuilds backend and redeploys only the app stack |
-| `deploy_app_local.sh` | Redeploys only the app stack (without infrastructure) |
+`platforms` defaults to `linux/amd64`. You can pass a comma-separated list, e.g. `linux/amd64,linux/arm64`.
 
-#### 📦 Registry Scripts
+#### Local helpers
 
-| Script | Description |
-|--------|-------------|
-| `publish_all.sh` | Publishes all built containers to the GitHub Container Registry |
+| Script | What it does |
+|--------|--------------|
+| `create_local_domain.sh` | Adds `*.dogappa.local` entries into `/etc/hosts` (Linux/macOS/WSL, needs `sudo`) |
+| `ios_dev.sh <cmd>` | iOS dev helper for Capacitor (`open`, `sync`, `run`, ...) — edit device UDID inside |
+
+#### Deploy (Docker Swarm)
+
+Local deploy scripts live in `deploy/`:
+
+| Script | What it does |
+|--------|--------------|
+| `deploy/start_local.sh` | Initializes swarm (if needed) and deploys `management` + `infra` + `app` stacks |
+| `deploy/stop.sh` | Removes stacks (`app`, `infra`, `management`) |
+| `deploy/generate-local-certs.ps1` / `deploy/generate-local-certs.sh` | Generates local HTTPS certs into `deploy/certs/` (mkcert preferred) |
+| `deploy/switch-gateway-mode.sh <mode>` | Switches API routing between Docker gateway and locally running gateway |
+| `scripts/remove_all.sh` | Removes stacks and leaves swarm (`docker swarm leave --force`) |
+
+Common flows (local):
+
+```bash
+# Full rebuild + deploy
+cd scripts
+./build_all.sh
+cd ../deploy
+./start_local.sh
+
+# Rebuild backend + redeploy only app stack
+cd scripts
+./build_backend.sh
+cd ../deploy
+docker stack deploy --detach=false --compose-file docker-compose.app.yml app
+```
+
+Stage deploy:
+
+| Script | What it does |
+|--------|--------------|
+| `scripts/deploy_all_stage.sh` | SSH to server and runs `deploy/start_stage.sh` (pulls images from GHCR) |
 
 ### Deployment Order
 
