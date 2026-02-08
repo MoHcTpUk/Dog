@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { IonPage, IonContent } from "@ionic/react";
 import { useTranslation } from "react-i18next";
 import { useIonRouter } from "@ionic/react";
@@ -9,6 +9,7 @@ import { Text } from "@shared/ui/Text/Text";
 import { Button } from "@shared/ui/Button/Button";
 import { Input } from "@shared/ui/Input/Input";
 import { BackIcon } from "@shared/ui/icons/BackIcon";
+import { useAuth } from "@features/auth";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email format"),
@@ -19,6 +20,8 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export const LoginPage: React.FC = () => {
   const { t } = useTranslation();
   const router = useIonRouter();
+  const { sendVerificationCode, isLoading } = useAuth();
+  const [apiError, setApiError] = useState<string>("");
 
   const {
     handleSubmit,
@@ -31,14 +34,30 @@ export const LoginPage: React.FC = () => {
 
   const emailValue = watch("email");
 
-
   const handleBack = () => {
     router.goBack();
   };
 
-  const onSubmit = () => {
-    // Navigate to code verification page
-    router.push('/verification', 'forward', 'push');
+  const onSubmit = async (data: LoginFormData) => {
+    setApiError("");
+
+    try {
+      const response = await sendVerificationCode(data.email);
+
+      console.log("🔥 Response from API:", response);
+      console.log("🔥 Activation code:", response.activationCode);
+
+      // TEMPORARY: Using sessionStorage because Ionic router doesn't pass state properly
+      // TODO: Remove when backend sends code via email/phone instead of response
+      sessionStorage.setItem("verification_email", response.email);
+      sessionStorage.setItem("verification_registrationId", response.id);
+      sessionStorage.setItem("verification_activationCode", response.activationCode);
+      sessionStorage.setItem("verification_isRegistration", "false");
+
+      router.push("/verification", "forward", "push");
+    } catch {
+      setApiError(t("Failed to send verification code. Please try again."));
+    }
   };
 
   return (
@@ -68,8 +87,11 @@ export const LoginPage: React.FC = () => {
                   placeholder={t("E-mail")}
                   type="email"
                   value={emailValue || ""}
-                  onInput={(value) => setValue("email", value)}
-                  error={errors.email?.message ? t(errors.email.message) : undefined}
+                  onInput={(value) => {
+                    setValue("email", value);
+                    setApiError("");
+                  }}
+                  error={errors.email?.message ? t(errors.email.message) : apiError || undefined}
                 />
               </div>
 
@@ -81,8 +103,9 @@ export const LoginPage: React.FC = () => {
                   fullWidth
                   className="bg-gray-700 text-white"
                   onClick={handleSubmit(onSubmit)}
+                  disabled={isLoading}
                 >
-                  {t("Get email code")}
+                  {isLoading ? t("Sending...") : t("Get email code")}
                 </Button>
                 <Button
                   variant="secondary"

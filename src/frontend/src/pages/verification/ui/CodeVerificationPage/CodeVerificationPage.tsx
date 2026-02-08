@@ -7,6 +7,7 @@ import { Button } from "@shared/ui/Button/Button";
 import { CodeInput } from "@shared/ui/CodeInput/CodeInput";
 import { BackIcon } from "@shared/ui/icons/BackIcon";
 import { useResendTimer } from "@shared/hooks/useResendTimer";
+import { useAuth } from "@features/auth";
 
 // interface CodeVerificationPageProps {
 //   email: string;
@@ -17,20 +18,27 @@ import { useResendTimer } from "@shared/hooks/useResendTimer";
 export const CodeVerificationPage: React.FC = () => {
   const { t } = useTranslation();
   const router = useIonRouter();
+  const { verifyCode, sendVerificationCode, isLoading } = useAuth();
   const [codeError, setCodeError] = useState<string>("");
 
-  // Get email and registration flag from router state
+  // TEMPORARY: Using sessionStorage because Ionic router doesn't pass state properly
+  // TODO: Remove activationCode display when backend sends code via email/phone
   const [email] = useState<string>(() => {
-    // Try to get email from router state/location state
-    const locationState = (window.history.state as { email?: string })?.email;
-    return locationState || "user@example.com";
+    return sessionStorage.getItem("verification_email") || "user@example.com";
+  });
+
+  const [registrationId, setRegistrationId] = useState<string>(() => {
+    return sessionStorage.getItem("verification_registrationId") || "";
+  });
+
+  const [activationCode, setActivationCode] = useState<string>(() => {
+    const code = sessionStorage.getItem("verification_activationCode") || "";
+    console.log("🔥 Initial activationCode from sessionStorage:", code);
+    return code;
   });
 
   const [isRegistration] = useState<boolean>(() => {
-    // Check if this is registration flow
-    const locationState = (window.history.state as { isRegistration?: boolean })
-      ?.isRegistration;
-    return locationState || false;
+    return sessionStorage.getItem("verification_isRegistration") === "true";
   });
 
   const { timeLeft, canResend, startTimer, formatTime } = useResendTimer(59);
@@ -44,32 +52,43 @@ export const CodeVerificationPage: React.FC = () => {
     router.goBack();
   };
 
-  const handleCodeComplete = (code: string) => {
+  const handleCodeComplete = async (code: string) => {
     setCodeError("");
 
-    // Validate against hardcoded value for now
-    if (code === "1234") {
-      // Success - navigate based on flow type
+    if (!registrationId) {
+      setCodeError(t("Registration ID is missing. Please try again."));
+      return;
+    }
+
+    try {
+      console.log("🔥 Calling verifyCode with:", { code, registrationId });
+      await verifyCode(code, registrationId);
+
       if (isRegistration) {
-        // Registration flow - navigate to onboarding
         router.push("/onboarding", "forward", "push");
       } else {
-        // Login flow - navigate to onboarding as well for now
-        router.push("/onboarding", "forward", "push");
+        router.push("/home", "forward", "push");
       }
-    } else {
-      // Show error
-      setCodeError(t("Invalid code"));
+    } catch (error) {
+      console.error("🔥 Verification error:", error);
+      setCodeError(t("Invalid code. Please try again."));
     }
   };
 
-  const handleResendCode = () => {
+  const handleResendCode = async () => {
     if (canResend) {
-      // Here you would typically call your API to resend the code
-      console.log("Resending code for:", email);
       setCodeError("");
-      startTimer();
-      // You can also call onResendCode callback if provided
+
+      try {
+        const response = await sendVerificationCode(email);
+        setRegistrationId(response.id);
+        setActivationCode(response.activationCode);
+        sessionStorage.setItem("verification_registrationId", response.id);
+        sessionStorage.setItem("verification_activationCode", response.activationCode);
+        startTimer();
+      } catch {
+        setCodeError(t("Failed to resend code. Please try again."));
+      }
     }
   };
 
@@ -105,15 +124,18 @@ export const CodeVerificationPage: React.FC = () => {
               </Text>
 
               {/* Code input */}
-              <div className="self-stretch flex flex-col justify-center items-center gap-10">
+              <div className="self-stretch flex flex-col justify-center items-center gap-3">
                 <CodeInput
-                  length={4}
+                  length={6}
                   onComplete={handleCodeComplete}
                   onCodeChange={handleCodeChange}
                   hasError={!!codeError}
                   errorMessage={codeError}
                   className="self-stretch"
                 />
+                <Text variant="medium-small-12" className="text-slate-400 text-center">
+                  {t("Code")}: <span className="font-mono font-bold">{activationCode || "..."}</span>
+                </Text>
               </div>
             </div>
 
@@ -125,8 +147,9 @@ export const CodeVerificationPage: React.FC = () => {
                   size="M"
                   onClick={handleResendCode}
                   className="mx-auto"
+                  disabled={isLoading}
                 >
-                  {t("New code")}
+                  {isLoading ? t("Sending...") : t("New code")}
                 </Button>
               ) : (
                 <Text variant="medium-small-12" className="text-slate-500 leading-none self-stretch text-center">
