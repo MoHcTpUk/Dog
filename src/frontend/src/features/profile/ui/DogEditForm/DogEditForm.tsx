@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { IonImg } from '@ionic/react';
+import React, { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { IonImg } from "@ionic/react";
 import {
   Text,
   Input,
@@ -14,14 +14,14 @@ import {
   Textarea,
   BottomModal,
   DatePicker,
-} from '@shared/ui';
+} from "@shared/ui";
 import {
   getBreeds,
   getGenderOptions,
   getActivityOptions,
   getGenderComfortOptions,
   getSizeComfortOptions,
-} from '@features/profile/lib/constants';
+} from "@features/profile/lib/constants";
 
 interface DogData {
   photos?: string[];
@@ -61,12 +61,12 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [photos, setPhotos] = useState<string[]>(initialData?.photos || []);
-  const [gender, setGender] = useState<string>(initialData?.gender || 'female');
-  const [name, setName] = useState<string>(initialData?.name || 'Клара');
+  const [gender, setGender] = useState<string>(initialData?.gender || "female");
+  const [name, setName] = useState<string>(initialData?.name || "Клара");
   const [weight, setWeight] = useState<number>(initialData?.weight || 20);
-  const [breed, setBreed] = useState<string>(initialData?.breed || t('Mixed'));
+  const [breed, setBreed] = useState<string>(initialData?.breed || t("Mixed"));
   const [birthDate, setBirthDate] = useState<string>(
-    initialData?.birthDate || '01.09.2023'
+    initialData?.birthDate || "01.09.2023",
   );
   const [health, setHealth] = useState<{
     sterilized: boolean;
@@ -78,7 +78,7 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
     parasite_treated: initialData?.health?.parasite_treated ?? true,
   });
   const [activity, setActivity] = useState<string>(
-    initialData?.character?.activity || 'medium'
+    initialData?.character?.activity || "medium",
   );
   const [comfortableWith, setComfortableWith] = useState<{
     males: boolean;
@@ -95,12 +95,12 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
   });
   const [comment, setComment] = useState<string>(
     initialData?.comment ||
-      'Боится резких звуков и не любит навязчивость. Идеальна для активных прогулок в компании'
+      "Боится резких звуков и не любит навязчивость. Идеальна для активных прогулок в компании",
   );
 
   const [isBreedDrawerOpen, setIsBreedDrawerOpen] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  const [searchBreed, setSearchBreed] = useState('');
+  const [searchBreed, setSearchBreed] = useState("");
   const [selectedDate, setSelectedDate] = useState({
     day: 1,
     month: 9,
@@ -139,7 +139,7 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
       reader.readAsDataURL(file);
     }
     if (event.target) {
-      event.target.value = '';
+      event.target.value = "";
     }
   };
 
@@ -152,16 +152,18 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
   };
 
   const handleDateSave = () => {
-    const dateString = `${selectedDate.day.toString().padStart(2, '0')}.${selectedDate.month
+    const dateString = `${selectedDate.day
       .toString()
-      .padStart(2, '0')}.${selectedDate.year}`;
+      .padStart(2, "0")}.${selectedDate.month.toString().padStart(2, "0")}.${
+      selectedDate.year
+    }`;
     setBirthDate(dateString);
     setIsDatePickerOpen(false);
   };
 
   const breeds = getBreeds(t);
   const filteredBreeds = breeds.filter((b) =>
-    b.toLowerCase().includes(searchBreed.toLowerCase())
+    b.toLowerCase().includes(searchBreed.toLowerCase()),
   );
 
   const genderOptions = getGenderOptions(t);
@@ -200,7 +202,10 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
               <Icon name="camera" size={24} />
             </div>
             {photos.slice(0, 2).map((photo, index) => (
-              <div key={index} className="w-44 h-44 relative rounded-3xl overflow-hidden">
+              <div
+                key={index}
+                className="w-44 h-44 relative rounded-3xl overflow-hidden"
+              >
                 <IonImg
                   className="w-44 h-44 absolute rounded-3xl object-cover"
                   src={photo}
@@ -241,7 +246,13 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
           <Text variant="semibold-18" className="self-stretch">
             Вес
           </Text>
-          <Slider min={1} max={50} value={weight} onChange={setWeight} unit="кг" />
+          <Slider
+            min={1}
+            max={50}
+            value={weight}
+            onChange={setWeight}
+            unit="кг"
+          />
         </div>
 
         <div className="self-stretch flex flex-col justify-start items-center gap-3.5">
@@ -284,12 +295,16 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
             <Checkbox
               label="Стерелизована"
               checked={health.sterilized}
-              onChange={(checked) => setHealth({ ...health, sterilized: checked })}
+              onChange={(checked) =>
+                setHealth({ ...health, sterilized: checked })
+              }
             />
             <Checkbox
               label="Вакцинирована"
               checked={health.vaccinated}
-              onChange={(checked) => setHealth({ ...health, vaccinated: checked })}
+              onChange={(checked) =>
+                setHealth({ ...health, vaccinated: checked })
+              }
             />
             <Checkbox
               label="Обработана от паразитов"
@@ -321,14 +336,14 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
           <TagCheckboxGroup
             options={genderComfortOptions}
             values={[
-              ...(comfortableWith.males ? ['males'] : []),
-              ...(comfortableWith.females ? ['females'] : []),
+              ...(comfortableWith.males ? ["males"] : []),
+              ...(comfortableWith.females ? ["females"] : []),
             ]}
             onChange={(values) =>
               setComfortableWith({
                 ...comfortableWith,
-                males: values.includes('males'),
-                females: values.includes('females'),
+                males: values.includes("males"),
+                females: values.includes("females"),
               })
             }
             size="medium"
@@ -337,16 +352,16 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
           <TagCheckboxGroup
             options={sizeComfortOptions}
             values={[
-              ...(comfortableWith.big_dogs ? ['big_dogs'] : []),
-              ...(comfortableWith.small_dogs ? ['small_dogs'] : []),
-              ...(comfortableWith.same_size ? ['same_size'] : []),
+              ...(comfortableWith.big_dogs ? ["big_dogs"] : []),
+              ...(comfortableWith.small_dogs ? ["small_dogs"] : []),
+              ...(comfortableWith.same_size ? ["same_size"] : []),
             ]}
             onChange={(values) =>
               setComfortableWith({
                 ...comfortableWith,
-                big_dogs: values.includes('big_dogs'),
-                small_dogs: values.includes('small_dogs'),
-                same_size: values.includes('same_size'),
+                big_dogs: values.includes("big_dogs"),
+                small_dogs: values.includes("small_dogs"),
+                same_size: values.includes("same_size"),
               })
             }
             size="medium"
@@ -395,7 +410,11 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
             >
               Отмена
             </Button>
-            <Button variant="primary" onClick={handleBreedSave} className="flex-1">
+            <Button
+              variant="primary"
+              onClick={handleBreedSave}
+              className="flex-1"
+            >
               Сохранить
             </Button>
           </div>
@@ -428,14 +447,22 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
             >
               Отмена
             </Button>
-            <Button variant="primary" onClick={handleDateSave} className="flex-1">
+            <Button
+              variant="primary"
+              onClick={handleDateSave}
+              className="flex-1"
+            >
               Сохранить
             </Button>
           </div>
         }
       >
-        <div className="self-stretch h-72 relative flex flex-col justify-start items-center overflow-hidden">
-          <DatePicker value={selectedDate} onChange={setSelectedDate} />
+        <div className="self-stretch h-44 relative flex flex-col justify-start items-center overflow-hidden">
+          <DatePicker
+            value={selectedDate}
+            onChange={setSelectedDate}
+            variant="top"
+          />
         </div>
       </BottomModal>
     </>

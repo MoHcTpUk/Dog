@@ -4,23 +4,26 @@
   --max-height: 80vh;
   --backdrop-opacity: 0.5;
   --box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
+  --background: transparent;
 }
 
 :global(ion-modal.bottom-modal) {
   border-top-left-radius: 16px !important;
   border-top-right-radius: 16px !important;
-  overflow: hidden !important;
 }
 
 :global(ion-modal.bottom-modal::part(content)) {
   border-top-left-radius: 16px !important;
   border-top-right-radius: 16px !important;
+  background: transparent !important;
+  overflow: visible !important;
 }
 
 :global(ion-modal.bottom-modal .ion-page) {
   border-top-left-radius: 16px !important;
   border-top-right-radius: 16px !important;
-  overflow: hidden !important;
+  background: transparent !important;
+  overflow: visible !important;
 }
 
 :global(ion-backdrop) {

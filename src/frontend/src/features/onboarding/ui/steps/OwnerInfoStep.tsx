@@ -63,7 +63,7 @@ export const OwnerInfoStep: React.FC<OwnerInfoStepProps> = ({
     } catch (error) {
       console.error(
         "Capacitor camera not available, falling back to file input:",
-        error
+        error,
       );
       if (fileInputRef.current) {
         fileInputRef.current.click();
@@ -229,8 +229,12 @@ export const OwnerInfoStep: React.FC<OwnerInfoStepProps> = ({
           </div>
         }
       >
-        <div className="Carusel self-stretch h-72 relative flex flex-col justify-start items-center overflow-hidden">
-          <DatePicker value={selectedDate} onChange={handleDateChange} />
+        <div className="Carusel self-stretch h-44 relative flex flex-col justify-start items-center overflow-hidden">
+          <DatePicker
+            value={selectedDate}
+            onChange={handleDateChange}
+            variant="top"
+          />
         </div>
       </BottomModal>
     </>

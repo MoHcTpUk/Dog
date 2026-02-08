@@ -1,16 +1,9 @@
-import React, { useState, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { IonImg } from '@ionic/react';
-import {
-  Text,
-  Input,
-  Button,
-  Icon,
-  BottomModal,
-  DatePicker,
-} from '@shared/ui';
-import { getMonthNames } from '@shared/lib/constants';
+import React, { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { IonImg } from "@ionic/react";
+import { Text, Input, Button, Icon, BottomModal, DatePicker } from "@shared/ui";
+import { getMonthNames } from "@shared/lib/constants";
 
 interface OwnerData {
   photo?: string | null;
@@ -31,11 +24,11 @@ export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [photo, setPhoto] = useState<string | null>(
-    initialData?.photo || 'https://placehold.co/173x173'
+    initialData?.photo || "https://placehold.co/173x173",
   );
-  const [name, setName] = useState<string>(initialData?.name || 'Альберт');
+  const [name, setName] = useState<string>(initialData?.name || "Альберт");
   const [birthDate, setBirthDate] = useState<string>(
-    initialData?.birth_date || '3 марта 2009'
+    initialData?.birth_date || "3 марта 2009",
   );
 
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -77,7 +70,7 @@ export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
       reader.readAsDataURL(file);
     }
     if (event.target) {
-      event.target.value = '';
+      event.target.value = "";
     }
   };
 
@@ -87,9 +80,9 @@ export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
 
   const handleDateSave = () => {
     const monthNames = getMonthNames(t);
-    const dateString = `${selectedDate.day} ${monthNames[selectedDate.month - 1]} ${
-      selectedDate.year
-    }`;
+    const dateString = `${selectedDate.day} ${
+      monthNames[selectedDate.month - 1]
+    } ${selectedDate.year}`;
     setBirthDate(dateString);
     setIsDatePickerOpen(false);
   };
@@ -188,14 +181,22 @@ export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
             >
               Отмена
             </Button>
-            <Button variant="primary" onClick={handleDateSave} className="flex-1">
+            <Button
+              variant="primary"
+              onClick={handleDateSave}
+              className="flex-1"
+            >
               Сохранить
             </Button>
           </div>
         }
       >
-        <div className="self-stretch h-72 relative flex flex-col justify-start items-center overflow-hidden">
-          <DatePicker value={selectedDate} onChange={setSelectedDate} />
+        <div className="self-stretch h-44 relative flex flex-col justify-start items-center overflow-hidden">
+          <DatePicker
+            value={selectedDate}
+            onChange={setSelectedDate}
+            variant="top"
+          />
         </div>
       </BottomModal>
     </>
