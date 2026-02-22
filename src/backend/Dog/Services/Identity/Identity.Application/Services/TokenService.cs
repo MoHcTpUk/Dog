@@ -3,14 +3,11 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using OpenIddict.Abstractions;
 
 namespace Identity.Application.Services;
 
 public class TokenService(
-    IConfiguration configuration,
-    IIdentityService identityService,
-    IOpenIddictTokenManager tokenManager) : ITokenService
+    IConfiguration configuration) : ITokenService
 {
     public async Task<string?> GenerateTokenAsync(ClaimsPrincipal principal)
     {

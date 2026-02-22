@@ -6,7 +6,6 @@ COPY ./Api ./Api
 COPY ./Gateways ./Gateways
 COPY ./Services/Identity ./Services/Identity
 COPY ./Shared ./Shared
-COPY ./Common ./Common
 
 RUN dotnet restore ./Gateways/Gateway.WebApi/Gateway.WebApi.csproj
 RUN dotnet publish ./Gateways/Gateway.WebApi/Gateway.WebApi.csproj -c Release -o /out

@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using Identity.Api.Commands;
 using Identity.Application.Services;
-using Microsoft.Extensions.Configuration;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using Shared.Messaging.Interfaces;
@@ -10,16 +9,16 @@ namespace Identity.Application.Handlers;
 
 public class GenerateTokenHandler(
     IIdentityService identityService,
-    ITokenService tokenService,
-    IOpenIddictTokenManager tokenManager,
-    IOpenIddictApplicationManager applicationManager,
-    IConfiguration configuration
+    ITokenService tokenService
 ) : ICommandHandler<GenerateTokenCommand, GenerateTokenResult>
 {
     public async Task<GenerateTokenResult> Handle(GenerateTokenCommand request,
         CancellationToken cancellationToken)
     {
         var user = await identityService.ValidateUserAsync(request.Email, request.Password, cancellationToken);
+
+        if (user is null)
+            throw new InvalidOperationException("User could not be validated.");
 
         var scopes = request.Scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 

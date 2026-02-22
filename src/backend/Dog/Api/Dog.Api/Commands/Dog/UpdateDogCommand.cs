@@ -14,7 +14,7 @@ public class UpdateDogCommand : UpdateCommand<ResultContainer<DogDto>>
 
     public int Weight { get; set; }
 
-    public Species Species { get; set; }
+    public Species Species { get; set; } = Species.Unknown;
 
     public DateOnly Birthdate { get; set; }
 

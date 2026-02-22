@@ -1,4 +1,6 @@
 #!/bin/bash
+cd "$(dirname "$0")"
+
 if [ -n "$1" ]; then
   PLATFORM="$1"
 else
@@ -38,4 +40,16 @@ docker buildx build \
   --load \
   ../src/backend/Dog &
 
-wait
+docker buildx build \
+  --platform $PLATFORM \
+  -f ../build/backend/Dog.Dockerfile \
+  -t ghcr.io/mohctpuk/dog-dog:latest \
+  --push \
+  ../src/backend/Dog &
+
+docker buildx build \
+  --platform $PLATFORM \
+  -f ../build/backend/Owner.Dockerfile \
+  -t ghcr.io/mohctpuk/dog-owner:latest \
+  --push \
+  ../src/backend/Dog &

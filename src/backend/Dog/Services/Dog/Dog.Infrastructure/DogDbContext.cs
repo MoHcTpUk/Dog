@@ -1,5 +1,6 @@
 using Dog.Domain.Aggregates;
 using Microsoft.EntityFrameworkCore;
+using Shared.Enumeration;
 
 namespace Dog.Infrastructure;
 
@@ -15,6 +16,11 @@ public class DogDbContext(DbContextOptions<DogDbContext> options) : DbContext(op
             entity.Property(e => e.Name).IsRequired();
             entity.Property(e => e.Weight).IsRequired();
             entity.Property(e => e.Birthdate).IsRequired();
+            entity.Property(e => e.Species)
+                .HasConversion(
+                    species => species.Value,
+                    value => Species.FromValue(value))
+                .IsRequired();
         });
     }
 }

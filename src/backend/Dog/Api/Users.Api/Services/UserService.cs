@@ -17,6 +17,9 @@ public class UserService(ICommandBus commandBus)
         var result =
             await _commandBus.SendAsync<CreateRegistrationRequestCommand, RegistrationRequestDto>(
                 command, Subject);
+        
+        if (result is null)
+            throw new InvalidOperationException("Registration request could not be created.");
 
         return result;
     }
@@ -26,6 +29,9 @@ public class UserService(ICommandBus commandBus)
         var result =
             await _commandBus.SendAsync<VerifyRegistrationRequestCommand, UserDto>(
                 command, Subject);
+
+        if (result is null)
+            throw new InvalidOperationException("User could not be verified.");
 
         return result;
     }
