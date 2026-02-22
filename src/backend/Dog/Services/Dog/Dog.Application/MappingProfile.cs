@@ -2,9 +2,9 @@ using Dog.Api.Commands.Dog;
 using Dog.Api.Dtos;
 using Dog.Domain.Aggregates;
 using Shared.Application;
-using DomainActivity = Dog.Domain.Enums.Activity;
-using DomainGender = Dog.Domain.Enums.Gender;
-using DomainSpecies = Dog.Domain.Enums.Species;
+using DomainActivity = Shared.Enums.Activity;
+using DomainGender = Shared.Enums.Gender;
+using DomainSpecies = Shared.Enumeration.Species;
 
 namespace Dog.Application;
 
@@ -16,12 +16,12 @@ public class MappingProfile : BaseMappingProfile
         CreateMap<UpdateDogCommand, DogAggregate>();
         CreateMap<DogAggregate, DogDto>();
 
-        CreateMap<DomainGender, Dog.Api.Dtos.Gender>().ConvertUsing(x => (Dog.Api.Dtos.Gender)x);
-        CreateMap<DomainSpecies, Dog.Api.Dtos.Species>().ConvertUsing(x => (Dog.Api.Dtos.Species)x);
-        CreateMap<DomainActivity, Dog.Api.Dtos.Activity>().ConvertUsing(x => (Dog.Api.Dtos.Activity)x);
+        CreateMap<DomainGender, DomainGender>().ConvertUsing(x => x);
+        CreateMap<DomainSpecies, DomainSpecies>().ConvertUsing(x => x);
+        CreateMap<DomainActivity, DomainActivity>().ConvertUsing(x => x);
 
-        CreateMap<Dog.Api.Dtos.Gender, DomainGender>().ConvertUsing(x => (DomainGender)x);
-        CreateMap<Dog.Api.Dtos.Species, DomainSpecies>().ConvertUsing(x => (DomainSpecies)x);
-        CreateMap<Dog.Api.Dtos.Activity, DomainActivity>().ConvertUsing(x => (DomainActivity)x);
+        CreateMap<DomainGender, DomainGender>().ConvertUsing(x => x);
+        CreateMap<DomainSpecies, DomainSpecies>().ConvertUsing(x => x);
+        CreateMap<DomainActivity, DomainActivity>().ConvertUsing(x => x);
     }
 }

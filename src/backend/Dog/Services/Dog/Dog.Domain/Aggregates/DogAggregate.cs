@@ -1,12 +1,11 @@
-using Dog.Domain.Enums;
 using Shared.Domain.Interfaces;
+using Shared.Enumeration;
+using Shared.Enums;
 
 namespace Dog.Domain.Aggregates;
 
 public class DogAggregate : IAggregateRoot
 {
-    public required Guid Id { get; set; }
-
     public required string Name { get; set; }
 
     public Gender Gender { get; set; }
@@ -20,4 +19,5 @@ public class DogAggregate : IAggregateRoot
     public Activity Activity { get; set; }
 
     public string? About { get; set; }
+    public required Guid Id { get; set; }
 }

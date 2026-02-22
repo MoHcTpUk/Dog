@@ -1,4 +1,4 @@
-namespace Dog.Domain.Enums;
+namespace Shared.Enums;
 
 public enum Activity
 {

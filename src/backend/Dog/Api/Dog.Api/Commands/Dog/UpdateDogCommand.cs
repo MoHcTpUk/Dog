@@ -1,6 +1,8 @@
 using Dog.Api.Dtos;
 using Shared.Api.Commands;
 using Shared.Dtos;
+using Shared.Enumeration;
+using Shared.Enums;
 
 namespace Dog.Api.Commands.Dog;
 

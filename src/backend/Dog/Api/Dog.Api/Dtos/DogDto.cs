@@ -1,4 +1,6 @@
 using Shared.Dtos;
+using Shared.Enumeration;
+using Shared.Enums;
 
 namespace Dog.Api.Dtos;
 
@@ -19,30 +21,4 @@ public record DogDto : Dto
     public Activity Activity { get; set; }
 
     public string? About { get; set; }
-}
-
-public enum Gender
-{
-    Unknown = 0,
-    Male = 1,
-    Female = 2
-}
-
-public enum Species
-{
-    Unknown = 0,
-    Labrador = 1,
-    Shepherd = 2,
-    Bulldog = 3,
-    Poodle = 4,
-    Terrier = 5,
-    Husky = 6,
-    Other = 99
-}
-
-public enum Activity
-{
-    Low = 0,
-    Medium = 1,
-    High = 2
 }
