@@ -13,7 +13,6 @@ public static class Extensions
         IConfiguration configuration)
     {
         services.AddScoped<IUserService, UserService>();
-        services.AddHttpClient();
 
         services.AddIdentityApi(configuration);
         services.AddUsersInfrastructure(configuration);
