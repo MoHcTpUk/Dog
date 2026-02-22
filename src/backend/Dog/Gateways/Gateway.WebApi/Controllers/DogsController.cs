@@ -12,4 +12,29 @@ namespace Gateway.Api.Controllers;
 [Route("[controller]")]
 public class DogsController(IDogService service)
     : AbstractController<IDogService, ResultContainer<DogDto>, CreateDogCommand, UpdateDogCommand, DeleteDogCommand,
-        DogQuery, DogDto>(service);
+        DogQuery, DogDto>(service)
+{
+    [HttpPost(nameof(Create))]
+    public new Task<ResultContainer<DogDto>> Create([FromBody] CreateDogCommand command)
+    {
+        return base.Create(command);
+    }
+
+    [HttpPut(nameof(Update))]
+    public new Task<ResultContainer<DogDto>> Update([FromBody] UpdateDogCommand command)
+    {
+        return base.Update(command);
+    }
+
+    [HttpDelete(nameof(Delete))]
+    public new Task<ResultContainer<DogDto>> Delete([FromBody] DeleteDogCommand command)
+    {
+        return base.Delete(command);
+    }
+
+    [HttpGet(nameof(Get))]
+    public new Task<ResultContainer<DogDto>> Get([FromQuery] DogQuery query)
+    {
+        return base.Get(query);
+    }
+}

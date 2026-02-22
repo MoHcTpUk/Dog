@@ -17,29 +17,25 @@ public abstract class AbstractController<TService, TResultContainer, TCreateComm
     where TQuery : Query<ResultContainer<TDto>>
     where TDto : Dto
 {
-    [HttpPost(nameof(Create))]
-    public async Task<ResultContainer<TDto>> Create([FromBody] TCreateCommand command)
+    protected async Task<ResultContainer<TDto>> Create([FromBody] TCreateCommand command)
     {
         var result = await service.CreateAsync(command);
         return result;
     }
 
-    [HttpPut(nameof(Update))]
-    public async Task<ResultContainer<TDto>> Update([FromBody] TUpdateCommand command)
+    protected async Task<ResultContainer<TDto>> Update([FromBody] TUpdateCommand command)
     {
         var result = await service.UpdateAsync(command);
         return result;
     }
 
-    [HttpDelete(nameof(Delete))]
-    public async Task<ResultContainer<TDto>> Delete([FromBody] TDeleteCommand command)
+    protected async Task<ResultContainer<TDto>> Delete([FromBody] TDeleteCommand command)
     {
         var result = await service.DeleteAsync(command);
         return result;
     }
 
-    [HttpGet(nameof(Get))]
-    public async Task<ResultContainer<TDto>> Get([FromQuery] TQuery query)
+    protected async Task<ResultContainer<TDto>> Get([FromQuery] TQuery query)
     {
         var result = await service.GetAsync(query);
         return result;
