@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dog.Infrastructure.Migrations
 {
     [DbContext(typeof(DogDbContext))]
-    [Migration("20260222173435_Initial")]
+    [Migration("20260227143020_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -56,6 +56,24 @@ namespace Dog.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Dogs");
+                });
+
+            modelBuilder.Entity("Dog.Domain.Aggregates.OwnerAggregate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("Birthdate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Owners");
                 });
 #pragma warning restore 612, 618
         }

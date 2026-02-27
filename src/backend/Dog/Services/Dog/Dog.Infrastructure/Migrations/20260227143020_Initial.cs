@@ -28,6 +28,19 @@ namespace Dog.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Dogs", x => x.Id);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "Owners",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Birthdate = table.Column<DateOnly>(type: "date", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Owners", x => x.Id);
+                });
         }
 
         /// <inheritdoc />
@@ -35,6 +48,9 @@ namespace Dog.Infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Dogs");
+
+            migrationBuilder.DropTable(
+                name: "Owners");
         }
     }
 }

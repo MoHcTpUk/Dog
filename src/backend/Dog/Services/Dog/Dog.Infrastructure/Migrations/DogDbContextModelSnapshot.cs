@@ -54,6 +54,24 @@ namespace Dog.Infrastructure.Migrations
 
                     b.ToTable("Dogs");
                 });
+
+            modelBuilder.Entity("Dog.Domain.Aggregates.OwnerAggregate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("Birthdate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Owners");
+                });
 #pragma warning restore 612, 618
         }
     }
