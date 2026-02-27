@@ -7,6 +7,8 @@ namespace Dog.Infrastructure;
 public class DogDbContext(DbContextOptions<DogDbContext> options) : DbContext(options)
 {
     public DbSet<DogAggregate> Dogs { get; set; }
+    
+    public DbSet<OwnerAggregate> Owners { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -21,6 +23,13 @@ public class DogDbContext(DbContextOptions<DogDbContext> options) : DbContext(op
                     species => species.Value,
                     value => Species.FromValue(value))
                 .IsRequired();
+        });
+        
+        modelBuilder.Entity<OwnerAggregate>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired();
+            entity.Property(e => e.Birthdate).IsRequired();
         });
     }
 }

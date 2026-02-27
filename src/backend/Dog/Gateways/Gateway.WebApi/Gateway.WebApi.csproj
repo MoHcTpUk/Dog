@@ -15,7 +15,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Api\Dog.Api\Dog.Api.csproj" />
     <ProjectReference Include="..\..\Api\Identity.Api\Identity.Api.csproj" />
-    <ProjectReference Include="..\..\Api\Owner.Api\Owner.Api.csproj" />
     <ProjectReference Include="..\..\Api\Users.Api\Users.Api.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.Api\Shared.Api.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.WebApi\Shared.WebApi.csproj" />

@@ -46,10 +46,3 @@ docker buildx build \
   -t ghcr.io/mohctpuk/dog-dog:latest \
   --push \
   ../src/backend/Dog &
-
-docker buildx build \
-  --platform $PLATFORM \
-  -f ../build/backend/Owner.Dockerfile \
-  -t ghcr.io/mohctpuk/dog-owner:latest \
-  --push \
-  ../src/backend/Dog &

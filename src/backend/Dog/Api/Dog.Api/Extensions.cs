@@ -13,6 +13,7 @@ public static class Extensions
         services.AddSharedApi(configuration);
 
         services.AddScoped<IDogService, DogService>();
+        services.AddScoped<IOwnerService, OwnerService>();
 
         return services;
     }

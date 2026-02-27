@@ -11,7 +11,8 @@ public static class Extensions
         IConfiguration configuration)
     {
         services.AddScoped<IDogRepository, DogRepository>();
-
+        services.AddScoped<IOwnerRepository, OwnerRepository>();
+        
         services.AddSharedInfrastructure();
 
         return services;

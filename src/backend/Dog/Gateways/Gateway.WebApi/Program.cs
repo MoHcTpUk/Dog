@@ -1,7 +1,6 @@
 using Gateway.Api;
 using Gateway.Api.Filters;
 using Dog.Api;
-using Owner.Api;
 using Users.Api;
 using Environments = Shared.Environments;
 using Microsoft.AspNetCore.OpenApi;
@@ -24,7 +23,6 @@ builder.Services.AddReverseProxy()
 
 builder.Services.AddUsersApi(builder.Configuration);
 builder.Services.AddDogApi(builder.Configuration);
-builder.Services.AddOwnerApi(builder.Configuration);
 builder.Services.AddIdentityApi(builder.Configuration);
 
 if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName == Environments.Local)

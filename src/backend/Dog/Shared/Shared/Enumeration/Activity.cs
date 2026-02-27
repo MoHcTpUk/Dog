@@ -1,4 +1,4 @@
-namespace Shared.Enums;
+namespace Shared.Enumeration;
 
 public enum Activity
 {

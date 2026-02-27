@@ -1,8 +1,8 @@
+using Dog.Api.Commands.Owner;
+using Dog.Api.Dtos;
+using Dog.Api.Queries;
+using Dog.Api.Services;
 using Microsoft.AspNetCore.Mvc;
-using Owner.Api.Commands.Owner;
-using Owner.Api.Dtos;
-using Owner.Api.Queries;
-using Owner.Api.Services;
 using Shared.Api;
 using Shared.Dtos;
 

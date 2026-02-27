@@ -1,6 +1,5 @@
 using Shared.Domain.Interfaces;
 using Shared.Enumeration;
-using Shared.Enums;
 
 namespace Dog.Domain.Aggregates;
 
