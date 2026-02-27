@@ -45,4 +45,4 @@ docker buildx build \
   -f ../build/backend/Dog.Dockerfile \
   -t ghcr.io/mohctpuk/dog-dog:latest \
   --push \
-  ../src/backend/Dog &
+  ../src/backend/Dog

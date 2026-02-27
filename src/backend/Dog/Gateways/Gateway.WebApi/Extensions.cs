@@ -10,7 +10,6 @@ public static class Extensions
     {
         services.AddSharedApi(configuration);
 
-        // Регистрируем Identity.Api.Services для работы через NATS (для других операций, не связанных с токенами)
         services.AddScoped<IIdentityService, IdentityService>();
 
         return services;

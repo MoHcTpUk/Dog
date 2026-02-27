@@ -8,4 +8,7 @@ namespace Dog.Api.Services;
 
 public class OwnerService(ICommandBus commandBus)
     : Service<CreateOwnerCommand, UpdateOwnerCommand, DeleteOwnerCommand, OwnerQuery, OwnerDto>(commandBus),
-        IOwnerService;
+        IOwnerService
+{
+    public new string Subject = "DogService";
+}
