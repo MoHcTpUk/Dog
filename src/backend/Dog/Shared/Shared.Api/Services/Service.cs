@@ -14,7 +14,7 @@ public abstract class Service<TCreateCommand, TUpdateCommand, TDeleteCommand, TQ
     where TQuery : Query<ResultContainer<TDto>>
     where TDto : Dto
 {
-    public string Subject => GetType().Name;
+    protected virtual string Subject => GetType().Name;
 
     public async Task<ResultContainer<TDto>> CreateAsync(TCreateCommand command)
     {
