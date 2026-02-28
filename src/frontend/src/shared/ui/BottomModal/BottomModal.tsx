@@ -74,10 +74,10 @@ export const BottomModal: React.FC<BottomModalProps> = ({
     >
       <div
         ref={contentRef}
-        className="w-full px-5 pt-2.5 pb-10 bg-zinc-100 rounded-tl-2xl rounded-tr-2xl flex flex-col items-center gap-6"
+        className="w-full max-h-[80vh] px-5 pt-2.5 pb-10 bg-zinc-100 rounded-tl-2xl rounded-tr-2xl flex flex-col items-center gap-6 overflow-hidden"
         style={{ borderTopLeftRadius: "16px", borderTopRightRadius: "16px" }}
       >
-        <div className="self-stretch flex flex-col justify-start items-center gap-7">
+        <div className="self-stretch min-h-0 flex flex-col justify-start items-center gap-7 flex-1">
           {showHandle && (
             <div
               className="w-full flex items-center justify-center py-1 cursor-grab"
@@ -97,7 +97,7 @@ export const BottomModal: React.FC<BottomModalProps> = ({
             </div>
           )}
 
-          <div className="Content self-stretch flex flex-col justify-start items-start gap-6">
+          <div className="Content self-stretch min-h-0 flex flex-col justify-start items-start gap-6 flex-1">
             {title && (
               <div className="Top self-stretch inline-flex justify-start items-start gap-2.5">
                 <div className="Text flex-1 inline-flex flex-col justify-start items-start gap-[5px]">
@@ -108,12 +108,14 @@ export const BottomModal: React.FC<BottomModalProps> = ({
               </div>
             )}
 
-            {children}
+            <div className="self-stretch min-h-0 overflow-y-auto scrollbar-hide">
+              {children}
+            </div>
           </div>
         </div>
 
         {buttons && (
-          <div className="Buttons self-stretch inline-flex justify-center items-start gap-2.5">
+          <div className="Buttons self-stretch inline-flex justify-center items-start gap-2.5 shrink-0">
             {buttons}
           </div>
         )}

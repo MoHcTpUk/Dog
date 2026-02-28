@@ -12,6 +12,7 @@ import { Toggle, Icon, Tag, IconName } from "@shared/ui";
 import { Text } from "@shared/ui/Text";
 import { MainLayout } from "@app/layouts/MainLayout";
 import { mockPlaces, placeCategories } from "@shared/mocks/places.mock";
+import { useMapGL } from "@features/map/context";
 
 const mockWalks: Walk[] = [
   {
@@ -130,6 +131,7 @@ type TabValue = "walks" | "places";
 export const HomePage: React.FC = () => {
   const history = useHistory();
   const location = useLocation();
+  const { addUserPlace } = useMapGL();
   const searchParams = new URLSearchParams(location.search);
   const [activeTab, setActiveTab] = useState<TabValue>(
     (searchParams.get("tab") as TabValue) || "walks",
@@ -359,7 +361,44 @@ export const HomePage: React.FC = () => {
               className="flex-shrink-0 flex flex-col justify-start items-center gap-10"
               style={{ width: "calc(100vw - 24px)" }}
             >
-              <NewPlaceButton />
+              <NewPlaceButton
+                onSubmit={(data) => {
+                  const mapCategory =
+                    data.category === "cocktail"
+                      ? "restaurant"
+                      : data.category || "other";
+
+                  const categoryLabel =
+                    data.category === "cafe"
+                      ? "Кофейня"
+                      : data.category === "restaurant"
+                        ? "Ресторан"
+                        : data.category === "shop"
+                          ? "Магазин"
+                          : data.category === "mall"
+                            ? "Торговый центр"
+                            : data.category === "park"
+                              ? "Парк"
+                              : data.category === "cocktail"
+                                ? "Бар"
+                                : "Место";
+
+                  addUserPlace({
+                    id: `suggested-place-${Date.now()}`,
+                    name: data.name,
+                    coordinates: data.coordinates,
+                    dogFriendly: true,
+                    category: mapCategory,
+                    categoryLabel,
+                    distance: "Новое место на карте",
+                    address: data.address,
+                    description:
+                      data.description ||
+                      "Место добавлено пользователем и доступно для просмотра на карте",
+                    isFavorite: false,
+                  });
+                }}
+              />
 
               <div className="self-stretch flex flex-col justify-start items-center gap-5">
                 <div className="self-stretch flex justify-center items-center gap-2.5">

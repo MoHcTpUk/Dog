@@ -4,12 +4,18 @@ import { Icon } from "@shared/ui";
 import { Text } from "@shared/ui/Text";
 import { SuggestPlaceModal, SuggestPlaceData } from "@widgets/SuggestPlaceModal";
 
-export const NewPlaceButton: React.FC = () => {
+export interface NewPlaceButtonProps {
+  onSubmit?: (data: SuggestPlaceData) => void;
+}
+
+export const NewPlaceButton: React.FC<NewPlaceButtonProps> = ({
+  onSubmit,
+}) => {
   const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSubmit = (data: SuggestPlaceData) => {
-    // TODO: send to API
+    onSubmit?.(data);
     console.log("Suggest place:", data);
   };
 

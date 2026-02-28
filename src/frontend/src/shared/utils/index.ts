@@ -6,3 +6,4 @@ export * from "./clustering.utils";
 export * from "./cookie.utils";
 export * from "./reverseGeocode";
 export * from "./geo.utils";
+export * from "./forwardGeocode";
