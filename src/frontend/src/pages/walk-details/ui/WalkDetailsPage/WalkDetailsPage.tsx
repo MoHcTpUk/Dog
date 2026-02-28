@@ -32,6 +32,10 @@ export const WalkDetailsPage: React.FC = () => {
     history.push(`/dog/${dogId}`);
   };
 
+  const handleRouteClick = () => {
+    console.log('Route to walk:', id);
+  };
+
   const handleJoinClick = () => {
     console.log('Join walk:', id);
     handleClose();
@@ -70,6 +74,7 @@ export const WalkDetailsPage: React.FC = () => {
       isOpen={true}
       onClose={handleClose}
       variant={variant}
+      onRouteClick={handleRouteClick}
       onDogClick={handleDogClick}
       onJoinClick={handleJoinClick}
       onLeaveClick={handleLeaveClick}

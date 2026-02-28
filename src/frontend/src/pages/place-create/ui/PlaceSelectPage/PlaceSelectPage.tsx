@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { IonContent, IonPage } from "@ionic/react";
 import { useHistory, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Button, Input, Tag } from "@shared/ui";
+import { Button, Input, Tag, Toast } from "@shared/ui";
 import { Text } from "@shared/ui/Text";
 import { CenterModal } from "@shared/ui/CenterModal";
 import { useMapGL } from "@features/map/context";
@@ -11,6 +11,30 @@ import type { NearbyPlace } from "@shared/api/overpass";
 interface PlaceSelectLocationState {
   nearbyPlaces?: NearbyPlace[];
 }
+
+const CATEGORY_LABELS: Record<NearbyPlace["category"], string> = {
+  cafe: "Кофейня",
+  restaurant: "Ресторан",
+  shop: "Магазин",
+  mall: "Торговый центр",
+  park: "Парк",
+  other: "Место",
+};
+
+const formatAddressFromTags = (place: NearbyPlace) => {
+  const street = place.tags["addr:street"];
+  const house = place.tags["addr:housenumber"];
+
+  if (street && house) {
+    return `${street} ${house}`;
+  }
+
+  if (street) {
+    return street;
+  }
+
+  return place.name;
+};
 
 export const PlaceSelectPage: React.FC = () => {
   const { t } = useTranslation();
@@ -73,6 +97,14 @@ export const PlaceSelectPage: React.FC = () => {
       coordinates: selected.coordinates,
       dogFriendly: true,
       category: selected.category,
+      categoryLabel: CATEGORY_LABELS[selected.category],
+      distance: "Новое место на карте",
+      address: formatAddressFromTags(selected),
+      workingHours: selected.tags.opening_hours,
+      description:
+        selected.tags.description ||
+        "Место добавлено пользователем и доступно для просмотра на карте",
+      isFavorite: false,
     });
     setShowSuccessModal(true);
   };
@@ -87,21 +119,10 @@ export const PlaceSelectPage: React.FC = () => {
     <IonPage>
       <IonContent className="ion-no-padding">
         {showSelectNotif && (
-          <div
-            style={{
-              position: "fixed",
-              top: 60,
-              left: "50%",
-              transform: "translateX(-50%)",
-              zIndex: 100,
-              whiteSpace: "nowrap",
-            }}
-            className="px-6 py-3 bg-[#3F335A] rounded-full shadow-lg"
-          >
-            <Text variant="medium-16" color="white">
-              {t("Select a place to continue")}
-            </Text>
-          </div>
+          <Toast
+            message={t("Select a place to continue")}
+            variant="info"
+          />
         )}
 
         <CenterModal isOpen={showSuccessModal} onClose={handleSuccessClose}>

@@ -7,7 +7,7 @@ import React, {
 import { useHistory, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useMapGL } from "@features/map/context";
-import { Button, CenterMapPin } from "@shared/ui";
+import { Button, CenterMapPin, Toast } from "@shared/ui";
 import { useCenterPinMotion } from "@shared/hooks";
 import { Text } from "@shared/ui/Text";
 import { fetchNearbyPlaces, type NearbyPlace } from "@shared/api/overpass";
@@ -271,21 +271,10 @@ export const PlaceCreationOverlay: React.FC = () => {
     <>
       {/* Notifications */}
       {showNoPlacesNotif && (
-        <div
-          style={{
-            position: "fixed",
-            top: 60,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 100,
-            whiteSpace: "nowrap",
-          }}
-          className="px-6 py-3 bg-[#3F335A] rounded-full shadow-lg"
-        >
-          <Text variant="medium-16" color="white">
-            {t("No places nearby, move the map")}
-          </Text>
-        </div>
+        <Toast
+          message={t("No places nearby, move the map")}
+          variant="info"
+        />
       )}
       {placeCreationActive && (
         <>

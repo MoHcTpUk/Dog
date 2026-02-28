@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { IonToast, IonImg } from "@ionic/react";
+import { IonImg } from "@ionic/react";
 import { useIonRouter } from "@ionic/react";
-import { Button } from "@shared/ui";
+import { Button, Toast } from "@shared/ui";
 import { useDogProfileStepper } from "../../model/useDogProfileStepper";
 import { StepperHeader } from "./StepperHeader";
 import { DogNameStep } from "../steps/DogNameStep";
@@ -46,6 +46,7 @@ export const DogProfileStepper: React.FC<DogProfileStepperProps> = ({
     errors,
     showToast,
     toastMessage,
+    toastVariant,
     handleNext,
     handleBack: handleStepBack,
     updateStepperData,
@@ -79,6 +80,18 @@ export const DogProfileStepper: React.FC<DogProfileStepperProps> = ({
       router.push(`/onboarding?step=${currentStep}`, 'forward', 'replace');
     }
   }, [currentStep, router]);
+
+  useEffect(() => {
+    if (!showToast) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setShowToast(false);
+    }, 2000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [showToast, toastMessage, toastVariant, setShowToast]);
 
   const stepProps = {
     data: stepperData,
@@ -171,12 +184,12 @@ export const DogProfileStepper: React.FC<DogProfileStepperProps> = ({
         </div>
       </div>
 
-      <IonToast
-        isOpen={showToast}
-        message={toastMessage}
-        duration={2000}
-        onDidDismiss={() => setShowToast(false)}
-      />
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          variant={toastVariant}
+        />
+      )}
     </>
   );
 };

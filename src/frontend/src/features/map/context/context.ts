@@ -11,6 +11,13 @@ export interface Place {
   coordinates: [number, number];
   dogFriendly: boolean;
   category?: PlaceCategory;
+  categoryLabel?: string;
+  distance?: string;
+  address?: string;
+  workingHours?: string;
+  description?: string;
+  photos?: string[];
+  isFavorite?: boolean;
 }
 
 interface MapGLContextValue {

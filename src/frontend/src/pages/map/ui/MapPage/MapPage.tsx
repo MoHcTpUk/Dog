@@ -6,6 +6,9 @@ import { type Place, useMapGL } from "@features/map/context";
 import type { MapInstance } from "@features/map/types/map.types";
 import { mockWalks } from "@shared/mocks/walks.mock";
 
+let hasAutocenteredToUserLocation = false;
+const MAP_MARKER_FOCUS_ZOOM = 17;
+
 // Все места кластеризованы вокруг Парка Горького для демонстрации кластеров
 const BASE_MOCK_PLACES: Place[] = [
   { id: "place-1", name: "Хлебник", coordinates: [37.6017, 55.7311], dogFriendly: true, category: "cafe" },
@@ -45,14 +48,13 @@ export const MapPage: React.FC = () => {
   const locationRef = useRef(location);
   locationRef.current = location;
 
-  const autocenteredRef = useRef(false);
-
   const creationActive = walkCreationActive || placeCreationActive;
 
   const allPlaces = useMemo<Place[]>(
     () => [...BASE_MOCK_PLACES, ...userAddedPlaces],
     [userAddedPlaces]
   );
+  const allWalks = useMemo(() => [...userAddedWalks, ...mockWalks], [userAddedWalks]);
 
   const displayedPlaces = useMemo(() => {
     if (creationActive) return [];
@@ -64,25 +66,34 @@ export const MapPage: React.FC = () => {
 
   const displayedWalks = useMemo(() => {
     if (creationActive) return [];
-    return activeTab === "walks" ? [...userAddedWalks, ...mockWalks] : [];
-  }, [activeTab, creationActive, userAddedWalks]);
+    return activeTab === "walks" ? allWalks : [];
+  }, [activeTab, creationActive, allWalks]);
 
   const handleWalkClick = useCallback(
     (walkId: string) => {
+      const walk = allWalks.find((item) => item.id === walkId);
+      if (walk && mapInstance) {
+        mapInstance.setCenter(walk.coordinates);
+        const currentZoom = mapInstance.getZoom();
+        if (currentZoom < MAP_MARKER_FOCUS_ZOOM) {
+          mapInstance.setZoom(MAP_MARKER_FOCUS_ZOOM);
+        }
+      }
+
       const cleanLocation = { ...locationRef.current, search: "" };
       history.push(`/walk/${walkId}`, { background: cleanLocation });
     },
-    [history],
+    [allWalks, history, mapInstance],
   );
 
   const handlePlaceClick = useCallback(
     (placeId: string) => {
       const place = allPlaces.find((p) => p.id === placeId);
       if (place && mapInstance) {
+        mapInstance.setCenter(place.coordinates);
         const currentZoom = mapInstance.getZoom();
-        if (currentZoom < 15) {
-          mapInstance.setCenter(place.coordinates);
-          mapInstance.setZoom(15);
+        if (currentZoom < MAP_MARKER_FOCUS_ZOOM) {
+          mapInstance.setZoom(MAP_MARKER_FOCUS_ZOOM);
         }
       }
       const cleanLocation = { ...locationRef.current, search: "" };
@@ -111,8 +122,8 @@ export const MapPage: React.FC = () => {
   }, [mapInstance]);
 
   useEffect(() => {
-    if (!mapInstance || autocenteredRef.current) return;
-    autocenteredRef.current = true;
+    if (!mapInstance || hasAutocenteredToUserLocation) return;
+    hasAutocenteredToUserLocation = true;
 
     Geolocation.getCurrentPosition({ timeout: 5000 })
       .then((pos) => {

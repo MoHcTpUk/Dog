@@ -95,3 +95,6 @@ export type { NotificationCardProps } from "./NotificationCard";
 
 export { TimePicker, getDefaultTimeValue } from "./TimePicker";
 export type { TimePickerProps, TimePickerValue } from "./TimePicker";
+
+export { Toast } from "./Toast";
+export type { ToastProps, ToastVariant } from "./Toast";

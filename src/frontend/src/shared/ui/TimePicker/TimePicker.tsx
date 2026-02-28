@@ -31,7 +31,10 @@ export function getDefaultTimeValue(): TimePickerValue {
 }
 
 const ITEM_HEIGHT = 56;
-const SCROLL_SETTLE_MS = 150;
+const PICKER_HEIGHT = 176;
+const SELECTION_OFFSET = (PICKER_HEIGHT - ITEM_HEIGHT) / 2;
+const TRAILING_SPACER_HEIGHT = PICKER_HEIGHT - ITEM_HEIGHT - SELECTION_OFFSET;
+const SCROLL_SETTLE_MS = 220;
 type TimeColumnType = "day" | "hour" | "minute";
 
 export const TimePicker: React.FC<TimePickerProps> = ({
@@ -81,6 +84,16 @@ export const TimePicker: React.FC<TimePickerProps> = ({
     hour: false,
     minute: false,
   });
+  const isPointerDownRef = useRef<{ [key: string]: boolean }>({
+    day: false,
+    hour: false,
+    minute: false,
+  });
+  const isProgrammaticScrollRef = useRef<{ [key: string]: boolean }>({
+    day: false,
+    hour: false,
+    minute: false,
+  });
 
   const [scrollTops, setScrollTops] = useState<{ [key: string]: number }>(() => {
     const minuteItems = Array.from({ length: 6 }, (_, i) => i * 10);
@@ -104,6 +117,24 @@ export const TimePicker: React.FC<TimePickerProps> = ({
     [days, hours, minutes],
   );
 
+  const setProgrammaticScrollTop = useCallback(
+    (
+      type: TimeColumnType,
+      element: HTMLDivElement,
+      nextScrollTop: number,
+    ) => {
+      isProgrammaticScrollRef.current[type] = true;
+      element.scrollTop = nextScrollTop;
+      setScrollTops((prev) =>
+        prev[type] === nextScrollTop ? prev : { ...prev, [type]: nextScrollTop },
+      );
+      requestAnimationFrame(() => {
+        isProgrammaticScrollRef.current[type] = false;
+      });
+    },
+    [],
+  );
+
   const handleCommit = useCallback(
     (type: TimeColumnType, element: HTMLDivElement) => {
       const scrollTop = element.scrollTop;
@@ -116,12 +147,13 @@ export const TimePicker: React.FC<TimePickerProps> = ({
       const current = valueRef.current;
 
       if (Math.abs(scrollTop - snappedScrollTop) > 1) {
-        element.scrollTo({
-          top: snappedScrollTop,
-          behavior: "smooth",
-        });
+        setProgrammaticScrollTop(type, element, snappedScrollTop);
       }
-      setScrollTops((prev) => ({ ...prev, [type]: snappedScrollTop }));
+      setScrollTops((prev) =>
+        prev[type] === snappedScrollTop
+          ? prev
+          : { ...prev, [type]: snappedScrollTop },
+      );
 
       let newValue = { ...current };
       if (type === "day") newValue.dayOffset = clampedIndex;
@@ -138,7 +170,28 @@ export const TimePicker: React.FC<TimePickerProps> = ({
       }
       isUserScrollingRef.current[type] = false;
     },
-    [getItems, hours, minutes, haptic, onChange],
+    [getItems, hours, minutes, haptic, onChange, setProgrammaticScrollTop],
+  );
+
+  const getTargetScrollTop = useCallback(
+    (type: TimeColumnType) => {
+      if (type === "day") {
+        return Math.max(0, Math.min(days.length - 1, value.dayOffset)) * ITEM_HEIGHT;
+      }
+
+      if (type === "hour") {
+        const hourIndex = Math.max(0, hours.findIndex((hour) => hour === value.hour));
+        return hourIndex * ITEM_HEIGHT;
+      }
+
+      const minuteIndex = Math.max(
+        0,
+        minutes.findIndex((minute) => minute === value.minute),
+      );
+
+      return minuteIndex * ITEM_HEIGHT;
+    },
+    [days.length, hours, minutes, value.dayOffset, value.hour, value.minute],
   );
 
   const scheduleCommit = useCallback(
@@ -147,58 +200,62 @@ export const TimePicker: React.FC<TimePickerProps> = ({
         window.clearTimeout(scrollTimeoutRefs.current[type]!);
       }
 
-      scrollTimeoutRefs.current[type] = window.setTimeout(() => {
+      const commitWhenIdle = () => {
+        if (isPointerDownRef.current[type]) {
+          scrollTimeoutRefs.current[type] = window.setTimeout(commitWhenIdle, delay);
+          return;
+        }
+
         handleCommit(type, element);
         scrollTimeoutRefs.current[type] = null;
-      }, delay);
+      };
+
+      scrollTimeoutRefs.current[type] = window.setTimeout(commitWhenIdle, delay);
     },
     [handleCommit],
   );
 
   const handleScroll = useCallback(
     (type: TimeColumnType, element: HTMLDivElement) => {
+      if (isProgrammaticScrollRef.current[type]) return;
       isUserScrollingRef.current[type] = true;
-      setScrollTops((prev) => ({ ...prev, [type]: element.scrollTop }));
+      setScrollTops((prev) =>
+        prev[type] === element.scrollTop
+          ? prev
+          : { ...prev, [type]: element.scrollTop },
+      );
 
       scheduleCommit(type, element);
     },
     [scheduleCommit],
   );
 
-  const scrollToIndex = useCallback(
-    (type: TimeColumnType, index: number, behavior: ScrollBehavior = "auto") => {
-      const element = scrollRefs.current[type];
-      if (!element) return;
-      element.scrollTo({ top: index * ITEM_HEIGHT, behavior });
-    },
-    [],
-  );
-
-  const handleInteractionEnd = useCallback(
-    (type: TimeColumnType, element: HTMLDivElement) => {
-      scheduleCommit(type, element, 24);
-    },
-    [scheduleCommit],
-  );
-
   useEffect(() => {
-    if (!isInitializedRef.current) {
-      const minuteIndex = minutes.findIndex((m) => m === value.minute);
-      scrollToIndex("day", value.dayOffset);
-      scrollToIndex("hour", value.hour);
-      scrollToIndex("minute", minuteIndex >= 0 ? minuteIndex : 0);
-      isInitializedRef.current = true;
+    const syncColumn = (type: TimeColumnType) => {
+      const element = scrollRefs.current[type];
+      if (!element || isUserScrollingRef.current[type]) return;
 
-      requestAnimationFrame(() => {
-        const newTops: { [key: string]: number } = {};
-        (["day", "hour", "minute"] as const).forEach((t) => {
-          const el = scrollRefs.current[t];
-          if (el) newTops[t] = el.scrollTop;
-        });
-        setScrollTops(newTops);
-      });
+      const targetScrollTop = getTargetScrollTop(type);
+
+      if (Math.abs(element.scrollTop - targetScrollTop) > 1) {
+        setProgrammaticScrollTop(type, element, targetScrollTop);
+      } else {
+        setScrollTops((prev) =>
+          prev[type] === targetScrollTop
+            ? prev
+            : { ...prev, [type]: targetScrollTop },
+        );
+      }
+    };
+
+    syncColumn("day");
+    syncColumn("hour");
+    syncColumn("minute");
+
+    if (!isInitializedRef.current) {
+      isInitializedRef.current = true;
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [getTargetScrollTop, value.dayOffset, value.hour, value.minute]);
 
   useEffect(() => {
     return () => {
@@ -232,11 +289,18 @@ export const TimePicker: React.FC<TimePickerProps> = ({
             overscrollBehavior: "contain",
             touchAction: "pan-y",
           }}
+          onPointerDown={() => {
+            isPointerDownRef.current[type] = true;
+          }}
+          onPointerUp={() => {
+            isPointerDownRef.current[type] = false;
+          }}
+          onPointerCancel={() => {
+            isPointerDownRef.current[type] = false;
+          }}
           onScroll={(e) => handleScroll(type, e.currentTarget)}
-          onTouchEnd={(e) => handleInteractionEnd(type, e.currentTarget)}
-          onMouseUp={(e) => handleInteractionEnd(type, e.currentTarget)}
         >
-          <div style={{ height: ITEM_HEIGHT * 1.5 }} />
+          <div style={{ height: SELECTION_OFFSET }} />
           {items.map((item, index) => {
             const isActive = index === activeIndex;
             const display = formatItem ? formatItem(item) : String(item);
@@ -258,7 +322,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
               </div>
             );
           })}
-          <div style={{ height: ITEM_HEIGHT * 1.5 }} />
+          <div style={{ height: TRAILING_SPACER_HEIGHT }} />
         </div>
       </div>
     );

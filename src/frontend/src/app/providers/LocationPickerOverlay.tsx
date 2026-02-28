@@ -224,31 +224,32 @@ export const LocationPickerOverlay: React.FC = () => {
         }
         body={
           <div style={{ position: 'relative', width: 44, height: 68 }}>
-            <div className="w-11 h-11 bg-[#3F335A] rounded-full flex items-center justify-center shadow-lg">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="white"/>
-              </svg>
+            <div className="p-0.5 bg-white rounded-2xl shadow-[0px_5px_9px_0px_rgba(66,58,58,0.06)] inline-flex justify-start items-center">
+              <div className="p-2 bg-zinc-100 rounded-xl flex justify-start items-center">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M13.8348 7.50039C14.1755 6.70955 14.3721 5.89934 14.3721 5.2454C14.3721 2.89731 12.4685 0.993652 10.1204 0.993652C7.77231 0.993652 5.86865 2.89731 5.86865 5.2454C5.86865 8.41753 10.1204 13.0004 10.1204 13.0004C10.1204 13.0004 11.3949 11.6268 12.5537 9.8329M14.4741 6.49863C15.8548 5.60719 17.5062 5.13979 19.201 5.24564C19.574 5.26897 19.7605 5.28063 19.8759 5.41211C19.9912 5.54358 19.9647 5.73359 19.9117 6.11362C19.4498 9.42613 17.8847 12.175 15.0818 14.332C14.5973 14.7048 14.3551 14.8912 14.0723 14.8779C13.7894 14.8646 13.584 14.6567 13.1732 14.2407L12.5568 13.6163C12.1644 13.2187 11.9681 13.02 11.9454 12.7493C11.9228 12.4786 12.0909 12.2433 12.4272 11.7728C12.9267 11.0737 13.3924 10.2552 13.7724 9.28199M18.6401 7.97755C18.6401 7.97755 17.4906 7.8438 15.5905 9.58087"
+                    stroke="#3F3F46"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
             </div>
             <div
               style={{
                 position: 'absolute',
-                left: 15,
-                top: 43,
-                width: 14,
-                height: 10,
-                overflow: 'hidden',
+                left: 20,
+                top: 44,
+                width: 4,
+                height: 24,
+                background: '#3F3F46',
+                borderBottomLeftRadius: 100,
+                borderBottomRightRadius: 100,
+                boxShadow: '0px 5px 9px 0px rgba(66,58,58,0.06)',
               }}
-            >
-              <div
-                style={{
-                  width: 0,
-                  height: 0,
-                  borderLeft: '7px solid transparent',
-                  borderRight: '7px solid transparent',
-                  borderTop: '10px solid #3F335A',
-                }}
-              />
-            </div>
+            />
           </div>
         }
       />

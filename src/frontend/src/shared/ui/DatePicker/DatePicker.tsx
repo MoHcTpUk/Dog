@@ -16,7 +16,9 @@ export interface DatePickerProps {
 }
 
 const ITEM_HEIGHT = 56;
-const SCROLL_SETTLE_MS = 150;
+const TOP_PICKER_HEIGHT = 176;
+const CENTER_PICKER_HEIGHT = 288;
+const SCROLL_SETTLE_MS = 220;
 const REPEATS = 21;
 const CENTER_REPEAT = Math.floor(REPEATS / 2);
 type DateColumnType = "day" | "month" | "year";
@@ -28,12 +30,20 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   variant = "center",
 }) => {
   const isTop = variant === "top";
+  const containerHeight = isTop ? TOP_PICKER_HEIGHT : CENTER_PICKER_HEIGHT;
+  const leadingSpacerHeight = isTop
+    ? 0
+    : (containerHeight - ITEM_HEIGHT) / 2;
+  const trailingSpacerHeight = containerHeight - ITEM_HEIGHT - leadingSpacerHeight;
   const { haptic } = usePlatform();
 
-  const months = getMonthsList().map((m) => m.label);
+  const months = useMemo(() => getMonthsList().map((m) => m.label), []);
 
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
+  const years = useMemo(
+    () => Array.from({ length: 100 }, (_, i) => currentYear - i),
+    [currentYear],
+  );
 
   const daysInSelectedMonth = getDaysInMonth(value.month, value.year);
   const days = useMemo(
@@ -49,6 +59,11 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   });
   const isInitializedRef = useRef(false);
   const isUserScrollingRef = useRef<{ [key: string]: boolean }>({
+    day: false,
+    month: false,
+    year: false,
+  });
+  const isPointerDownRef = useRef<{ [key: string]: boolean }>({
     day: false,
     month: false,
     year: false,
@@ -98,6 +113,24 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     [isInfinite, getItemsLength],
   );
 
+  const setProgrammaticScrollTop = useCallback(
+    (
+      type: DateColumnType,
+      element: HTMLDivElement,
+      nextScrollTop: number,
+    ) => {
+      isRecentering.current[type] = true;
+      element.scrollTop = nextScrollTop;
+      setScrollTops((prev) =>
+        prev[type] === nextScrollTop ? prev : { ...prev, [type]: nextScrollTop },
+      );
+      requestAnimationFrame(() => {
+        isRecentering.current[type] = false;
+      });
+    },
+    [],
+  );
+
   const recenterIfNeeded = useCallback(
     (type: DateColumnType, element: HTMLDivElement) => {
       if (!isInfinite(type)) return;
@@ -113,15 +146,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         const currentIndex = Math.round(scrollTop / ITEM_HEIGHT);
         const realIndex = ((currentIndex % len) + len) % len;
         const newScrollTop = (CENTER_REPEAT * len + realIndex) * ITEM_HEIGHT;
-        isRecentering.current[type] = true;
-        element.scrollTop = newScrollTop;
-        requestAnimationFrame(() => {
-          isRecentering.current[type] = false;
-          setScrollTops((prev) => ({ ...prev, [type]: newScrollTop }));
-        });
+        setProgrammaticScrollTop(type, element, newScrollTop);
       }
     },
-    [isInfinite, getItemsLength],
+    [isInfinite, getItemsLength, setProgrammaticScrollTop],
   );
 
   const handleCommit = useCallback(
@@ -136,12 +164,13 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       const newValue = { ...currentValue };
 
       if (Math.abs(rawScrollTop - snappedScrollTop) > 1) {
-        element.scrollTo({
-          top: snappedScrollTop,
-          behavior: "smooth",
-        });
+        setProgrammaticScrollTop(type, element, snappedScrollTop);
       }
-      setScrollTops((prev) => ({ ...prev, [type]: snappedScrollTop }));
+      setScrollTops((prev) =>
+        prev[type] === snappedScrollTop
+          ? prev
+          : { ...prev, [type]: snappedScrollTop },
+      );
 
       if (type === "day") {
         const len = currentDays.length;
@@ -176,7 +205,51 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
       isUserScrollingRef.current[type] = false;
     },
-    [months.length, years, haptic, onChange, isInfinite, recenterIfNeeded],
+    [
+      months.length,
+      years,
+      haptic,
+      onChange,
+      isInfinite,
+      recenterIfNeeded,
+      setProgrammaticScrollTop,
+    ],
+  );
+
+  const getTargetScrollTop = useCallback(
+    (type: DateColumnType) => {
+      let targetIndex = 0;
+
+      switch (type) {
+        case "day":
+          targetIndex = days.indexOf(value.day);
+          if (targetIndex === -1) {
+            targetIndex = Math.min(Math.max(value.day - 1, 0), days.length - 1);
+          }
+          break;
+        case "month":
+          targetIndex = Math.max(0, Math.min(months.length - 1, value.month - 1));
+          break;
+        case "year":
+          targetIndex = years.indexOf(value.year);
+          if (targetIndex === -1) targetIndex = 0;
+          break;
+      }
+
+      return isInfinite(type)
+        ? getCenterScrollTop(type, targetIndex)
+        : targetIndex * ITEM_HEIGHT;
+    },
+    [
+      days,
+      getCenterScrollTop,
+      isInfinite,
+      months.length,
+      value.day,
+      value.month,
+      value.year,
+      years,
+    ],
   );
 
   const scheduleCommit = useCallback(
@@ -185,10 +258,17 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         window.clearTimeout(scrollTimeoutRefs.current[type]!);
       }
 
-      scrollTimeoutRefs.current[type] = window.setTimeout(() => {
+      const commitWhenIdle = () => {
+        if (isPointerDownRef.current[type]) {
+          scrollTimeoutRefs.current[type] = window.setTimeout(commitWhenIdle, delay);
+          return;
+        }
+
         handleCommit(type, element);
         scrollTimeoutRefs.current[type] = null;
-      }, delay);
+      };
+
+      scrollTimeoutRefs.current[type] = window.setTimeout(commitWhenIdle, delay);
     },
     [handleCommit],
   );
@@ -201,13 +281,6 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       setScrollTops((prev) => ({ ...prev, [type]: element.scrollTop }));
 
       scheduleCommit(type, element);
-    },
-    [scheduleCommit],
-  );
-
-  const handleInteractionEnd = useCallback(
-    (type: DateColumnType, element: HTMLDivElement) => {
-      scheduleCommit(type, element, 24);
     },
     [scheduleCommit],
   );
@@ -227,55 +300,28 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     const scrollToValue = (type: "day" | "month" | "year") => {
       const element = scrollRefs.current[type];
       if (!element || isUserScrollingRef.current[type]) return;
-      let targetIndex = 0;
-      switch (type) {
-        case "day":
-          targetIndex = days.indexOf(value.day);
-          if (targetIndex === -1)
-            targetIndex = Math.min(value.day - 1, days.length - 1);
-          break;
-        case "month":
-          targetIndex = value.month - 1;
-          break;
-        case "year":
-          targetIndex = years.indexOf(value.year);
-          if (targetIndex === -1) targetIndex = 0;
-          break;
-      }
-      const targetScrollTop = isInfinite(type)
-        ? getCenterScrollTop(type, targetIndex)
-        : targetIndex * ITEM_HEIGHT;
+      const targetScrollTop = getTargetScrollTop(type);
       const currentScrollTop = element.scrollTop;
-      if (Math.abs(currentScrollTop - targetScrollTop) > 2) {
-        element.scrollTo({
-          top: targetScrollTop,
-          behavior: "auto",
-        });
+      if (Math.abs(currentScrollTop - targetScrollTop) > 1) {
+        setProgrammaticScrollTop(type, element, targetScrollTop);
+      } else {
+        setScrollTops((prev) =>
+          prev[type] === targetScrollTop
+            ? prev
+            : { ...prev, [type]: targetScrollTop },
+        );
       }
     };
 
+    scrollToValue("day");
+    scrollToValue("month");
+    scrollToValue("year");
+
     if (!isInitializedRef.current) {
-      scrollToValue("day");
-      scrollToValue("month");
-      scrollToValue("year");
       isInitializedRef.current = true;
-      requestAnimationFrame(() => {
-        const newTops: { [key: string]: number } = {};
-        (["day", "month", "year"] as const).forEach((t) => {
-          const el = scrollRefs.current[t];
-          if (el) newTops[t] = el.scrollTop;
-        });
-        setScrollTops(newTops);
-      });
-    } else {
-      scrollToValue("day");
-      requestAnimationFrame(() => {
-        const el = scrollRefs.current["day"];
-        if (el) setScrollTops((prev) => ({ ...prev, day: el.scrollTop }));
-      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [daysInSelectedMonth]);
+  }, [getTargetScrollTop, value.day, value.month, value.year, daysInSelectedMonth]);
 
   const renderColumn = (
     type: DateColumnType,
@@ -307,11 +353,18 @@ export const DatePicker: React.FC<DatePickerProps> = ({
             overscrollBehavior: "contain",
             touchAction: "pan-y",
           }}
+          onPointerDown={() => {
+            isPointerDownRef.current[type] = true;
+          }}
+          onPointerUp={() => {
+            isPointerDownRef.current[type] = false;
+          }}
+          onPointerCancel={() => {
+            isPointerDownRef.current[type] = false;
+          }}
           onScroll={(e) => handleScroll(type, e.currentTarget)}
-          onTouchEnd={(e) => handleInteractionEnd(type, e.currentTarget)}
-          onMouseUp={(e) => handleInteractionEnd(type, e.currentTarget)}
         >
-          {!isTop && <div className="h-28" />}
+          {leadingSpacerHeight > 0 && <div style={{ height: leadingSpacerHeight }} />}
           {renderItems.map((item, index) => {
             const isActivePosition = index === activeIndex;
             return (
@@ -332,10 +385,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
               </div>
             );
           })}
-          {isTop ? (
-            <div style={{ height: 176 - ITEM_HEIGHT }} />
-          ) : (
-            <div className="h-28" />
+          {trailingSpacerHeight > 0 && (
+            <div style={{ height: trailingSpacerHeight }} />
           )}
         </div>
       </div>

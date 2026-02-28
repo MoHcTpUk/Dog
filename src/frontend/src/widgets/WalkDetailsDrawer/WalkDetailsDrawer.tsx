@@ -15,6 +15,7 @@ export interface WalkDetailsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   variant?: WalkDetailsVariant;
+  onRouteClick?: () => void;
   onDogClick?: (dogId: string) => void;
   onJoinClick?: () => void;
   onLeaveClick?: () => void;
@@ -31,6 +32,7 @@ export const WalkDetailsDrawer: React.FC<WalkDetailsDrawerProps> = ({
   isOpen,
   onClose,
   variant = 'regular',
+  onRouteClick,
   onDogClick,
   onJoinClick,
   onLeaveClick,
@@ -60,6 +62,8 @@ export const WalkDetailsDrawer: React.FC<WalkDetailsDrawerProps> = ({
 
   const isOwnWalk = variant === 'own' || variant === 'own-with-requests';
   const showRequests = variant === 'own-with-requests' && requestedDogs.length > 0;
+  const roundActionClass =
+    'p-3 -rotate-90 bg-white rounded-full shadow-[0px_5px_9px_0px_rgba(66,58,58,0.06)] inline-flex items-center justify-center';
 
   return (
     <>
@@ -93,7 +97,7 @@ export const WalkDetailsDrawer: React.FC<WalkDetailsDrawerProps> = ({
             {showRequests && (
               <div className="flex flex-col gap-5">
                 <Text variant="semibold-18" color="primary">
-                  {t('Wants To Join Your Walk')}
+                  Запросы на прогулку
                 </Text>
                 <div className="flex flex-col gap-1">
                   {requestedDogs.map((dog) => (
@@ -116,66 +120,83 @@ export const WalkDetailsDrawer: React.FC<WalkDetailsDrawerProps> = ({
           </div>
 
           <div className="flex justify-between items-start">
-            <div className="p-3 -rotate-90 bg-white rounded-full flex items-center justify-center">
+            <button
+              type="button"
+              className={roundActionClass}
+              onClick={onRouteClick}
+            >
               <div className="rotate-90">
                 <Icon name="route" size={24} color="#3F335A" />
               </div>
-            </div>
+            </button>
 
-            <div className="flex items-center gap-1">
+            <div className="flex flex-1 min-w-0 justify-end items-center gap-1 ml-3">
               {isOwnWalk && onDeleteClick && (
-                <div
-                  className="p-3 -rotate-90 bg-white rounded-full flex items-center justify-center cursor-pointer"
+                <button
+                  type="button"
+                  className={roundActionClass}
                   onClick={() => setShowDeleteModal(true)}
                 >
                   <div className="rotate-90">
                     <Icon name="trash" size={24} color="#3F335A" />
                   </div>
-                </div>
+                </button>
               )}
 
               {variant === 'regular' && (
-                <Button
-                  variant="secondary-white"
-                  size="M"
-                  icon={<Icon name="plus" size={24} color="#3F335A" />}
-                  onClick={onJoinClick}
-                >
-                  Присоединиться
-                </Button>
+                <div className="min-w-0">
+                  <Button
+                    variant="secondary-white"
+                    size="M"
+                    shadow
+                    icon={<Icon name="plus" size={24} color="#3F335A" />}
+                    onClick={onJoinClick}
+                  >
+                    Присоединиться
+                  </Button>
+                </div>
               )}
 
               {variant === 'request-sent' && (
-                <Button
-                  variant="secondary-white"
-                  size="M"
-                  icon={<Icon name="check" size={24} color="#3F335A" />}
-                  onClick={() => setShowCancelModal(true)}
-                >
-                  Запрос отправлен
-                </Button>
+                <div className="min-w-0">
+                  <Button
+                    variant="secondary-white"
+                    size="M"
+                    shadow
+                    icon={<Icon name="check" size={24} color="#3F335A" />}
+                    onClick={() => setShowCancelModal(true)}
+                  >
+                    Запрос отправлен
+                  </Button>
+                </div>
               )}
 
               {variant === 'joined' && (
-                <Button
-                  variant="secondary-white"
-                  size="M"
-                  icon={<Icon name="cross" size={24} color="#3F335A" />}
-                  onClick={() => setShowLeaveModal(true)}
-                >
-                  Выйти из прогулки
-                </Button>
+                <div className="min-w-0">
+                  <Button
+                    variant="secondary-white"
+                    size="M"
+                    shadow
+                    icon={<Icon name="cross" size={24} color="#3F335A" />}
+                    onClick={() => setShowLeaveModal(true)}
+                  >
+                    Выйти из прогулки
+                  </Button>
+                </div>
               )}
 
               {isOwnWalk && (
-                <Button
-                  variant="secondary-white"
-                  size="M"
-                  icon={<Icon name="edit" size={24} color="#3F335A" />}
-                  onClick={handleEditClick}
-                >
-                  {t('Edit Walk')}
-                </Button>
+                <div className="min-w-0">
+                  <Button
+                    variant="secondary-white"
+                    size="M"
+                    shadow
+                    icon={<Icon name="edit" size={24} color="#3F335A" />}
+                    onClick={handleEditClick}
+                  >
+                    Редактировать
+                  </Button>
+                </div>
               )}
             </div>
           </div>

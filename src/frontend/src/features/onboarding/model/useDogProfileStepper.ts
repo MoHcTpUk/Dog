@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DogProfileData, StepErrors } from "./types";
 
+type StepperToastVariant = "info" | "error" | "success";
+
 const getCurrentDate = () => {
   const today = new Date();
   return {
@@ -51,9 +53,14 @@ export const useDogProfileStepper = (
   const [errors, setErrors] = useState<StepErrors>({});
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [toastVariant, setToastVariant] = useState<StepperToastVariant>("info");
 
-  const showToastMessage = (message: string) => {
+  const showToastMessage = (
+    message: string,
+    variant: StepperToastVariant = "info"
+  ) => {
     setToastMessage(message);
+    setToastVariant(variant);
     setShowToast(true);
   };
 
@@ -110,7 +117,7 @@ export const useDogProfileStepper = (
         break;
       case 4:
         if (!dataToValidate.breed) {
-          showToastMessage(t("Please select a breed to continue"));
+          showToastMessage(t("Please select a breed to continue"), "info");
           return false;
         }
         break;
@@ -140,7 +147,7 @@ export const useDogProfileStepper = (
     if (currentStep < 10) {
       setCurrentStep(currentStep + 1);
     } else {
-      showToastMessage(t("Excellent! One step left"));
+      showToastMessage(t("Excellent! One step left"), "success");
       setTimeout(() => {
         onComplete();
       }, 2000);
@@ -161,6 +168,7 @@ export const useDogProfileStepper = (
     errors,
     showToast,
     toastMessage,
+    toastVariant,
     handleNext,
     handleBack,
     updateStepperData,

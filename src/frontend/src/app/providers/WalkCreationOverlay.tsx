@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMapGL } from '@features/map/context';
-import { Button, Tag, Icon, CenterMapPin } from '@shared/ui';
+import { Button, Tag, Icon, CenterMapPin, Toast } from '@shared/ui';
 import { useCenterPinMotion } from '@shared/hooks';
 import { Text } from '@shared/ui/Text';
 import { TimePicker, getDefaultTimeValue } from '@shared/ui/TimePicker';
@@ -298,21 +298,10 @@ export const WalkCreationOverlay: React.FC = () => {
     <>
       {/* Success toast */}
       {showSuccess && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 60,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 100,
-            whiteSpace: 'nowrap',
-          }}
-          className="px-6 py-3 bg-[#3F335A] rounded-full shadow-lg"
-        >
-          <Text variant="medium-16" color="white">
-            {t('Walk published!')}
-          </Text>
-        </div>
+        <Toast
+          message={t('Walk published!')}
+          variant="success"
+        />
       )}
 
       {walkCreationActive && (
