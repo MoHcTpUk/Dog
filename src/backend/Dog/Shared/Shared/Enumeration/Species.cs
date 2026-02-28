@@ -1,8 +1,5 @@
-using System.Text.Json.Serialization;
-
 namespace Shared.Enumeration;
 
-// [JsonConverter(typeof(EnumerationJsonConverter<Species>))]
 public sealed class Species : Enumeration<Species>
 {
     public static readonly Species Unknown = new(0, nameof(Unknown));

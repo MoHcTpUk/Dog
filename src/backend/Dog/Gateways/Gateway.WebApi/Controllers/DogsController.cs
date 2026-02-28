@@ -5,6 +5,7 @@ using Dog.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Api;
 using Shared.Dtos;
+using Shared.Enumeration;
 
 namespace Gateway.Api.Controllers;
 
@@ -48,5 +49,18 @@ public class DogsController(IDogService service)
     public Task<ResultContainer<DogDto>> UnbindFromOwner([FromBody] UnbindDogFromOwnerCommand command)
     {
         return service.UnbindFromOwnerAsync(command);
+    }
+    
+    [HttpGet("AllSpecies")]
+    public ResultContainer<EnumerationDto> GetAllSpecies()
+    {
+        var items = Species.GetAll()
+            .Select(s => new EnumerationDto(s.Value, s.Name))
+            .ToList();
+
+        return new ResultContainer<EnumerationDto>
+        {
+            Items = items
+        };
     }
 }

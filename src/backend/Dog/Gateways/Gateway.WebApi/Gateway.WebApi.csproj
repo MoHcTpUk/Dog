@@ -18,6 +18,7 @@
     <ProjectReference Include="..\..\Api\Users.Api\Users.Api.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.Api\Shared.Api.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.WebApi\Shared.WebApi.csproj" />
+    <ProjectReference Include="..\..\Shared\Shared\Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
