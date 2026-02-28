@@ -1,4 +1,4 @@
-namespace Shared.Enumeration;
+namespace Shared.Enums;
 
 public enum Gender
 {

@@ -3,8 +3,8 @@ using Dog.Api.Commands.Owner;
 using Dog.Api.Dtos;
 using Dog.Domain.Aggregates;
 using Shared.Application;
-using DomainActivity = Shared.Enumeration.Activity;
-using DomainGender = Shared.Enumeration.Gender;
+using DomainActivity = Shared.Enums.Activity;
+using DomainGender = Shared.Enums.Gender;
 using DomainSpecies = Shared.Enumeration.Species;
 
 namespace Dog.Application;
