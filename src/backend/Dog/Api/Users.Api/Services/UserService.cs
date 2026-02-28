@@ -10,6 +10,8 @@ namespace Users.Api.Services;
 public class UserService(ICommandBus commandBus)
     : Service<CreateUserCommand, UpdateUserCommand, DeleteUserCommand, UserQuery, UserDto>(commandBus), IUserService
 {
+    protected override string Subject => MessagingSubject.UserService;
+
     private readonly ICommandBus _commandBus = commandBus;
 
     public async Task<RegistrationRequestDto> CreateRegistrationRequest(CreateRegistrationRequestCommand command)

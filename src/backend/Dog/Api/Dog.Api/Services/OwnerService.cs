@@ -10,5 +10,5 @@ public class OwnerService(ICommandBus commandBus)
     : Service<CreateOwnerCommand, UpdateOwnerCommand, DeleteOwnerCommand, OwnerQuery, OwnerDto>(commandBus),
         IOwnerService
 {
-    protected override string Subject => "DogService";
+    protected override string Subject => MessagingSubject.DogService;
 }

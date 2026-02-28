@@ -5,7 +5,7 @@ namespace Identity.Api.Services;
 
 public class IdentityService(ICommandBus commandBus) : IIdentityService
 {
-    private const string IdentityServiceSubject = "IdentityService";
+    private const string IdentityServiceSubject = MessagingSubject.IdentityService;
 
     public async Task<CreateIdentityUserResult> CreateUserAsync(CreateIdentityUserCommand command)
     {

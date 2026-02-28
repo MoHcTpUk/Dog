@@ -7,4 +7,7 @@ using Shared.Messaging.Messaging;
 namespace Dog.Api.Services;
 
 public class DogService(ICommandBus commandBus)
-    : Service<CreateDogCommand, UpdateDogCommand, DeleteDogCommand, DogQuery, DogDto>(commandBus), IDogService;
+    : Service<CreateDogCommand, UpdateDogCommand, DeleteDogCommand, DogQuery, DogDto>(commandBus), IDogService
+    {
+        protected override string Subject => MessagingSubject.DogService;
+    };
