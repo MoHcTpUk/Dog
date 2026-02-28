@@ -1,3 +1,3 @@
 export { MapGLProvider } from './MapGLContext';
-export { MapGLContext, type Place } from './context';
+export { MapGLContext, type Place, type PlaceCategory } from './context';
 export { useMapGL } from './useMapGL';

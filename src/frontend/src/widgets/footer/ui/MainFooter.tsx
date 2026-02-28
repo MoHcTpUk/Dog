@@ -49,14 +49,22 @@ export const MainFooter: React.FC = () => {
           onClick={() => handleTabClick("map")}
           className="p-3 rounded-full flex justify-start items-start transition-colors"
         >
-          <Icon name={activeTab === "map" ? "pin-filled" : "pin-stroke"} size={24} />
+          <Icon
+            name={activeTab === "map" ? "pin-filled" : "pin-stroke"}
+            size={24}
+            color={activeTab === "map" ? "var(--color-text-primary)" : "var(--color-text-secondary)"}
+          />
         </button>
 
         <button
           onClick={() => handleTabClick("list")}
           className="p-3 rounded-full flex justify-start items-start transition-colors"
         >
-          <Icon name={activeTab === "list" ? "list-filled" : "list-stroke"} size={24} />
+          <Icon
+            name={activeTab === "list" ? "list-filled" : "list-stroke"}
+            size={24}
+            color={activeTab === "list" ? "var(--color-text-primary)" : "var(--color-text-secondary)"}
+          />
         </button>
       </div>
 
@@ -64,7 +72,11 @@ export const MainFooter: React.FC = () => {
         onClick={() => handleTabClick("dogs")}
         className="p-4 rounded-full flex justify-start items-start transition-colors"
       >
-        <Icon name={activeTab === "dogs" ? "paw-filled" : "paw-stroke"} size={24} />
+        <Icon
+          name={activeTab === "dogs" ? "paw-filled" : "paw-stroke"}
+          size={24}
+          color={activeTab === "dogs" ? "var(--color-text-primary)" : "var(--color-text-secondary)"}
+        />
       </button>
     </div>
   );

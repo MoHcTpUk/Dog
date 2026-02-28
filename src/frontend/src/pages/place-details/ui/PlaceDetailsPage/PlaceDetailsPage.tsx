@@ -17,10 +17,6 @@ export const PlaceDetailsPage: React.FC = () => {
     console.log('Route to place:', id);
   };
 
-  const handleReportClick = () => {
-    console.log('Report error for place:', id);
-  };
-
   const handleFavoriteToggle = () => {
     console.log('Toggle favorite for place:', id);
   };
@@ -31,7 +27,6 @@ export const PlaceDetailsPage: React.FC = () => {
       isOpen={true}
       onClose={handleClose}
       onRouteClick={handleRouteClick}
-      onReportClick={handleReportClick}
       onFavoriteToggle={handleFavoriteToggle}
     />
   );

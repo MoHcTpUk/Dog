@@ -1,5 +1,6 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
+import { useMapGL } from '@features/map/context';
 import { WalkDetailsDrawer, WalkDetailsVariant } from '@widgets/WalkDetailsDrawer';
 import { mockWalks, mockWalkRequests } from '@shared/mocks/walks.mock';
 import { WalkStatus } from '@shared/types/walk';
@@ -17,8 +18,9 @@ const statusToVariant: Record<WalkStatus, WalkDetailsVariant> = {
 export const WalkDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
+  const { userAddedWalks } = useMapGL();
 
-  const walk = mockWalks.find((w) => w.id === id);
+  const walk = [...userAddedWalks, ...mockWalks].find((w) => w.id === id);
   const variant = walk ? statusToVariant[walk.status] : 'regular';
   const requestedDogs = walk ? mockWalkRequests[walk.id] || [] : [];
 

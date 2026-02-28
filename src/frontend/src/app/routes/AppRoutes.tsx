@@ -3,6 +3,7 @@ import { IonRouterOutlet } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { Route, Redirect, useLocation, Switch } from "react-router-dom";
 import { Location } from "history";
+import { useMapGL } from "@features/map/context";
 
 import { WelcomePage } from "@pages/welcome";
 import { LoginPage } from "@pages/login";
@@ -13,12 +14,17 @@ import { HomePage } from "@pages/home";
 import { MapPage } from "@pages/map";
 import { DogProfilePage } from "@pages/dog-profile";
 import { WalkDetailsPage } from "@pages/walk-details";
-import { PlaceDetailsPage } from "@pages/place-details";
+import { PlaceDetailsPage, PlaceReportPage } from "@pages/place-details";
+import { PlaceSelectPage } from "@pages/place-create";
 import { DogsPage } from "@pages/dogs";
+import { WalkFormPage } from "@pages/walk-create";
 import { ProfilePage, EditProfilePage, PromocodesPage, SettingsPage, FeedbackPage, TermsPage, LocationAccessPage, NotificationsPage } from "@pages/profile";
 import { MainFooter } from "@widgets/footer";
 import { PersistentMapLayer } from "@app/providers/PersistentMapLayer";
 import { MapUIOverlay } from "@app/providers/MapUIOverlay";
+import { WalkCreationOverlay } from "@app/providers/WalkCreationOverlay";
+import { LocationPickerOverlay } from "@app/providers/LocationPickerOverlay";
+import { PlaceCreationOverlay } from "@app/providers/PlaceCreationOverlay";
 
 interface LocationState {
   background?: Location;
@@ -27,10 +33,11 @@ interface LocationState {
 const AppContent: FC = () => {
   const location = useLocation<LocationState>();
   const background = location.state?.background;
+  const { walkCreationActive, locationPickerActive, placeCreationActive } = useMapGL();
 
   const pagesWithFooter = ['/home', '/map', '/dog', '/profile'];
   const currentPath = background ? background.pathname : location.pathname;
-  const showFooter = pagesWithFooter.some(path => {
+  const showFooter = !walkCreationActive && !locationPickerActive && !placeCreationActive && pagesWithFooter.some(path => {
     if (path === '/dog') {
       return currentPath === '/dog';
     }
@@ -41,6 +48,9 @@ const AppContent: FC = () => {
     <>
       <PersistentMapLayer />
       <MapUIOverlay />
+      <WalkCreationOverlay />
+      <LocationPickerOverlay />
+      <PlaceCreationOverlay />
       <IonRouterOutlet animated={true}>
         <Switch location={background || location}>
           <Route exact path="/welcome" component={WelcomePage} />
@@ -50,6 +60,9 @@ const AppContent: FC = () => {
           <Route exact path="/verification" component={CodeVerificationPage} />
           <Route exact path="/home" component={HomePage} />
           <Route exact path="/map" component={MapPage} />
+          <Route exact path="/walk/:id/edit" render={() => <WalkFormPage mode="edit" />} />
+          <Route exact path="/place/create/select" component={PlaceSelectPage} />
+          <Route exact path="/place/:id/report" component={PlaceReportPage} />
           <Route exact path="/dog" component={DogsPage} />
           <Route exact path="/dog/:id" component={DogProfilePage} />
           <Route exact path="/profile" component={ProfilePage} />

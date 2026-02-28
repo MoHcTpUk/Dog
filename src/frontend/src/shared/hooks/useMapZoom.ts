@@ -10,7 +10,6 @@ interface UseMapZoomProps {
 export const useMapZoom = ({ mapInstance, initialZoom }: UseMapZoomProps) => {
   const [currentZoom, setCurrentZoom] = useState(initialZoom);
   const currentZoomRef = useRef(initialZoom);
-  const prevClusterZoomLevelRef = useRef<number>(getClusterZoomLevel(initialZoom));
 
   const clusterZoomLevel = useMemo(() => {
     return getClusterZoomLevel(currentZoom);
@@ -39,17 +38,9 @@ export const useMapZoom = ({ mapInstance, initialZoom }: UseMapZoomProps) => {
     mapInstance.setZoom(Math.min(currentZoomRef.current + 2, 18));
   }, [mapInstance]);
 
-  const hasClusteringChanged = useCallback(() => {
-    const prevClusterZoomLevel = prevClusterZoomLevelRef.current;
-    const changed = prevClusterZoomLevel !== clusterZoomLevel;
-    prevClusterZoomLevelRef.current = clusterZoomLevel;
-    return changed;
-  }, [clusterZoomLevel]);
-
   return {
     currentZoom,
     clusterZoomLevel,
     handleClusterClick,
-    hasClusteringChanged,
   };
 };

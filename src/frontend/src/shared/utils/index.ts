@@ -4,3 +4,5 @@ export * from "./format.utils";
 export * from "./walk.utils";
 export * from "./clustering.utils";
 export * from "./cookie.utils";
+export * from "./reverseGeocode";
+export * from "./geo.utils";

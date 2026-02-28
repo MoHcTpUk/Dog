@@ -6,3 +6,5 @@ export { DogProfileModal } from './DogProfileModal';
 export type { DogProfileModalProps } from './DogProfileModal';
 export { ProfileTabSwitcher } from './ProfileTabSwitcher';
 export type { ProfileTab } from './ProfileTabSwitcher';
+export { SuggestPlaceModal } from './SuggestPlaceModal';
+export type { SuggestPlaceModalProps, SuggestPlaceData } from './SuggestPlaceModal';

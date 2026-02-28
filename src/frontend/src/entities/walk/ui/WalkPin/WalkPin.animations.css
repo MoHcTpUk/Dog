@@ -2,14 +2,14 @@
 @keyframes walkPinFadeIn {
   0% {
     opacity: 0;
-    transform: scale(0.3);
+    transform: translate(-50%, -100%) scale(0.3);
   }
   60% {
-    transform: scale(1.1);
+    transform: translate(-50%, -100%) scale(1.1);
   }
   100% {
     opacity: 1;
-    transform: scale(1);
+    transform: translate(-50%, -100%) scale(1);
   }
 }
 
@@ -17,11 +17,11 @@
 @keyframes walkPinFadeOut {
   0% {
     opacity: 1;
-    transform: scale(1);
+    transform: translate(-50%, -100%) scale(1);
   }
   100% {
     opacity: 0;
-    transform: scale(0.3);
+    transform: translate(-50%, -100%) scale(0.3);
   }
 }
 
@@ -71,7 +71,9 @@
 
 /* Базовые стили для контейнеров */
 .walk-pin-container {
-  /* Убрали transition чтобы не конфликтовал с animation */
+  /* Bottom center of the DOM node is aligned to marker coordinates. */
+  transform: translate(-50%, -100%);
+  transform-origin: center bottom;
 }
 
 .cluster-container {

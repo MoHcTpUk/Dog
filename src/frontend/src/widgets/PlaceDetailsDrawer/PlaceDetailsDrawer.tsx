@@ -1,4 +1,6 @@
 import React from 'react';
+import { useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button, Icon, BottomDrawer, Tag } from '@shared/ui';
 import { Text } from '@shared/ui/Text';
 import { Place } from '@features/home';
@@ -8,7 +10,6 @@ export interface PlaceDetailsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   onRouteClick?: () => void;
-  onReportClick?: () => void;
   onFavoriteToggle?: () => void;
 }
 
@@ -17,12 +18,18 @@ export const PlaceDetailsDrawer: React.FC<PlaceDetailsDrawerProps> = ({
   isOpen,
   onClose,
   onRouteClick,
-  onReportClick,
   onFavoriteToggle,
 }) => {
+  const { t } = useTranslation();
+  const history = useHistory();
+
   if (!place) return null;
 
   const hasPhotos = place.photos && place.photos.length > 0;
+
+  const handleReportClick = () => {
+    history.push(`/place/${place.id}/report`);
+  };
 
   return (
     <BottomDrawer isOpen={isOpen} onClose={onClose}>
@@ -51,14 +58,11 @@ export const PlaceDetailsDrawer: React.FC<PlaceDetailsDrawerProps> = ({
                   {place.categoryLabel}
                 </Text>
               </div>
-              <div
-                className="cursor-pointer"
-                onClick={onFavoriteToggle}
-              >
+              <div className="cursor-pointer" onClick={onFavoriteToggle}>
                 <Icon
                   name={place.isFavorite ? 'star-filled' : 'star'}
                   size={24}
-                  color="#3F335A"
+                  color="var(--color-text-primary)"
                 />
               </div>
             </div>
@@ -88,16 +92,12 @@ export const PlaceDetailsDrawer: React.FC<PlaceDetailsDrawerProps> = ({
             onClick={onRouteClick}
           >
             <div className="rotate-90">
-              <Icon name="route" size={24} color="#3F335A" />
+              <Icon name="route" size={24} color="var(--color-text-primary)" />
             </div>
           </div>
 
-          <Button
-            variant="secondary-white"
-            size="M"
-            onClick={onReportClick}
-          >
-            Сообщить об ошибке
+          <Button variant="secondary-white" size="M" onClick={handleReportClick}>
+            {t('Report an Error')}
           </Button>
         </div>
       </>

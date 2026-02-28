@@ -1,0 +1,38 @@
+/* Пин появляется из центра (anchor [0,0] + translate(-50%,-50%) = центр на координатах) */
+@keyframes placePinFadeIn {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+  60% {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes placePinFadeOut {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+}
+
+/* Базовый стиль — центрирует пин относительно географической точки */
+.place-pin-container {
+  transform: translate(-50%, -50%);
+}
+
+.place-pin-enter {
+  animation: placePinFadeIn 0.4s cubic-bezier(0.34, 1.35, 0.64, 1) forwards;
+}
+
+.place-pin-exit {
+  animation: placePinFadeOut 0.35s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}

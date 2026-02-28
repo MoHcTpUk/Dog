@@ -19,6 +19,7 @@ const ITEM_HEIGHT = 56;
 const SCROLL_SETTLE_MS = 150;
 const REPEATS = 21;
 const CENTER_REPEAT = Math.floor(REPEATS / 2);
+type DateColumnType = "day" | "month" | "year";
 
 export const DatePicker: React.FC<DatePickerProps> = ({
   value,
@@ -57,10 +58,17 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     month: false,
     year: false,
   });
-  const [scrollTops, setScrollTops] = useState<{ [key: string]: number }>({
-    day: 0,
-    month: 0,
-    year: 0,
+  const [scrollTops, setScrollTops] = useState<{ [key: string]: number }>(() => {
+    const initialDaysLen = getDaysInMonth(value.month, value.year);
+    const initialDays = Array.from({ length: initialDaysLen }, (_, i) => i + 1);
+    const dayIdx = Math.max(0, initialDays.indexOf(value.day));
+    const monthIdx = value.month - 1;
+    const yearIdx = Math.max(0, years.indexOf(value.year));
+    return {
+      day: (CENTER_REPEAT * initialDaysLen + dayIdx) * ITEM_HEIGHT,
+      month: (CENTER_REPEAT * 12 + monthIdx) * ITEM_HEIGHT,
+      year: yearIdx * ITEM_HEIGHT,
+    };
   });
 
   const valueRef = useRef(value);
@@ -69,13 +77,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   const daysRef = useRef(days);
   daysRef.current = days;
 
-  const isInfinite = useCallback(
-    (type: "day" | "month" | "year") => type !== "year",
-    [],
-  );
+  const isInfinite = useCallback((type: DateColumnType) => type !== "year", []);
 
   const getItemsLength = useCallback(
-    (type: "day" | "month" | "year") => {
+    (type: DateColumnType) => {
       if (type === "day") return daysRef.current.length;
       if (type === "month") return months.length;
       return years.length;
@@ -84,7 +89,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   );
 
   const getCenterScrollTop = useCallback(
-    (type: "day" | "month" | "year", itemIndex: number) => {
+    (type: DateColumnType, itemIndex: number) => {
       if (isInfinite(type)) {
         return (CENTER_REPEAT * getItemsLength(type) + itemIndex) * ITEM_HEIGHT;
       }
@@ -94,7 +99,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   );
 
   const recenterIfNeeded = useCallback(
-    (type: "day" | "month" | "year", element: HTMLDivElement) => {
+    (type: DateColumnType, element: HTMLDivElement) => {
       if (!isInfinite(type)) return;
       const len = getItemsLength(type);
       const totalItems = len * REPEATS;
@@ -112,6 +117,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         element.scrollTop = newScrollTop;
         requestAnimationFrame(() => {
           isRecentering.current[type] = false;
+          setScrollTops((prev) => ({ ...prev, [type]: newScrollTop }));
         });
       }
     },
@@ -119,14 +125,23 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   );
 
   const handleCommit = useCallback(
-    (type: "day" | "month" | "year", element: HTMLDivElement) => {
+    (type: DateColumnType, element: HTMLDivElement) => {
       recenterIfNeeded(type, element);
 
-      const scrollTop = element.scrollTop;
-      const globalIndex = Math.round(scrollTop / ITEM_HEIGHT);
+      const rawScrollTop = element.scrollTop;
+      const globalIndex = Math.round(rawScrollTop / ITEM_HEIGHT);
+      const snappedScrollTop = globalIndex * ITEM_HEIGHT;
       const currentValue = valueRef.current;
       const currentDays = daysRef.current;
       const newValue = { ...currentValue };
+
+      if (Math.abs(rawScrollTop - snappedScrollTop) > 1) {
+        element.scrollTo({
+          top: snappedScrollTop,
+          behavior: "smooth",
+        });
+      }
+      setScrollTops((prev) => ({ ...prev, [type]: snappedScrollTop }));
 
       if (type === "day") {
         const len = currentDays.length;
@@ -164,23 +179,49 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     [months.length, years, haptic, onChange, isInfinite, recenterIfNeeded],
   );
 
+  const scheduleCommit = useCallback(
+    (type: DateColumnType, element: HTMLDivElement, delay = SCROLL_SETTLE_MS) => {
+      if (scrollTimeoutRefs.current[type]) {
+        window.clearTimeout(scrollTimeoutRefs.current[type]!);
+      }
+
+      scrollTimeoutRefs.current[type] = window.setTimeout(() => {
+        handleCommit(type, element);
+        scrollTimeoutRefs.current[type] = null;
+      }, delay);
+    },
+    [handleCommit],
+  );
+
   const handleScroll = useCallback(
-    (type: "day" | "month" | "year", element: HTMLDivElement) => {
+    (type: DateColumnType, element: HTMLDivElement) => {
       if (isRecentering.current[type]) return;
       isUserScrollingRef.current[type] = true;
 
       setScrollTops((prev) => ({ ...prev, [type]: element.scrollTop }));
 
-      if (scrollTimeoutRefs.current[type]) {
-        window.clearTimeout(scrollTimeoutRefs.current[type]!);
-      }
-      scrollTimeoutRefs.current[type] = window.setTimeout(() => {
-        handleCommit(type, element);
-        scrollTimeoutRefs.current[type] = null;
-      }, SCROLL_SETTLE_MS);
+      scheduleCommit(type, element);
     },
-    [handleCommit],
+    [scheduleCommit],
   );
+
+  const handleInteractionEnd = useCallback(
+    (type: DateColumnType, element: HTMLDivElement) => {
+      scheduleCommit(type, element, 24);
+    },
+    [scheduleCommit],
+  );
+
+  useEffect(() => {
+    return () => {
+      (["day", "month", "year"] as const).forEach((type) => {
+        if (scrollTimeoutRefs.current[type]) {
+          window.clearTimeout(scrollTimeoutRefs.current[type]!);
+          scrollTimeoutRefs.current[type] = null;
+        }
+      });
+    };
+  }, []);
 
   useEffect(() => {
     const scrollToValue = (type: "day" | "month" | "year") => {
@@ -237,7 +278,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   }, [daysInSelectedMonth]);
 
   const renderColumn = (
-    type: "day" | "month" | "year",
+    type: DateColumnType,
     items: (string | number)[],
     width: string,
   ) => {
@@ -261,11 +302,14 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           }}
           className="h-full overflow-y-scroll scrollbar-hide relative z-10"
           style={{
-            scrollSnapType: "y proximity",
+            scrollSnapType: "y mandatory",
             WebkitOverflowScrolling: "touch",
             overscrollBehavior: "contain",
+            touchAction: "pan-y",
           }}
           onScroll={(e) => handleScroll(type, e.currentTarget)}
+          onTouchEnd={(e) => handleInteractionEnd(type, e.currentTarget)}
+          onMouseUp={(e) => handleInteractionEnd(type, e.currentTarget)}
         >
           {!isTop && <div className="h-28" />}
           {renderItems.map((item, index) => {

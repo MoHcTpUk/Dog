@@ -4,4 +4,5 @@ export { useDebounce } from "./useDebounce";
 export { useFormatWalkTime } from "./useFormatWalkTime";
 export { useMapZoom } from "./useMapZoom";
 export { usePlaceMarkers } from "./usePlaceMarkers";
+export { useCenterPinMotion } from "./useCenterPinMotion";
 export { useWalkMarkers } from "./useWalkMarkers";

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
 import type { Walk } from '@shared/types/walk';
@@ -11,7 +11,6 @@ interface UseWalkMarkersProps {
   mapglAPI: MapGLAPI | null;
   walks: Walk[];
   clusterZoomLevel: number;
-  hasClusteringChanged: () => boolean;
   onClusterClick: (center: [number, number]) => void;
   onWalkClick?: (walkId: string) => void;
   isPaused?: boolean;
@@ -23,12 +22,15 @@ interface WalkMarkerData {
   id: string;
 }
 
+const getMarkerElement = (marker: MapMarker): HTMLElement | null => {
+  return marker.getContent?.() || marker._el || null;
+};
+
 export const useWalkMarkers = ({
   mapInstance,
   mapglAPI,
   walks,
   clusterZoomLevel,
-  hasClusteringChanged,
   onClusterClick,
   onWalkClick,
   isPaused = false,
@@ -38,29 +40,23 @@ export const useWalkMarkers = ({
   const onWalkClickRef = useRef(onWalkClick);
   const cleanupTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const createTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const prevClusterZoomLevelRef = useRef(clusterZoomLevel);
 
   onClusterClickRef.current = onClusterClick;
   onWalkClickRef.current = onWalkClick;
 
-  const shouldUpdate = useMemo(() => {
-    return hasClusteringChanged();
-  }, [hasClusteringChanged]);
-
   useEffect(() => {
     if (isPaused) return;
-
     if (!mapInstance || !mapglAPI) return;
 
-    // Всегда обновляем если количество walks изменилось с ненулевого на ноль или наоборот
-    const hasWalksCountChanged = (walks.length === 0) !== (walkMarkersRef.current.length === 0);
-    if (!shouldUpdate && !hasWalksCountChanged && walkMarkersRef.current.length > 0) return;
+    const hasClusteringChanged = prevClusterZoomLevelRef.current !== clusterZoomLevel;
+    prevClusterZoomLevelRef.current = clusterZoomLevel;
 
-    if (cleanupTimeoutRef.current) {
-      clearTimeout(cleanupTimeoutRef.current);
-    }
-    if (createTimeoutRef.current) {
-      clearTimeout(createTimeoutRef.current);
-    }
+    const hasWalksCountChanged = (walks.length === 0) !== (walkMarkersRef.current.length === 0);
+    if (!hasClusteringChanged && !hasWalksCountChanged && walkMarkersRef.current.length > 0) return;
+
+    if (cleanupTimeoutRef.current) clearTimeout(cleanupTimeoutRef.current);
+    if (createTimeoutRef.current) clearTimeout(createTimeoutRef.current);
 
     const clusteredItems = clusterWalks(walks, clusterZoomLevel);
 
@@ -79,7 +75,7 @@ export const useWalkMarkers = ({
     });
 
     markersToRemove.forEach(({ marker }) => {
-      const element = marker.getContent?.() || marker._el;
+      const element = getMarkerElement(marker);
       if (element) {
         const walkPinContainer = element.querySelector('.walk-pin-container');
         const clusterContainer = element.querySelector('.cluster-container');
@@ -143,7 +139,9 @@ export const useWalkMarkers = ({
             const marker = new mapglAPI.HtmlMarker(mapInstance, {
               coordinates: item.coordinates,
               html: markerElement,
-              anchor: [60, 63],
+              // Anchor the marker at the walk pin's bottom center so the tip
+              // stays exactly on the selected map coordinates regardless of pin width.
+              anchor: [0, 0],
             });
 
             walkMarkersRef.current.push({ marker, root, id: item.id });
@@ -153,23 +151,15 @@ export const useWalkMarkers = ({
     }
 
     return () => {
-      if (cleanupTimeoutRef.current) {
-        clearTimeout(cleanupTimeoutRef.current);
-      }
-      if (createTimeoutRef.current) {
-        clearTimeout(createTimeoutRef.current);
-      }
+      if (cleanupTimeoutRef.current) clearTimeout(cleanupTimeoutRef.current);
+      if (createTimeoutRef.current) clearTimeout(createTimeoutRef.current);
     };
-  }, [isPaused, walks, mapglAPI, mapInstance, clusterZoomLevel, shouldUpdate]);
+  }, [isPaused, walks, mapglAPI, mapInstance, clusterZoomLevel]);
 
   useEffect(() => {
     return () => {
-      if (cleanupTimeoutRef.current) {
-        clearTimeout(cleanupTimeoutRef.current);
-      }
-      if (createTimeoutRef.current) {
-        clearTimeout(createTimeoutRef.current);
-      }
+      if (cleanupTimeoutRef.current) clearTimeout(cleanupTimeoutRef.current);
+      if (createTimeoutRef.current) clearTimeout(createTimeoutRef.current);
       walkMarkersRef.current.forEach(({ marker, root }) => {
         root.unmount();
         marker.destroy();

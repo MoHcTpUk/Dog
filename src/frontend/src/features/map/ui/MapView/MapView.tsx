@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import { memo } from "react";
 import { useMapLoader } from "../../hooks/useMapLoader";
 import { useMapGL } from "../../context";
 import { useMapZoom, usePlaceMarkers, useWalkMarkers } from "@shared/hooks";
@@ -19,9 +19,9 @@ interface MapViewProps {
 const MapViewComponent: React.FC<MapViewProps> = ({
   isPaused = false,
   center = [37.573856, 55.751574],
-  zoom = 13,
+  zoom = 12,
 }) => {
-  const { displayedWalks, displayedPlaces, onWalkClick } = useMapGL();
+  const { displayedWalks, displayedPlaces, onWalkClick, onPlaceClick } = useMapGL();
 
   const { mapglAPI, mapInstance, isLoading } = useMapLoader({
     center,
@@ -30,7 +30,7 @@ const MapViewComponent: React.FC<MapViewProps> = ({
 
   console.log('[MapView] Rendering, isPaused:', isPaused, 'isLoading:', isLoading, 'mapInstance:', !!mapInstance);
 
-  const { clusterZoomLevel, handleClusterClick, hasClusteringChanged } = useMapZoom({
+  const { clusterZoomLevel, handleClusterClick } = useMapZoom({
     mapInstance,
     initialZoom: zoom,
   });
@@ -39,6 +39,9 @@ const MapViewComponent: React.FC<MapViewProps> = ({
     mapInstance,
     mapglAPI,
     places: displayedPlaces,
+    clusterZoomLevel,
+    onClusterClick: handleClusterClick,
+    onPlaceClick: onPlaceClick || undefined,
     isPaused,
   });
 
@@ -47,21 +50,10 @@ const MapViewComponent: React.FC<MapViewProps> = ({
     mapglAPI,
     walks: displayedWalks,
     clusterZoomLevel,
-    hasClusteringChanged,
     onClusterClick: handleClusterClick,
     onWalkClick: onWalkClick || undefined,
     isPaused,
   });
-
-  // Пересчитываем размер карты когда она становится видимой
-  React.useEffect(() => {
-    if (!isPaused && mapInstance) {
-      console.log('[MapView] Map became visible, calling invalidateSize');
-      setTimeout(() => {
-        mapInstance.invalidateSize?.();
-      }, 100);
-    }
-  }, [isPaused, mapInstance]);
 
   return (
     <div className="relative w-full h-full">

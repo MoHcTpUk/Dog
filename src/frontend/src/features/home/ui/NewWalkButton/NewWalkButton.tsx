@@ -7,7 +7,7 @@ export const NewWalkButton: React.FC = () => {
   const history = useHistory();
 
   const handleClick = () => {
-    history.push("/walk/create");
+    history.push("/map?createWalk=1");
   };
 
   return (

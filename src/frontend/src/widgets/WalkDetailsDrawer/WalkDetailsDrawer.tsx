@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button, Icon, BottomDrawer, ConfirmModal } from '@shared/ui';
 import { Text } from '@shared/ui/Text';
 import { WalkInfoCard } from '@entities/walk';
@@ -39,11 +41,20 @@ export const WalkDetailsDrawer: React.FC<WalkDetailsDrawerProps> = ({
   onRejectRequest,
   requestedDogs = [],
 }) => {
+  const { t } = useTranslation();
+  const history = useHistory();
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const formattedTime = useFormatWalkTime(walk?.time || new Date());
+
+  const handleEditClick = () => {
+    if (walk) {
+      history.push(`/walk/${walk.id}/edit`);
+    }
+    onEditClick?.();
+  };
 
   if (!walk) return null;
 
@@ -56,7 +67,7 @@ export const WalkDetailsDrawer: React.FC<WalkDetailsDrawerProps> = ({
         <>
           <div className="flex flex-col gap-5">
             <WalkInfoCard
-              time={isOwnWalk ? `Ваша прогулка ${formattedTime}` : formattedTime}
+              time={isOwnWalk ? `${t('New Walk')} ${formattedTime}` : formattedTime}
               description={walk.description}
               location={walk.location}
               distance={walk.distance}
@@ -82,7 +93,7 @@ export const WalkDetailsDrawer: React.FC<WalkDetailsDrawerProps> = ({
             {showRequests && (
               <div className="flex flex-col gap-5">
                 <Text variant="semibold-18" color="primary">
-                  Запросы на прогулку
+                  {t('Wants To Join Your Walk')}
                 </Text>
                 <div className="flex flex-col gap-1">
                   {requestedDogs.map((dog) => (
@@ -156,14 +167,14 @@ export const WalkDetailsDrawer: React.FC<WalkDetailsDrawerProps> = ({
                 </Button>
               )}
 
-              {isOwnWalk && onEditClick && (
+              {isOwnWalk && (
                 <Button
                   variant="secondary-white"
                   size="M"
                   icon={<Icon name="edit" size={24} color="#3F335A" />}
-                  onClick={onEditClick}
+                  onClick={handleEditClick}
                 >
-                  Редактировать
+                  {t('Edit Walk')}
                 </Button>
               )}
             </div>

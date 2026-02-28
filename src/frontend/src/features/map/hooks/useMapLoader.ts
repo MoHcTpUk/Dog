@@ -10,7 +10,7 @@ interface UseMapLoaderProps {
 
 export const useMapLoader = ({
   center = [37.573856, 55.751574],
-  zoom = 13,
+  zoom = 12,
   onMapReady,
 }: UseMapLoaderProps = {}) => {
   const { mapglAPI, isLoaded, isMapReady, mapInstance, initMap } = useMapGL();

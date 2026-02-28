@@ -1,5 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
+import { Icon } from '../Icon';
 
 export interface RadioButtonProps {
   label: string;
@@ -7,6 +8,7 @@ export interface RadioButtonProps {
   checked?: boolean;
   onChange?: (value: string) => void;
   name?: string;
+  className?: string;
 }
 
 export const RadioButton: React.FC<RadioButtonProps> = ({
@@ -14,13 +16,14 @@ export const RadioButton: React.FC<RadioButtonProps> = ({
   value,
   checked = false,
   onChange,
+  className,
 }) => {
   const handleClick = () => {
     onChange?.(value);
   };
 
   const containerClasses = classNames(
-    "w-80",
+    "w-full",
     "p-5",
     "bg-surface",
     "rounded-2xl",
@@ -30,7 +33,8 @@ export const RadioButton: React.FC<RadioButtonProps> = ({
     "items-center",
     "gap-5",
     "overflow-hidden",
-    "cursor-pointer"
+    "cursor-pointer",
+    className
   );
 
   const labelClasses = classNames(
@@ -71,7 +75,9 @@ export const RadioButton: React.FC<RadioButtonProps> = ({
         </div>
         {checked ? (
           <div data-state="on" className="w-6 h-6 flex justify-center items-center gap-2.5">
-            <div className={checkedCircleClasses} />
+            <div className={checkedCircleClasses + " flex items-center justify-center"}>
+              <Icon name="check" size={12} color="white" />
+            </div>
           </div>
         ) : (
           <div data-state="off" className="p-0.5 flex justify-start items-center gap-2.5">

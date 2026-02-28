@@ -77,7 +77,7 @@ export const Button: React.FC<ButtonProps> = ({
 
     // Variant-specific styles
     if (disabled) {
-      baseClasses.push("bg-zinc-100", "text-gray-700", "cursor-not-allowed");
+      baseClasses.push("bg-zinc-200", "text-zinc-400", "cursor-not-allowed");
     } else {
       switch (variant) {
         case "primary":
@@ -113,7 +113,7 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const renderContent = () => {
-    const textColor = variant === "primary" ? "white" : undefined;
+    const textColor = variant === "primary" && !disabled ? "white" : undefined;
 
     if (loading) {
       return (
@@ -172,6 +172,7 @@ export const Button: React.FC<ButtonProps> = ({
           "--padding-end": "0",
           "--padding-top": "0",
           "--padding-bottom": "0",
+          "--opacity": "1",
           margin: "0",
           height: "auto",
           minHeight: "0",

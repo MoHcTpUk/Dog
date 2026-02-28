@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { MapView } from '@features/map';
+import { useMapGL } from '@features/map/context';
 import type { Location } from 'history';
 
 interface LocationState {
@@ -9,24 +10,18 @@ interface LocationState {
 
 export const PersistentMapLayer: React.FC = () => {
   const location = useLocation<LocationState>();
-  const [isMapRoute, setIsMapRoute] = useState(false);
+  const { locationPickerActive } = useMapGL();
 
-  useEffect(() => {
-    // Проверяем background location, если drawer открыт
-    const background = location.state?.background;
-    const currentPath = background ? background.pathname : location.pathname;
-    const shouldShow = currentPath.startsWith('/map');
-    console.log('[PersistentMapLayer] Current path:', currentPath, 'shouldShow:', shouldShow);
-    setIsMapRoute(shouldShow);
-  }, [location.pathname, location.state]);
-
-  console.log('[PersistentMapLayer] Rendering, isMapRoute:', isMapRoute);
+  const background = location.state?.background;
+  const currentPath = background ? background.pathname : location.pathname;
+  const isMapRoute = currentPath.startsWith('/map');
+  const isVisible = isMapRoute || locationPickerActive;
 
   return (
     <div
       className="persistent-map-layer"
       style={{
-        display: isMapRoute ? 'block' : 'none',
+        display: 'block',
         position: 'fixed',
         top: 0,
         left: 0,
@@ -34,11 +29,12 @@ export const PersistentMapLayer: React.FC = () => {
         bottom: 0,
         width: '100%',
         height: '100%',
-        zIndex: isMapRoute ? 1 : -1,
-        pointerEvents: isMapRoute ? 'auto' : 'none',
+        zIndex: isVisible ? 1 : -1,
+        pointerEvents: isVisible ? 'auto' : 'none',
+        opacity: isVisible ? 1 : 0,
       }}
     >
-      <MapView isPaused={!isMapRoute} />
+      <MapView isPaused={!isVisible} />
     </div>
   );
 };

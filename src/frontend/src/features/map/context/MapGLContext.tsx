@@ -9,10 +9,8 @@ import { load } from "@2gis/mapgl";
 import type { MapGLAPI, MapInstance } from "../types/map.types";
 import type { Walk } from "@shared/types/walk";
 import { MapGLContext, type Place } from "./context";
-
-// const MAP_API_KEY = "f9c14a07-af77-4cd7-8a71-f9adf475db9b";
-
-const MAP_API_KEY = "6361e894-da48-41bb-974b-d3dfe4dcea1e";
+import type { PlaceCategory } from "@shared/types/place";
+import { TWO_GIS_MAP_KEY } from "@shared/config/2gis.config";
 
 export const MapGLProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -28,6 +26,17 @@ export const MapGLProvider: React.FC<{ children: React.ReactNode }> = ({
   const [displayedPlaces, setDisplayedPlaces] = useState<Place[]>([]);
   const [activeTab, setActiveTab] = useState<"walks" | "places">("walks");
   const onWalkClickRef = useRef<((walkId: string) => void) | null>(null);
+  const onPlaceClickRef = useRef<((placeId: string) => void) | null>(null);
+  const [walkCreationActive, setWalkCreationActive] = useState(false);
+
+  const [locationPickerActive, setLocationPickerActive] = useState(false);
+  const [locationPickerInitialCoords, setLocationPickerInitialCoords] = useState<[number, number] | null>(null);
+  const locationPickerCallbackRef = useRef<((coords: [number, number], address: string) => void) | null>(null);
+
+  const [placeCreationActive, setPlaceCreationActive] = useState(false);
+  const [placesCategoryFilter, setPlacesCategoryFilter] = useState<PlaceCategory | null>(null);
+  const [userAddedWalks, setUserAddedWalks] = useState<Walk[]>([]);
+  const [userAddedPlaces, setUserAddedPlaces] = useState<Place[]>([]);
 
   // Загружаем только API карты при инициализации приложения (для быстрой загрузки)
   useEffect(() => {
@@ -80,7 +89,7 @@ export const MapGLProvider: React.FC<{ children: React.ReactNode }> = ({
         const map = new mapglRef.current.Map(container, {
           center,
           zoom,
-          key: MAP_API_KEY,
+          key: TWO_GIS_MAP_KEY,
           rotationControl: false,
           zoomControl: false,
           trafficControl: false,
@@ -132,6 +141,60 @@ export const MapGLProvider: React.FC<{ children: React.ReactNode }> = ({
     onWalkClickRef.current?.(walkId);
   }, []);
 
+  const setPlaceClickHandler = useCallback(
+    (handler: ((placeId: string) => void) | null) => {
+      onPlaceClickRef.current = handler;
+    },
+    [],
+  );
+
+  const onPlaceClick = useCallback((placeId: string) => {
+    onPlaceClickRef.current?.(placeId);
+  }, []);
+
+  const startWalkCreation = useCallback(() => {
+    setWalkCreationActive(true);
+  }, []);
+
+  const cancelWalkCreation = useCallback(() => {
+    setWalkCreationActive(false);
+  }, []);
+
+  const startLocationPicker = useCallback((coords: [number, number], onConfirm: (coords: [number, number], address: string) => void) => {
+    locationPickerCallbackRef.current = onConfirm;
+    setLocationPickerInitialCoords(coords);
+    setLocationPickerActive(true);
+  }, []);
+
+  const cancelLocationPicker = useCallback(() => {
+    setLocationPickerActive(false);
+    setLocationPickerInitialCoords(null);
+    locationPickerCallbackRef.current = null;
+  }, []);
+
+  const confirmLocationPicker = useCallback((coords: [number, number], address: string) => {
+    locationPickerCallbackRef.current?.(coords, address);
+    setLocationPickerActive(false);
+    setLocationPickerInitialCoords(null);
+    locationPickerCallbackRef.current = null;
+  }, []);
+
+  const startPlaceCreation = useCallback(() => {
+    setPlaceCreationActive(true);
+  }, []);
+
+  const cancelPlaceCreation = useCallback(() => {
+    setPlaceCreationActive(false);
+  }, []);
+
+  const addUserWalk = useCallback((walk: Walk) => {
+    setUserAddedWalks((prev) => [walk, ...prev]);
+  }, []);
+
+  const addUserPlace = useCallback((place: Place) => {
+    setUserAddedPlaces((prev) => [...prev, place]);
+  }, []);
+
   // Уничтожаем карту только при размонтировании провайдера
   useEffect(() => {
     return () => {
@@ -151,12 +214,35 @@ export const MapGLProvider: React.FC<{ children: React.ReactNode }> = ({
       displayedWalks,
       displayedPlaces,
       onWalkClick,
+      onPlaceClick,
       activeTab,
 
       setDisplayedWalks,
       setDisplayedPlaces,
       setWalkClickHandler,
+      setPlaceClickHandler,
       setActiveTab,
+
+      walkCreationActive,
+      startWalkCreation,
+      cancelWalkCreation,
+
+      locationPickerActive,
+      locationPickerInitialCoords,
+      startLocationPicker,
+      cancelLocationPicker,
+      confirmLocationPicker,
+
+      placeCreationActive,
+      startPlaceCreation,
+      cancelPlaceCreation,
+
+      placesCategoryFilter,
+      setPlacesCategoryFilter,
+      userAddedWalks,
+      addUserWalk,
+      userAddedPlaces,
+      addUserPlace,
     }),
     [
       isLoaded,
@@ -166,8 +252,27 @@ export const MapGLProvider: React.FC<{ children: React.ReactNode }> = ({
       displayedWalks,
       displayedPlaces,
       onWalkClick,
+      onPlaceClick,
       activeTab,
       setWalkClickHandler,
+      setPlaceClickHandler,
+      walkCreationActive,
+      startWalkCreation,
+      cancelWalkCreation,
+      locationPickerActive,
+      locationPickerInitialCoords,
+      startLocationPicker,
+      cancelLocationPicker,
+      confirmLocationPicker,
+      placeCreationActive,
+      startPlaceCreation,
+      cancelPlaceCreation,
+      placesCategoryFilter,
+      setPlacesCategoryFilter,
+      userAddedWalks,
+      addUserWalk,
+      userAddedPlaces,
+      addUserPlace,
     ],
   );
 
