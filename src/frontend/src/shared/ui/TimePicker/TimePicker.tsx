@@ -188,6 +188,11 @@ export const TimePicker: React.FC<TimePickerProps> = ({
     (type: TimeColumnType) => {
       if (Date.now() < syncLockUntilRef.current[type]) return;
 
+      const element = scrollRefs.current[type];
+      if (element) {
+        setActiveIndex(type, getNearestIndex(type, element.scrollTop));
+      }
+
       if (timeoutRefs.current[type]) {
         window.clearTimeout(timeoutRefs.current[type]!);
       }
@@ -206,7 +211,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
 
       schedule();
     },
-    [commitColumn],
+    [commitColumn, getNearestIndex, setActiveIndex],
   );
 
   useLayoutEffect(() => {
@@ -314,7 +319,6 @@ export const TimePicker: React.FC<TimePickerProps> = ({
         <div style={{ height: TOP_PADDING }} />
         {items.map((item, index) => {
           const display = formatItem ? formatItem(item) : String(item);
-          const isActive = activeIndices[type] === index;
 
           return (
             <div
@@ -323,11 +327,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
               style={{ scrollSnapAlign: "center" }}
             >
               <span
-                className={`text-center text-base transition-all duration-75 font-['Golos_Text'] ${
-                  isActive
-                    ? "font-semibold text-text-primary"
-                    : "text-text-muted"
-                }`}
+                className="text-center text-base transition-all duration-75 font-['Golos_Text'] text-text-muted"
               >
                 {display}
               </span>
@@ -342,6 +342,10 @@ export const TimePicker: React.FC<TimePickerProps> = ({
   const padTwo = (item: string | number) =>
     String(typeof item === "number" ? item : Number(item)).padStart(2, "0");
 
+  const activeDay = days[activeIndices.day] ?? "";
+  const activeHour = HOURS[activeIndices.hour] ?? 0;
+  const activeMinute = MINUTES[activeIndices.minute] ?? 0;
+
   return (
     <div
       className={`w-full h-44 relative flex flex-col justify-start items-center overflow-hidden ${className}`}
@@ -351,7 +355,29 @@ export const TimePicker: React.FC<TimePickerProps> = ({
         {renderColumn("hour", HOURS, padTwo)}
         {renderColumn("minute", MINUTES, padTwo)}
       </div>
-      <div className="absolute top-1/2 left-0 right-0 h-14 -translate-y-1/2 bg-white rounded-2xl pointer-events-none z-0" />
+      <div className="absolute top-1/2 left-0 right-0 h-14 -translate-y-1/2 pointer-events-none z-20 flex items-center">
+        <div className="flex justify-between items-center w-full">
+          <div className="flex-1 flex justify-center">
+            <span className="text-center text-base font-['Golos_Text'] font-semibold text-text-primary">
+              {activeDay}
+            </span>
+          </div>
+          <div className="flex-1 flex justify-center">
+            <span className="text-center text-base font-['Golos_Text'] font-semibold text-text-primary">
+              {padTwo(activeHour)}
+            </span>
+          </div>
+          <div className="flex-1 flex justify-center">
+            <span className="text-center text-base font-['Golos_Text'] font-semibold text-text-primary">
+              {padTwo(activeMinute)}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        className="absolute top-1/2 left-0 right-0 h-14 -translate-y-1/2 bg-white rounded-2xl pointer-events-none"
+        style={{ zIndex: 15 }}
+      />
       <div className="absolute top-0 left-0 w-full h-14 bg-gradient-to-b from-zinc-100 to-zinc-100/0 pointer-events-none z-30" />
       <div className="absolute bottom-0 left-0 w-full h-14 bg-gradient-to-b from-zinc-100/0 to-zinc-100 pointer-events-none z-30" />
     </div>

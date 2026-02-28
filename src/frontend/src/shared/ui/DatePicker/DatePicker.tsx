@@ -167,6 +167,11 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     (type: DateColumnType) => {
       if (Date.now() < syncLockUntilRef.current[type]) return;
 
+      const element = scrollRefs.current[type];
+      if (element) {
+        setActiveIndex(type, getNearestIndex(type, element.scrollTop));
+      }
+
       if (timeoutRefs.current[type]) {
         window.clearTimeout(timeoutRefs.current[type]!);
       }
@@ -185,7 +190,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
       schedule();
     },
-    [commitColumn],
+    [commitColumn, getNearestIndex, setActiveIndex],
   );
 
   useLayoutEffect(() => {
@@ -287,7 +292,6 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         {items.map((item, index) => {
           const isDisabled =
             type === "day" && typeof item === "number" && item > maxValidDay;
-          const isActive = activeIndices[type] === index;
 
           return (
             <div
@@ -299,9 +303,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                 className={`${width} text-center text-base transition-all duration-75 font-['Golos_Text'] ${
                   isDisabled
                     ? "text-text-muted opacity-30"
-                    : isActive
-                      ? "font-semibold text-text-primary"
-                      : "text-text-muted"
+                    : "text-text-muted"
                 }`}
               >
                 {item}
@@ -314,6 +316,15 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     </div>
   );
 
+  const activeDay = DAYS[activeIndices.day];
+  const activeMonth = months[activeIndices.month] ?? "";
+  const activeYear = years[activeIndices.year] ?? "";
+  const isActiveDayDisabled = activeDay > maxValidDay;
+
+  const selectionOverlayPositionClass = isTop
+    ? "absolute top-0 left-0 right-0 h-14"
+    : "absolute top-1/2 left-0 right-0 h-14 -translate-y-1/2";
+
   return (
     <div
       className={`w-full ${
@@ -325,14 +336,47 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         {renderColumn("month", months, "w-24")}
         {renderColumn("year", years, "w-12")}
       </div>
+      <div
+        className={`${selectionOverlayPositionClass} pointer-events-none z-20 flex items-center`}
+      >
+        <div className="flex justify-between items-center w-full">
+          <div className="flex-1 flex justify-center">
+            <span
+              className={`w-7 text-center text-base font-['Golos_Text'] ${
+                isActiveDayDisabled
+                  ? "text-text-muted opacity-30"
+                  : "font-semibold text-text-primary"
+              }`}
+            >
+              {activeDay}
+            </span>
+          </div>
+          <div className="flex-1 flex justify-center">
+            <span className="w-24 text-center text-base font-['Golos_Text'] font-semibold text-text-primary">
+              {activeMonth}
+            </span>
+          </div>
+          <div className="flex-1 flex justify-center">
+            <span className="w-12 text-center text-base font-['Golos_Text'] font-semibold text-text-primary">
+              {activeYear}
+            </span>
+          </div>
+        </div>
+      </div>
       {isTop ? (
         <>
-          <div className="absolute top-0 left-0 right-0 h-14 bg-white rounded-2xl pointer-events-none z-0" />
+          <div
+            className="absolute top-0 left-0 right-0 h-14 bg-white rounded-2xl pointer-events-none"
+            style={{ zIndex: 15 }}
+          />
           <div className="absolute bottom-0 left-0 w-full h-14 bg-gradient-to-b from-zinc-100/0 to-zinc-100 pointer-events-none z-30" />
         </>
       ) : (
         <>
-          <div className="absolute top-1/2 left-0 right-0 h-14 -translate-y-1/2 bg-white rounded-2xl pointer-events-none z-0" />
+          <div
+            className="absolute top-1/2 left-0 right-0 h-14 -translate-y-1/2 bg-white rounded-2xl pointer-events-none"
+            style={{ zIndex: 15 }}
+          />
           <div className="absolute top-0 left-0 w-full h-14 bg-gradient-to-b from-zinc-100 to-zinc-100/0 pointer-events-none z-30" />
           <div className="absolute bottom-0 left-0 w-full h-14 bg-gradient-to-b from-zinc-100/0 to-zinc-100 pointer-events-none z-30" />
         </>
