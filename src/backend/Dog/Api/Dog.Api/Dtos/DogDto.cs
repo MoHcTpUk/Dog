@@ -20,4 +20,6 @@ public record DogDto : Dto
     public Activity Activity { get; set; }
 
     public string? About { get; set; }
+
+    public Guid? OwnerId { get; set; }
 }

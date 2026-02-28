@@ -18,5 +18,8 @@ public class DogAggregate : IAggregateRoot
     public Activity Activity { get; set; }
 
     public string? About { get; set; }
+
+    public Guid? OwnerId { get; set; }
+
     public required Guid Id { get; set; }
 }

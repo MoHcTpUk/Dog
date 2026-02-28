@@ -23,6 +23,11 @@ public class DogDbContext(DbContextOptions<DogDbContext> options) : DbContext(op
                     species => species.Value,
                     value => Species.FromValue(value))
                 .IsRequired();
+            entity.Property(e => e.OwnerId);
+            entity.HasOne<OwnerAggregate>()
+                .WithMany()
+                .HasForeignKey(e => e.OwnerId)
+                .IsRequired(false);
         });
         
         modelBuilder.Entity<OwnerAggregate>(entity =>

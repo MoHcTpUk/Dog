@@ -37,4 +37,16 @@ public class DogsController(IDogService service)
     {
         return base.Get(query);
     }
+
+    [HttpPost("BindToOwner")]
+    public Task<ResultContainer<DogDto>> BindToOwner([FromBody] BindDogToOwnerCommand command)
+    {
+        return service.BindToOwnerAsync(command);
+    }
+
+    [HttpPost("UnbindFromOwner")]
+    public Task<ResultContainer<DogDto>> UnbindFromOwner([FromBody] UnbindDogFromOwnerCommand command)
+    {
+        return service.UnbindFromOwnerAsync(command);
+    }
 }
