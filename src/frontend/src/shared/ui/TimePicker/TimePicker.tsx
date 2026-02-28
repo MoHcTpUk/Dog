@@ -1,4 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { usePlatform } from "@shared/hooks/usePlatform";
 
@@ -13,6 +20,7 @@ export interface TimePickerProps {
   onChange: (value: TimePickerValue) => void;
   daysCount?: number;
   className?: string;
+  syncToken?: number;
 }
 
 export function getDefaultTimeValue(): TimePickerValue {
@@ -47,6 +55,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
   onChange,
   daysCount = 30,
   className = "",
+  syncToken = 0,
 }) => {
   const { t } = useTranslation();
   const { haptic } = usePlatform();
@@ -75,6 +84,11 @@ export const TimePicker: React.FC<TimePickerProps> = ({
 
   const scrollRefs = useRef<ColumnRefs>({ day: null, hour: null, minute: null });
   const timeoutRefs = useRef<TimeoutRefs>({ day: null, hour: null, minute: null });
+  const isInteractingRef = useRef<Record<TimeColumnType, boolean>>({
+    day: false,
+    hour: false,
+    minute: false,
+  });
   const syncLockUntilRef = useRef<Record<TimeColumnType, number>>({
     day: 0,
     hour: 0,
@@ -171,31 +185,42 @@ export const TimePicker: React.FC<TimePickerProps> = ({
   );
 
   const handleScroll = useCallback(
-    (type: TimeColumnType, element: HTMLDivElement) => {
-      if (Date.now() < syncLockUntilRef.current[type]) {
-        setActiveIndex(type, getNearestIndex(type, element.scrollTop));
-        return;
-      }
-
-      setActiveIndex(type, getNearestIndex(type, element.scrollTop));
+    (type: TimeColumnType) => {
+      if (Date.now() < syncLockUntilRef.current[type]) return;
 
       if (timeoutRefs.current[type]) {
         window.clearTimeout(timeoutRefs.current[type]!);
       }
 
-      timeoutRefs.current[type] = window.setTimeout(() => {
-        timeoutRefs.current[type] = null;
-        commitColumn(type);
-      }, SCROLL_SETTLE_MS);
+      const schedule = () => {
+        timeoutRefs.current[type] = window.setTimeout(() => {
+          if (isInteractingRef.current[type]) {
+            schedule();
+            return;
+          }
+
+          timeoutRefs.current[type] = null;
+          commitColumn(type);
+        }, SCROLL_SETTLE_MS);
+      };
+
+      schedule();
     },
-    [commitColumn, getNearestIndex, setActiveIndex],
+    [commitColumn],
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     scrollToIndex("day", getValueIndex("day"));
     scrollToIndex("hour", getValueIndex("hour"));
     scrollToIndex("minute", getValueIndex("minute"));
-  }, [getValueIndex, scrollToIndex, value.dayOffset, value.hour, value.minute]);
+  }, [
+    getValueIndex,
+    scrollToIndex,
+    syncToken,
+    value.dayOffset,
+    value.hour,
+    value.minute,
+  ]);
 
   useEffect(() => {
     const currentTimeouts = timeoutRefs.current;
@@ -210,6 +235,56 @@ export const TimePicker: React.FC<TimePickerProps> = ({
     };
   }, []);
 
+  const beginInteraction = useCallback((type: TimeColumnType) => {
+    isInteractingRef.current[type] = true;
+  }, []);
+
+  const endInteraction = useCallback((type: TimeColumnType) => {
+    isInteractingRef.current[type] = false;
+  }, []);
+
+  const columnRefs = useMemo(
+    () => ({
+      day: (element: HTMLDivElement | null) => {
+        scrollRefs.current.day = element;
+        if (!element) return;
+
+        const index = getValueIndex("day");
+        const targetScrollTop = index * ITEM_HEIGHT;
+        syncLockUntilRef.current.day = Date.now() + 120;
+        if (Math.abs(element.scrollTop - targetScrollTop) > 1) {
+          element.scrollTop = targetScrollTop;
+        }
+        setActiveIndex("day", index);
+      },
+      hour: (element: HTMLDivElement | null) => {
+        scrollRefs.current.hour = element;
+        if (!element) return;
+
+        const index = getValueIndex("hour");
+        const targetScrollTop = index * ITEM_HEIGHT;
+        syncLockUntilRef.current.hour = Date.now() + 120;
+        if (Math.abs(element.scrollTop - targetScrollTop) > 1) {
+          element.scrollTop = targetScrollTop;
+        }
+        setActiveIndex("hour", index);
+      },
+      minute: (element: HTMLDivElement | null) => {
+        scrollRefs.current.minute = element;
+        if (!element) return;
+
+        const index = getValueIndex("minute");
+        const targetScrollTop = index * ITEM_HEIGHT;
+        syncLockUntilRef.current.minute = Date.now() + 120;
+        if (Math.abs(element.scrollTop - targetScrollTop) > 1) {
+          element.scrollTop = targetScrollTop;
+        }
+        setActiveIndex("minute", index);
+      },
+    }),
+    [getValueIndex, setActiveIndex],
+  );
+
   const renderColumn = (
     type: TimeColumnType,
     items: (string | number)[],
@@ -217,9 +292,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
   ) => (
     <div className="flex-1 relative h-44 overflow-hidden">
       <div
-        ref={(element) => {
-          scrollRefs.current[type] = element;
-        }}
+        ref={columnRefs[type]}
         className="h-full overflow-y-auto scrollbar-hide relative z-10"
         style={{
           scrollSnapType: "y mandatory",
@@ -230,7 +303,13 @@ export const TimePicker: React.FC<TimePickerProps> = ({
           overflowAnchor: "none",
           touchAction: "pan-y",
         }}
-        onScroll={(event) => handleScroll(type, event.currentTarget)}
+        onPointerDown={() => beginInteraction(type)}
+        onPointerUp={() => endInteraction(type)}
+        onPointerCancel={() => endInteraction(type)}
+        onTouchStart={() => beginInteraction(type)}
+        onTouchEnd={() => endInteraction(type)}
+        onTouchCancel={() => endInteraction(type)}
+        onScroll={() => handleScroll(type)}
       >
         <div style={{ height: TOP_PADDING }} />
         {items.map((item, index) => {

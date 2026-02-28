@@ -1,4 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { getDaysInMonth, getMonthsList } from "@shared/utils/date.utils";
 import { usePlatform } from "@shared/hooks/usePlatform";
 
@@ -7,6 +14,7 @@ export interface DatePickerProps {
   onChange: (date: { day: number; month: number; year: number }) => void;
   className?: string;
   variant?: "center" | "top";
+  syncToken?: number;
 }
 
 const ITEM_HEIGHT = 56;
@@ -24,6 +32,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   onChange,
   className = "",
   variant = "center",
+  syncToken = 0,
 }) => {
   const isTop = variant === "top";
   const containerHeight = isTop ? TOP_PICKER_HEIGHT : CENTER_PICKER_HEIGHT;
@@ -42,6 +51,11 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
   const scrollRefs = useRef<ColumnRefs>({ day: null, month: null, year: null });
   const timeoutRefs = useRef<TimeoutRefs>({ day: null, month: null, year: null });
+  const isInteractingRef = useRef<Record<DateColumnType, boolean>>({
+    day: false,
+    month: false,
+    year: false,
+  });
   const syncLockUntilRef = useRef<Record<DateColumnType, number>>({
     day: 0,
     month: 0,
@@ -150,31 +164,35 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   );
 
   const handleScroll = useCallback(
-    (type: DateColumnType, element: HTMLDivElement) => {
-      if (Date.now() < syncLockUntilRef.current[type]) {
-        setActiveIndex(type, getNearestIndex(type, element.scrollTop));
-        return;
-      }
-
-      setActiveIndex(type, getNearestIndex(type, element.scrollTop));
+    (type: DateColumnType) => {
+      if (Date.now() < syncLockUntilRef.current[type]) return;
 
       if (timeoutRefs.current[type]) {
         window.clearTimeout(timeoutRefs.current[type]!);
       }
 
-      timeoutRefs.current[type] = window.setTimeout(() => {
-        timeoutRefs.current[type] = null;
-        commitColumn(type);
-      }, SCROLL_SETTLE_MS);
+      const schedule = () => {
+        timeoutRefs.current[type] = window.setTimeout(() => {
+          if (isInteractingRef.current[type]) {
+            schedule();
+            return;
+          }
+
+          timeoutRefs.current[type] = null;
+          commitColumn(type);
+        }, SCROLL_SETTLE_MS);
+      };
+
+      schedule();
     },
-    [commitColumn, getNearestIndex, setActiveIndex],
+    [commitColumn],
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     scrollToIndex("day", getValueIndex("day"));
     scrollToIndex("month", getValueIndex("month"));
     scrollToIndex("year", getValueIndex("year"));
-  }, [getValueIndex, scrollToIndex, value.day, value.month, value.year]);
+  }, [getValueIndex, scrollToIndex, syncToken, value.day, value.month, value.year]);
 
   useEffect(() => {
     const currentTimeouts = timeoutRefs.current;
@@ -189,6 +207,56 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     };
   }, []);
 
+  const beginInteraction = useCallback((type: DateColumnType) => {
+    isInteractingRef.current[type] = true;
+  }, []);
+
+  const endInteraction = useCallback((type: DateColumnType) => {
+    isInteractingRef.current[type] = false;
+  }, []);
+
+  const columnRefs = useMemo(
+    () => ({
+      day: (element: HTMLDivElement | null) => {
+        scrollRefs.current.day = element;
+        if (!element) return;
+
+        const index = getValueIndex("day");
+        const targetScrollTop = index * ITEM_HEIGHT;
+        syncLockUntilRef.current.day = Date.now() + 120;
+        if (Math.abs(element.scrollTop - targetScrollTop) > 1) {
+          element.scrollTop = targetScrollTop;
+        }
+        setActiveIndex("day", index);
+      },
+      month: (element: HTMLDivElement | null) => {
+        scrollRefs.current.month = element;
+        if (!element) return;
+
+        const index = getValueIndex("month");
+        const targetScrollTop = index * ITEM_HEIGHT;
+        syncLockUntilRef.current.month = Date.now() + 120;
+        if (Math.abs(element.scrollTop - targetScrollTop) > 1) {
+          element.scrollTop = targetScrollTop;
+        }
+        setActiveIndex("month", index);
+      },
+      year: (element: HTMLDivElement | null) => {
+        scrollRefs.current.year = element;
+        if (!element) return;
+
+        const index = getValueIndex("year");
+        const targetScrollTop = index * ITEM_HEIGHT;
+        syncLockUntilRef.current.year = Date.now() + 120;
+        if (Math.abs(element.scrollTop - targetScrollTop) > 1) {
+          element.scrollTop = targetScrollTop;
+        }
+        setActiveIndex("year", index);
+      },
+    }),
+    [getValueIndex, setActiveIndex],
+  );
+
   const renderColumn = (
     type: DateColumnType,
     items: (string | number)[],
@@ -196,9 +264,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   ) => (
     <div className={`flex-1 relative ${isTop ? "h-44" : "h-72"} overflow-hidden`}>
       <div
-        ref={(element) => {
-          scrollRefs.current[type] = element;
-        }}
+        ref={columnRefs[type]}
         className="h-full overflow-y-auto scrollbar-hide relative z-10"
         style={{
           scrollSnapType: "y mandatory",
@@ -209,7 +275,13 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           overflowAnchor: "none",
           touchAction: "pan-y",
         }}
-        onScroll={(event) => handleScroll(type, event.currentTarget)}
+        onPointerDown={() => beginInteraction(type)}
+        onPointerUp={() => endInteraction(type)}
+        onPointerCancel={() => endInteraction(type)}
+        onTouchStart={() => beginInteraction(type)}
+        onTouchEnd={() => endInteraction(type)}
+        onTouchCancel={() => endInteraction(type)}
+        onScroll={() => handleScroll(type)}
       >
         {topPadding > 0 && <div style={{ height: topPadding }} />}
         {items.map((item, index) => {

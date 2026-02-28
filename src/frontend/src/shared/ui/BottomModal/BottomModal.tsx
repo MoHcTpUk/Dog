@@ -6,6 +6,8 @@ import "./BottomModal.module.css";
 export interface BottomModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onDidPresent?: () => void;
+  keepContentsMounted?: boolean;
   title?: string;
   children: React.ReactNode;
   buttons?: React.ReactNode;
@@ -16,6 +18,8 @@ export interface BottomModalProps {
 export const BottomModal: React.FC<BottomModalProps> = ({
   isOpen,
   onClose,
+  onDidPresent,
+  keepContentsMounted = false,
   title,
   children,
   buttons,
@@ -61,6 +65,8 @@ export const BottomModal: React.FC<BottomModalProps> = ({
       ref={modalRef}
       isOpen={isOpen}
       onDidDismiss={onClose}
+      onDidPresent={onDidPresent}
+      keepContentsMounted={keepContentsMounted}
       showBackdrop={true}
       backdropDismiss={true}
       handle={false}

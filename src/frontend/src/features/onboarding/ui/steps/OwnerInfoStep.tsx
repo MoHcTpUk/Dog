@@ -1,8 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { IonImg } from "@ionic/react";
 import { Input, BottomModal, DatePicker, Text, Button, Icon } from "@shared/ui";
+import { parseDateParts } from "@shared/utils/date.utils";
 import { DogProfileData, StepErrors } from "../../model/types";
 
 interface OwnerInfoStepProps {
@@ -18,26 +19,26 @@ export const OwnerInfoStep: React.FC<OwnerInfoStepProps> = ({
 }) => {
   const { t } = useTranslation();
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  const getInitialDate = () => {
-    if (data.owner.birth_date) {
-      const date = new Date(data.owner.birth_date);
-      return {
-        day: date.getDate(),
-        month: date.getMonth() + 1,
-        year: date.getFullYear(),
-      };
-    }
-    // Default to today's date
+  const [datePickerSyncToken, setDatePickerSyncToken] = useState(0);
+  const getInitialDate = useCallback(() => {
     const today = new Date();
-    return {
+    const fallback = {
       day: today.getDate(),
       month: today.getMonth() + 1,
       year: today.getFullYear(),
     };
-  };
+
+    return parseDateParts(data.owner.birth_date, {
+      fallback,
+    });
+  }, [data.owner.birth_date]);
 
   const [selectedDate, setSelectedDate] = useState(getInitialDate());
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setSelectedDate(getInitialDate());
+  }, [getInitialDate]);
 
   const handleOwnerUpdate = (field: string, value: string) => {
     onUpdate({
@@ -112,14 +113,24 @@ export const OwnerInfoStep: React.FC<OwnerInfoStepProps> = ({
     setIsDatePickerOpen(false);
   };
 
+  const syncDatePickerPosition = useCallback(() => {
+    setDatePickerSyncToken((current) => current + 1);
+  }, []);
+
   const openDatePicker = () => {
+    setSelectedDate(getInitialDate());
     setIsDatePickerOpen(true);
   };
 
   const formatDisplayDate = (dateString: string) => {
     if (!dateString) return t("Birth Date");
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
+    const parsedDate = parseDateParts(dateString, {
+      fallback: getInitialDate(),
+    });
+
+    return new Intl.DateTimeFormat(undefined).format(
+      new Date(parsedDate.year, parsedDate.month - 1, parsedDate.day),
+    );
   };
 
   return (
@@ -208,6 +219,7 @@ export const OwnerInfoStep: React.FC<OwnerInfoStepProps> = ({
       <BottomModal
         isOpen={isDatePickerOpen}
         onClose={handleDateCancel}
+        onDidPresent={syncDatePickerPosition}
         title={t("Owner birth date")}
         className="date-picker-modal"
         buttons={
@@ -230,11 +242,14 @@ export const OwnerInfoStep: React.FC<OwnerInfoStepProps> = ({
         }
       >
         <div className="Carusel self-stretch h-44 relative flex flex-col justify-start items-center overflow-hidden">
-          <DatePicker
-            value={selectedDate}
-            onChange={handleDateChange}
-            variant="top"
-          />
+          {isDatePickerOpen ? (
+            <DatePicker
+              value={selectedDate}
+              onChange={handleDateChange}
+              variant="top"
+              syncToken={datePickerSyncToken}
+            />
+          ) : null}
         </div>
       </BottomModal>
     </>

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { IonImg } from "@ionic/react";
@@ -22,6 +22,7 @@ import {
   getGenderComfortOptions,
   getSizeComfortOptions,
 } from "@features/profile/lib/constants";
+import { parseDateParts } from "@shared/utils/date.utils";
 
 interface DogData {
   photos?: string[];
@@ -53,6 +54,13 @@ interface DogEditFormProps {
   onSave?: (data: DogData) => void;
 }
 
+const DEFAULT_BIRTH_DATE = "01.09.2023";
+const DEFAULT_SELECTED_DATE = {
+  day: 1,
+  month: 9,
+  year: 2023,
+};
+
 export const DogEditForm: React.FC<DogEditFormProps> = ({
   initialData,
   onSave,
@@ -66,7 +74,7 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
   const [weight, setWeight] = useState<number>(initialData?.weight || 20);
   const [breed, setBreed] = useState<string>(initialData?.breed || t("Mixed"));
   const [birthDate, setBirthDate] = useState<string>(
-    initialData?.birthDate || "01.09.2023",
+    initialData?.birthDate || DEFAULT_BIRTH_DATE,
   );
   const [health, setHealth] = useState<{
     sterilized: boolean;
@@ -100,12 +108,25 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
 
   const [isBreedDrawerOpen, setIsBreedDrawerOpen] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [datePickerSyncToken, setDatePickerSyncToken] = useState(0);
   const [searchBreed, setSearchBreed] = useState("");
-  const [selectedDate, setSelectedDate] = useState({
-    day: 1,
-    month: 9,
-    year: 2023,
-  });
+  const [selectedDate, setSelectedDate] = useState(
+    parseDateParts(initialData?.birthDate || DEFAULT_BIRTH_DATE, {
+      fallback: DEFAULT_SELECTED_DATE,
+    }),
+  );
+
+  const parseBirthDate = useCallback((dateString: string) => {
+    return parseDateParts(dateString, {
+      fallback: DEFAULT_SELECTED_DATE,
+    });
+  }, []);
+
+  useEffect(() => {
+    const nextBirthDate = initialData?.birthDate || DEFAULT_BIRTH_DATE;
+    setBirthDate(nextBirthDate);
+    setSelectedDate(parseBirthDate(nextBirthDate));
+  }, [initialData?.birthDate, parseBirthDate]);
 
   const handleImageCapture = async () => {
     try {
@@ -160,6 +181,19 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
     setBirthDate(dateString);
     setIsDatePickerOpen(false);
   };
+
+  const openDatePicker = () => {
+    setSelectedDate(parseBirthDate(birthDate));
+    setIsDatePickerOpen(true);
+  };
+
+  const closeDatePicker = () => {
+    setIsDatePickerOpen(false);
+  };
+
+  const syncDatePickerPosition = useCallback(() => {
+    setDatePickerSyncToken((current) => current + 1);
+  }, []);
 
   const breeds = getBreeds(t);
   const filteredBreeds = breeds.filter((b) =>
@@ -277,7 +311,7 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
           </Text>
           <div
             className="self-stretch h-16 p-5 bg-white rounded-2xl flex flex-col justify-center items-center gap-5 overflow-hidden cursor-pointer"
-            onClick={() => setIsDatePickerOpen(true)}
+            onClick={openDatePicker}
           >
             <div className="self-stretch inline-flex justify-between items-center">
               <Text color="primary" className="flex-1">
@@ -436,13 +470,14 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
 
       <BottomModal
         isOpen={isDatePickerOpen}
-        onClose={() => setIsDatePickerOpen(false)}
+        onClose={closeDatePicker}
+        onDidPresent={syncDatePickerPosition}
         title="Дата рождения"
         buttons={
           <div className="self-stretch inline-flex justify-center items-start gap-2.5 w-full">
             <Button
               variant="secondary"
-              onClick={() => setIsDatePickerOpen(false)}
+              onClick={closeDatePicker}
               className="flex-1"
             >
               Отмена
@@ -458,11 +493,14 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
         }
       >
         <div className="self-stretch h-44 relative flex flex-col justify-start items-center overflow-hidden">
-          <DatePicker
-            value={selectedDate}
-            onChange={setSelectedDate}
-            variant="top"
-          />
+          {isDatePickerOpen ? (
+            <DatePicker
+              value={selectedDate}
+              onChange={setSelectedDate}
+              variant="top"
+              syncToken={datePickerSyncToken}
+            />
+          ) : null}
         </div>
       </BottomModal>
     </>

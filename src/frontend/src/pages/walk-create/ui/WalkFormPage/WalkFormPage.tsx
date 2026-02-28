@@ -24,6 +24,7 @@ export const WalkFormPage: React.FC<WalkFormPageProps> = ({
   const [locationCoords, setLocationCoords] = useState<[number, number] | null>(null);
   const [description, setDescription] = useState("");
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [timePickerSyncToken, setTimePickerSyncToken] = useState(0);
 
   // Temp time value for modal (only committed on Save)
   const [timeValue, setTimeValue] = useState<TimePickerValue>({
@@ -96,6 +97,7 @@ export const WalkFormPage: React.FC<WalkFormPageProps> = ({
 
   const handleTimePickerOpen = () => {
     setTempTimeValue(timeValue);
+    setTimePickerSyncToken((current) => current + 1);
     setShowTimePicker(true);
   };
 
@@ -247,7 +249,11 @@ export const WalkFormPage: React.FC<WalkFormPageProps> = ({
             </div>
           }
         >
-          <TimePicker value={tempTimeValue} onChange={setTempTimeValue} />
+          <TimePicker
+            value={tempTimeValue}
+            onChange={setTempTimeValue}
+            syncToken={timePickerSyncToken}
+          />
         </BottomModal>
       </IonContent>
     </IonPage>

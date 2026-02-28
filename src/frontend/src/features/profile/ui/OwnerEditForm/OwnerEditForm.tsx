@@ -1,9 +1,10 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { IonImg } from "@ionic/react";
 import { Text, Input, Button, Icon, BottomModal, DatePicker } from "@shared/ui";
 import { getMonthNames } from "@shared/lib/constants";
+import { parseDateParts } from "@shared/utils/date.utils";
 
 interface OwnerData {
   photo?: string | null;
@@ -15,6 +16,13 @@ interface OwnerEditFormProps {
   initialData?: OwnerData;
   onSave?: (data: OwnerData) => void;
 }
+
+const DEFAULT_BIRTH_DATE = "3 марта 2009";
+const DEFAULT_SELECTED_DATE = {
+  day: 3,
+  month: 3,
+  year: 2009,
+};
 
 export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
   initialData,
@@ -28,15 +36,33 @@ export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
   );
   const [name, setName] = useState<string>(initialData?.name || "Альберт");
   const [birthDate, setBirthDate] = useState<string>(
-    initialData?.birth_date || "3 марта 2009",
+    initialData?.birth_date || DEFAULT_BIRTH_DATE,
   );
 
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState({
-    day: 3,
-    month: 3,
-    year: 2009,
-  });
+  const [datePickerSyncToken, setDatePickerSyncToken] = useState(0);
+  const [selectedDate, setSelectedDate] = useState(
+    parseDateParts(initialData?.birth_date || DEFAULT_BIRTH_DATE, {
+      fallback: DEFAULT_SELECTED_DATE,
+      monthNames: getMonthNames(t),
+    }),
+  );
+
+  const parseBirthDate = useCallback(
+    (dateString: string) => {
+      return parseDateParts(dateString, {
+        fallback: DEFAULT_SELECTED_DATE,
+        monthNames: getMonthNames(t),
+      });
+    },
+    [t],
+  );
+
+  useEffect(() => {
+    const nextBirthDate = initialData?.birth_date || DEFAULT_BIRTH_DATE;
+    setBirthDate(nextBirthDate);
+    setSelectedDate(parseBirthDate(nextBirthDate));
+  }, [initialData?.birth_date, parseBirthDate]);
 
   const handleImageCapture = async () => {
     try {
@@ -86,6 +112,19 @@ export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
     setBirthDate(dateString);
     setIsDatePickerOpen(false);
   };
+
+  const openDatePicker = () => {
+    setSelectedDate(parseBirthDate(birthDate));
+    setIsDatePickerOpen(true);
+  };
+
+  const closeDatePicker = () => {
+    setIsDatePickerOpen(false);
+  };
+
+  const syncDatePickerPosition = useCallback(() => {
+    setDatePickerSyncToken((current) => current + 1);
+  }, []);
 
   const handleSave = () => {
     if (onSave) {
@@ -144,7 +183,7 @@ export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
             </Text>
             <div
               className="self-stretch h-16 p-5 bg-white rounded-2xl flex flex-col justify-center items-center gap-5 overflow-hidden cursor-pointer"
-              onClick={() => setIsDatePickerOpen(true)}
+              onClick={openDatePicker}
             >
               <div className="self-stretch inline-flex justify-between items-center">
                 <Text color="primary" className="flex-1">
@@ -170,13 +209,14 @@ export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
 
       <BottomModal
         isOpen={isDatePickerOpen}
-        onClose={() => setIsDatePickerOpen(false)}
+        onClose={closeDatePicker}
+        onDidPresent={syncDatePickerPosition}
         title="Дата рождения хозяина"
         buttons={
           <div className="self-stretch inline-flex justify-center items-start gap-2.5 w-full">
             <Button
               variant="secondary"
-              onClick={() => setIsDatePickerOpen(false)}
+              onClick={closeDatePicker}
               className="flex-1"
             >
               Отмена
@@ -192,11 +232,14 @@ export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
         }
       >
         <div className="self-stretch h-44 relative flex flex-col justify-start items-center overflow-hidden">
-          <DatePicker
-            value={selectedDate}
-            onChange={setSelectedDate}
-            variant="top"
-          />
+          {isDatePickerOpen ? (
+            <DatePicker
+              value={selectedDate}
+              onChange={setSelectedDate}
+              variant="top"
+              syncToken={datePickerSyncToken}
+            />
+          ) : null}
         </div>
       </BottomModal>
     </>
