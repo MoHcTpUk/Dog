@@ -1,12 +1,22 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Icon, BottomDrawer, Tag } from '@shared/ui';
+import { Button, Icon, BottomDrawer, Tag, RoundIconButton } from '@shared/ui';
 import { Text } from '@shared/ui/Text';
-import { Place } from '@features/home';
+
+interface PlaceDetailsViewModel {
+  id: string;
+  name: string;
+  categoryLabel?: string;
+  description?: string;
+  photos?: string[];
+  address?: string;
+  workingHours?: string;
+  isFavorite?: boolean;
+}
 
 export interface PlaceDetailsDrawerProps {
-  place: Place | null;
+  place: PlaceDetailsViewModel | null;
   isOpen: boolean;
   onClose: () => void;
   onRouteClick?: () => void;
@@ -58,13 +68,17 @@ export const PlaceDetailsDrawer: React.FC<PlaceDetailsDrawerProps> = ({
                   {place.categoryLabel}
                 </Text>
               </div>
-              <div className="cursor-pointer" onClick={onFavoriteToggle}>
+              <button
+                type="button"
+                className="cursor-pointer"
+                onClick={onFavoriteToggle}
+              >
                 <Icon
                   name={place.isFavorite ? 'star-filled' : 'star'}
                   size={24}
                   color="var(--color-text-primary)"
                 />
-              </div>
+              </button>
             </div>
 
             {place.description && (
@@ -87,14 +101,14 @@ export const PlaceDetailsDrawer: React.FC<PlaceDetailsDrawerProps> = ({
         </div>
 
         <div className="flex justify-between items-start">
-          <div
-            className="p-3 -rotate-90 bg-white rounded-full flex items-center justify-center cursor-pointer"
+          <RoundIconButton
             onClick={onRouteClick}
+            rotateContent
+            shadow={false}
+            className="p-3"
           >
-            <div className="rotate-90">
-              <Icon name="route" size={24} color="var(--color-text-primary)" />
-            </div>
-          </div>
+            <Icon name="route" size={24} color="var(--color-text-primary)" />
+          </RoundIconButton>
 
           <Button variant="secondary-white" size="M" onClick={handleReportClick}>
             {t('Report an Error')}

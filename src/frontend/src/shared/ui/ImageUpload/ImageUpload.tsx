@@ -1,6 +1,6 @@
-import React, { useState, useRef } from "react";
-import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { platformUtils } from "@shared/hooks/usePlatform";
 import { Icon } from "../Icon";
 import { BottomDrawer } from "../BottomDrawer";
 import { Text } from "../Text";
@@ -60,70 +60,20 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     null
   );
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageCapture = async () => {
-    try {
-      // Try to use Capacitor camera first (for mobile)
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.DataUrl,
-        source: CameraSource.Prompt,
-      });
-
-      if (image.dataUrl) {
-        const newImages = [...images, image.dataUrl];
-        onChange(newImages);
-      }
-    } catch (error) {
-      console.error(
-        "Capacitor camera not available, falling back to file input:",
-        error
-      );
-      // Fallback to file input for web
-      if (fileInputRef.current) {
-        fileInputRef.current.click();
-      }
+    const remainingSlots = maxImages - images.length;
+    if (remainingSlots <= 0) {
+      return;
     }
-  };
 
-  const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files && files.length > 0) {
-      const remainingSlots = maxImages - images.length;
-      const filesToProcess = Array.from(files).slice(0, remainingSlots);
+    const selectedImages = await platformUtils.media.pickImages({
+      multiple: true,
+      maxImages: remainingSlots,
+    });
 
-      // Show warning if user selected more files than available slots
-      if (files.length > remainingSlots) {
-        console.warn(
-          `Можно добавить только ${remainingSlots} фото. Остальные будут проигнорированы.`
-        );
-      }
-
-      const newImages: string[] = [];
-      let processedCount = 0;
-
-      filesToProcess.forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const result = e.target?.result as string;
-          if (result) {
-            newImages.push(result);
-          }
-          processedCount++;
-
-          if (processedCount === filesToProcess.length) {
-            const finalImages = [...images, ...newImages].slice(0, maxImages);
-            onChange(finalImages);
-          }
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-    // Reset the input so the same files can be selected again
-    if (event.target) {
-      event.target.value = "";
+    if (selectedImages.length > 0) {
+      onChange([...images, ...selectedImages].slice(0, maxImages));
     }
   };
 
@@ -159,7 +109,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   return (
     <div className="InputCover self-stretch inline-flex flex-col justify-start items-start gap-9 w-full">
       <Text variant="bold-24" tag="h1" className="mb-2 text-start">
-        {t("Добавьте фото собаки")}
+        {t("Upload dog photos")}
       </Text>
 
       {images.length === 0 && canAddMore ? (
@@ -200,17 +150,6 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
           ))}
         </div>
       )}
-
-      {/* Hidden file input for web fallback */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        multiple
-        className="hidden"
-        onChange={handleFileInput}
-      />
-
       <ImageActionDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}

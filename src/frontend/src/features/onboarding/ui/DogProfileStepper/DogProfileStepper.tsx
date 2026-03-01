@@ -19,6 +19,10 @@ import welcomeDogImage1 from "@shared/assets/images/welcome/welcomeDogStep1.webp
 import welcomeDogImage2 from "@shared/assets/images/welcome/welcomeDogStep2.webp";
 import welcomeDogImage3 from "@shared/assets/images/welcome/welcomeDogStep3.webp";
 import welcomeDogImage8 from "@shared/assets/images/welcome/welcomeDogStep8.webp";
+import {
+  ONBOARDING_ACTIONS_INSET_CLASS,
+  ONBOARDING_BOTTOM_INSET_STYLE,
+} from "../onboardingLayout.constants";
 
 // Function to get image for each step
 const getStepImage = (step: number): string | null => {
@@ -57,7 +61,7 @@ export const DogProfileStepper: React.FC<DogProfileStepperProps> = ({
   // Sync step with URL parameter - only once on mount
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    const stepParam = searchParams.get('step');
+    const stepParam = searchParams.get("step");
     if (stepParam) {
       const step = parseInt(stepParam, 10);
       if (step >= 1 && step <= 10) {
@@ -66,18 +70,18 @@ export const DogProfileStepper: React.FC<DogProfileStepperProps> = ({
     } else {
       // If no step param, default to step 1 and update URL
       setCurrentStep(1);
-      router.push(`/onboarding?step=1`, 'none', 'replace');
+      router.push(`/onboarding?step=1`, "none", "replace");
     }
   }, [router, setCurrentStep]); // Only run once on mount
 
   // Update URL when step changes (but not on initial load)
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    const currentStepParam = searchParams.get('step');
-    
+    const currentStepParam = searchParams.get("step");
+
     // Only update if URL step is different from current step
     if (currentStepParam !== currentStep.toString()) {
-      router.push(`/onboarding?step=${currentStep}`, 'forward', 'replace');
+      router.push(`/onboarding?step=${currentStep}`, "forward", "replace");
     }
   }, [currentStep, router]);
 
@@ -151,12 +155,13 @@ export const DogProfileStepper: React.FC<DogProfileStepperProps> = ({
 
         {/* Step Content */}
         <div className="flex-1 flex flex-col">
-          <div className="flex-1 px-5 py-[40px]">
-            {renderCurrentStep()}
-          </div>
+          <div className="flex-1 px-5 ">{renderCurrentStep()}</div>
 
           {/* Navigation buttons */}
-          <div className="px-5 pb-10 safe-area-bottom">
+          <div
+            className={ONBOARDING_ACTIONS_INSET_CLASS}
+            style={ONBOARDING_BOTTOM_INSET_STYLE}
+          >
             <div className="flex gap-[10px]">
               <Button
                 variant="secondary-white"
@@ -176,7 +181,7 @@ export const DogProfileStepper: React.FC<DogProfileStepperProps> = ({
                 className="bg-[#3F335A] hover:bg-[#342B47]"
               >
                 {currentStep === 9 && stepperData.photos.length === 0
-                  ? t("Add Photo")
+                  ? t("Upload")
                   : t("Next")}
               </Button>
             </div>
@@ -184,12 +189,7 @@ export const DogProfileStepper: React.FC<DogProfileStepperProps> = ({
         </div>
       </div>
 
-      {showToast && (
-        <Toast
-          message={toastMessage}
-          variant={toastVariant}
-        />
-      )}
+      {showToast && <Toast message={toastMessage} variant={toastVariant} />}
     </>
   );
 };

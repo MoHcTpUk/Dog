@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button, Icon, BottomDrawer, ConfirmModal } from '@shared/ui';
+import { Button, Icon, BottomDrawer, ConfirmModal, RoundIconButton } from '@shared/ui';
 import { Text } from '@shared/ui/Text';
 import { WalkInfoCard } from '@entities/walk';
 import { DogInfoCard, DogRequestCard } from '@entities/dog';
 import { Walk, Dog } from '@shared/types/walk';
 import { useFormatWalkTime } from '@shared/hooks/useFormatWalkTime';
+import {
+  isOwnWalkVariant,
+  WALK_DETAILS_ACTIONS,
+  WALK_DETAILS_MODAL_CONTENT,
+  type WalkDetailsModalKey,
+  type WalkDetailsVariant,
+} from './lib/walkDetailsDrawer.config';
 
-export type WalkDetailsVariant = 'regular' | 'request-sent' | 'joined' | 'own' | 'own-with-requests';
+export type { WalkDetailsVariant } from './lib/walkDetailsDrawer.config';
 
 export interface WalkDetailsDrawerProps {
   walk: Walk | null;
@@ -45,9 +52,7 @@ export const WalkDetailsDrawer: React.FC<WalkDetailsDrawerProps> = ({
 }) => {
   const { t } = useTranslation();
   const history = useHistory();
-  const [showLeaveModal, setShowLeaveModal] = useState(false);
-  const [showCancelModal, setShowCancelModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [activeModal, setActiveModal] = useState<WalkDetailsModalKey | null>(null);
 
   const formattedTime = useFormatWalkTime(walk?.time || new Date());
 
@@ -60,10 +65,33 @@ export const WalkDetailsDrawer: React.FC<WalkDetailsDrawerProps> = ({
 
   if (!walk) return null;
 
-  const isOwnWalk = variant === 'own' || variant === 'own-with-requests';
+  const isOwnWalk = isOwnWalkVariant(variant);
   const showRequests = variant === 'own-with-requests' && requestedDogs.length > 0;
-  const roundActionClass =
-    'p-3 -rotate-90 bg-white rounded-full shadow-[0px_5px_9px_0px_rgba(66,58,58,0.06)] inline-flex items-center justify-center';
+  const actionConfig =
+    variant === 'regular' || variant === 'request-sent' || variant === 'joined'
+      ? WALK_DETAILS_ACTIONS[variant]
+      : null;
+  const handleActionClick =
+    variant === 'regular'
+      ? onJoinClick
+      : variant === 'request-sent'
+        ? () => setActiveModal('cancel')
+        : variant === 'joined'
+          ? () => setActiveModal('leave')
+          : undefined;
+  const modalContent = activeModal ? WALK_DETAILS_MODAL_CONTENT[activeModal] : null;
+
+  const handleModalConfirm = () => {
+    if (activeModal === 'leave') {
+      onLeaveClick?.();
+    } else if (activeModal === 'cancel') {
+      onCancelRequestClick?.();
+    } else if (activeModal === 'delete') {
+      onDeleteClick?.();
+    }
+
+    setActiveModal(null);
+  };
 
   return (
     <>
@@ -97,7 +125,7 @@ export const WalkDetailsDrawer: React.FC<WalkDetailsDrawerProps> = ({
             {showRequests && (
               <div className="flex flex-col gap-5">
                 <Text variant="semibold-18" color="primary">
-                  Запросы на прогулку
+                  {t('Walk requests')}
                 </Text>
                 <div className="flex flex-col gap-1">
                   {requestedDogs.map((dog) => (
@@ -120,67 +148,31 @@ export const WalkDetailsDrawer: React.FC<WalkDetailsDrawerProps> = ({
           </div>
 
           <div className="flex justify-between items-start">
-            <button
-              type="button"
-              className={roundActionClass}
-              onClick={onRouteClick}
-            >
-              <div className="rotate-90">
-                <Icon name="route" size={24} color="#3F335A" />
-              </div>
-            </button>
+            <RoundIconButton onClick={onRouteClick} rotateContent className="p-3">
+              <Icon name="route" size={24} color="#3F335A" />
+            </RoundIconButton>
 
             <div className="flex flex-1 min-w-0 justify-end items-center gap-1 ml-3">
               {isOwnWalk && onDeleteClick && (
-                <button
-                  type="button"
-                  className={roundActionClass}
-                  onClick={() => setShowDeleteModal(true)}
+                <RoundIconButton
+                  onClick={() => setActiveModal('delete')}
+                  rotateContent
+                  className="p-3"
                 >
-                  <div className="rotate-90">
-                    <Icon name="trash" size={24} color="#3F335A" />
-                  </div>
-                </button>
+                  <Icon name="trash" size={24} color="#3F335A" />
+                </RoundIconButton>
               )}
 
-              {variant === 'regular' && (
+              {actionConfig && handleActionClick && (
                 <div className="min-w-0">
                   <Button
                     variant="secondary-white"
                     size="M"
                     shadow
-                    icon={<Icon name="plus" size={24} color="#3F335A" />}
-                    onClick={onJoinClick}
+                    icon={<Icon name={actionConfig.iconName} size={24} color="#3F335A" />}
+                    onClick={handleActionClick}
                   >
-                    Присоединиться
-                  </Button>
-                </div>
-              )}
-
-              {variant === 'request-sent' && (
-                <div className="min-w-0">
-                  <Button
-                    variant="secondary-white"
-                    size="M"
-                    shadow
-                    icon={<Icon name="check" size={24} color="#3F335A" />}
-                    onClick={() => setShowCancelModal(true)}
-                  >
-                    Запрос отправлен
-                  </Button>
-                </div>
-              )}
-
-              {variant === 'joined' && (
-                <div className="min-w-0">
-                  <Button
-                    variant="secondary-white"
-                    size="M"
-                    shadow
-                    icon={<Icon name="cross" size={24} color="#3F335A" />}
-                    onClick={() => setShowLeaveModal(true)}
-                  >
-                    Выйти из прогулки
+                    {t(actionConfig.labelKey)}
                   </Button>
                 </div>
               )}
@@ -191,10 +183,16 @@ export const WalkDetailsDrawer: React.FC<WalkDetailsDrawerProps> = ({
                     variant="secondary-white"
                     size="M"
                     shadow
-                    icon={<Icon name="edit" size={24} color="#3F335A" />}
+                    icon={
+                      <Icon
+                        name={WALK_DETAILS_ACTIONS.edit.iconName}
+                        size={24}
+                        color="#3F335A"
+                      />
+                    }
                     onClick={handleEditClick}
                   >
-                    Редактировать
+                    {t(WALK_DETAILS_ACTIONS.edit.labelKey)}
                   </Button>
                 </div>
               )}
@@ -203,38 +201,15 @@ export const WalkDetailsDrawer: React.FC<WalkDetailsDrawerProps> = ({
         </>
       </BottomDrawer>
 
-      <ConfirmModal
-        isOpen={showLeaveModal}
-        onClose={() => setShowLeaveModal(false)}
-        title="Выйти из прогулки?"
-        confirmText="Да, выйти"
-        onConfirm={() => {
-          onLeaveClick?.();
-          setShowLeaveModal(false);
-        }}
-      />
-
-      <ConfirmModal
-        isOpen={showCancelModal}
-        onClose={() => setShowCancelModal(false)}
-        title="Отменить запрос?"
-        confirmText="Да, отменить"
-        onConfirm={() => {
-          onCancelRequestClick?.();
-          setShowCancelModal(false);
-        }}
-      />
-
-      <ConfirmModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        title="Удалить прогулку?"
-        confirmText="Да, удалить"
-        onConfirm={() => {
-          onDeleteClick?.();
-          setShowDeleteModal(false);
-        }}
-      />
+      {modalContent && (
+        <ConfirmModal
+          isOpen={activeModal !== null}
+          onClose={() => setActiveModal(null)}
+          title={t(modalContent.titleKey)}
+          confirmText={t(modalContent.confirmTextKey)}
+          onConfirm={handleModalConfirm}
+        />
+      )}
     </>
   );
 };

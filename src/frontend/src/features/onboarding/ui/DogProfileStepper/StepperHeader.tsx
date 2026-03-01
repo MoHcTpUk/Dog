@@ -1,5 +1,5 @@
 import React from "react";
-import { IonProgressBar } from "@ionic/react";
+import { Icon } from "@shared/ui";
 
 interface StepperHeaderProps {
   currentStep: number;
@@ -11,17 +11,22 @@ export const StepperHeader: React.FC<StepperHeaderProps> = ({
   currentStep,
   totalSteps,
 }) => {
-  const progress = currentStep / totalSteps;
-
   return (
-    <IonProgressBar
-      value={progress}
-      className="h-1"
-      style={{
-        "--background": "white",
-        "--progress-background": "#3F335A",
-        borderRadius: "2px",
-      } as React.CSSProperties}
-    />
+    <div className="flex w-full justify-start items-center gap-[5px] py-0.5">
+      {Array.from({ length: totalSteps }, (_, index) => {
+        const step = index + 1;
+        const color = step === currentStep ? "#3F335A" : "#FFFFFF";
+
+        return (
+          <Icon
+            key={step}
+            name="stepper-segment"
+            width={30.5}
+            height={4}
+            color={color}
+          />
+        );
+      })}
+    </div>
   );
 };

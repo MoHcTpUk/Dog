@@ -1,27 +1,26 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import { Toggle, Icon, Button, Tag } from '@shared/ui';
+import { useTranslation } from 'react-i18next';
+import { Toggle, Icon, Button, Tag, RoundIconButton } from '@shared/ui';
 import { Text } from '@shared/ui/Text';
-import { useMapGL } from '@features/map/context';
+import type { ToggleOption } from '@shared/ui/Toggle';
+import { type MapTab, useMapGL } from '@features/map/context';
 import type { PlaceCategory } from '@shared/types/place';
-import { Geolocation } from '@capacitor/geolocation';
-import type { Location } from 'history';
-import type { IconName } from '@shared/ui/Icon';
-
-interface LocationState {
-  background?: Location;
-}
-
-const PLACE_CATEGORIES: { value: PlaceCategory; label: string; icon: IconName }[] = [
-  { value: 'cafe',       label: 'Кофейни',   icon: 'cafe'       },
-  { value: 'shop',       label: 'Магазины',  icon: 'shop'       },
-  { value: 'restaurant', label: 'Рестораны', icon: 'restaurant' },
-  { value: 'mall',       label: 'ТЦ',        icon: 'mall'       },
-  { value: 'park',       label: 'Парки',     icon: 'park'       },
-];
+import {
+  centerMapOnUserLocation,
+  isMapOverlayRoute,
+  type MapOverlayLocationState,
+  MAP_ACTION_LABELS,
+  MAP_MY_PLACES_LABEL_KEY,
+  MAP_NOTIFICATION_COUNT,
+  MAP_PLACE_CATEGORY_OPTIONS,
+  MAP_TAB_OPTIONS,
+  MAP_TAB_QUERY_PARAM,
+} from '@features/map/lib';
 
 export const MapUIOverlay: React.FC = () => {
-  const location = useLocation<LocationState>();
+  const { t } = useTranslation();
+  const location = useLocation<MapOverlayLocationState>();
   const history = useHistory();
   const {
     activeTab,
@@ -34,24 +33,29 @@ export const MapUIOverlay: React.FC = () => {
     placesCategoryFilter,
     setPlacesCategoryFilter,
   } = useMapGL();
-  const background = location.state?.background;
-  const currentPath = background ? background.pathname : location.pathname;
-  const isMapRoute = currentPath.startsWith('/map');
-  const notificationCount = 2;
+  const isMapRoute = isMapOverlayRoute(location.pathname, location.state);
+  const toggleOptions = useMemo(
+    () =>
+      MAP_TAB_OPTIONS.map((option) => ({
+        value: option.value,
+        label: t(option.labelKey),
+      })) as [ToggleOption<MapTab>, ToggleOption<MapTab>],
+    [t],
+  );
 
   useEffect(() => {
     if (!isMapRoute) return;
     if (location.pathname !== '/map') return;
 
     const params = new URLSearchParams(location.search);
-    const tabParam = params.get('tab') as 'walks' | 'places' | null;
+    const tabParam = params.get(MAP_TAB_QUERY_PARAM) as MapTab | null;
 
     if (tabParam === 'walks' || tabParam === 'places') {
       if (tabParam !== activeTab) {
         setActiveTab(tabParam);
       }
-    } else if (!params.has('tab')) {
-      params.set('tab', 'walks');
+    } else if (!params.has(MAP_TAB_QUERY_PARAM)) {
+      params.set(MAP_TAB_QUERY_PARAM, 'walks');
       history.replace({ search: params.toString() });
     }
   }, [isMapRoute, location.pathname, location.search, activeTab, setActiveTab, history]);
@@ -61,33 +65,25 @@ export const MapUIOverlay: React.FC = () => {
   }, [history]);
 
   const handleCenterLocation = useCallback(async () => {
-    try {
-      const position = await Geolocation.getCurrentPosition();
-      const { latitude, longitude } = position.coords;
-      if (mapInstance) {
-        mapInstance.setCenter([longitude, latitude]);
-        mapInstance.setZoom(15);
-      }
-    } catch {
-      // Silently handle geolocation errors
-    }
+    await centerMapOnUserLocation(mapInstance);
   }, [mapInstance]);
 
-  const handleTabChange = useCallback((tab: 'walks' | 'places') => {
+  const handleTabChange = useCallback((tab: MapTab) => {
     setActiveTab(tab);
-    // Reset category filter when switching tabs
+
     if (tab !== 'places') {
       setPlacesCategoryFilter(null);
     }
+
     if (location.pathname === '/map') {
       const params = new URLSearchParams(location.search);
-      params.set('tab', tab);
+      params.set(MAP_TAB_QUERY_PARAM, tab);
       history.replace({ search: params.toString() });
     }
   }, [setActiveTab, setPlacesCategoryFilter, location.pathname, location.search, history]);
 
-  const handleCategoryClick = useCallback((cat: PlaceCategory) => {
-    setPlacesCategoryFilter(placesCategoryFilter === cat ? null : cat);
+  const handleCategoryClick = useCallback((category: PlaceCategory) => {
+    setPlacesCategoryFilter(placesCategoryFilter === category ? null : category);
   }, [placesCategoryFilter, setPlacesCategoryFilter]);
 
   if (!isMapRoute || walkCreationActive || placeCreationActive) return null;
@@ -113,23 +109,22 @@ export const MapUIOverlay: React.FC = () => {
         {/* Toggle + notification */}
         <div className="flex justify-between items-center">
           <Toggle
-            options={[
-              { value: 'walks', label: 'Прогулки' },
-              { value: 'places', label: 'Места' },
-            ]}
+            options={toggleOptions}
             value={activeTab}
             onChange={handleTabChange}
           />
-          <div className="relative cursor-pointer" onClick={handleNotificationClick}>
-            <div className="p-3 -rotate-90 bg-white rounded-full shadow-[0px_5px_9px_0px_rgba(66,58,58,0.06)] flex flex-col justify-center items-center">
-              <div className="rotate-90">
-                <Icon name="bell" size={24} color="var(--color-text-primary)" />
-              </div>
-            </div>
-            {notificationCount > 0 && (
+          <div className="relative">
+            <RoundIconButton
+              onClick={handleNotificationClick}
+              rotateContent
+              className="p-3"
+            >
+              <Icon name="bell" size={24} color="var(--color-text-primary)" />
+            </RoundIconButton>
+            {MAP_NOTIFICATION_COUNT > 0 && (
               <div className="absolute min-w-5 px-1.5 py-0.5 left-[29px] top-[-9px] bg-pink-300 rounded-full flex flex-col justify-center items-center">
                 <Text variant="medium-14" color="white">
-                  {notificationCount}
+                  {MAP_NOTIFICATION_COUNT}
                 </Text>
               </div>
             )}
@@ -150,19 +145,19 @@ export const MapUIOverlay: React.FC = () => {
                 icon={<Icon name="star" size={16} />}
                 onClick={() => setPlacesCategoryFilter(null)}
               >
-                Мои места
+                {t(MAP_MY_PLACES_LABEL_KEY)}
               </Tag>
             </div>
 
-            {PLACE_CATEGORIES.map((cat) => (
-              <div key={cat.value} className="flex-shrink-0">
+            {MAP_PLACE_CATEGORY_OPTIONS.map((category) => (
+              <div key={category.value} className="flex-shrink-0">
                 <Tag
                   size="small"
-                  selected={placesCategoryFilter === cat.value}
-                  icon={<Icon name={cat.icon} size={16} />}
-                  onClick={() => handleCategoryClick(cat.value)}
+                  selected={placesCategoryFilter === category.value}
+                  icon={<Icon name={category.icon} size={16} />}
+                  onClick={() => handleCategoryClick(category.value)}
                 >
-                  {cat.label}
+                  {t(category.labelKey)}
                 </Tag>
               </div>
             ))}
@@ -183,7 +178,7 @@ export const MapUIOverlay: React.FC = () => {
             icon={<Icon name="plus" size={24} color="white" />}
             iconPosition="left"
           >
-            Прогулка
+            {t(MAP_ACTION_LABELS.walks)}
           </Button>
         ) : (
           <Button
@@ -193,18 +188,17 @@ export const MapUIOverlay: React.FC = () => {
             icon={<Icon name="plus" size={24} color="white" />}
             iconPosition="left"
           >
-            Место
+            {t(MAP_ACTION_LABELS.places)}
           </Button>
         )}
 
-        <button
+        <RoundIconButton
           onClick={handleCenterLocation}
-          className="p-3 -rotate-90 bg-white rounded-full shadow-[0px_5px_9px_0px_rgba(66,58,58,0.06)] inline-flex flex-col justify-center items-center gap-2.5 overflow-hidden"
+          rotateContent
+          className="p-3 gap-2.5 overflow-hidden"
         >
-          <div className="rotate-90">
-            <Icon name="plane" size={24} color="var(--color-text-primary)" />
-          </div>
-        </button>
+          <Icon name="plane" size={24} color="var(--color-text-primary)" />
+        </RoundIconButton>
       </div>
     </div>
   );

@@ -1,6 +1,10 @@
 import React, { ReactNode } from "react";
 import { IonImg } from "@ionic/react";
 import { Button, Text } from "@shared/ui";
+import {
+  ONBOARDING_BOTTOM_INSET_STYLE,
+  ONBOARDING_SHEET_INSET_CLASS,
+} from "@features/onboarding/ui/onboardingLayout.constants";
 
 interface OnboardingLayoutProps {
   image?: string;
@@ -46,7 +50,10 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
       )}
 
       {/* Bottom content container */}
-      <div className="relative z-10 px-5 py-10 bg-zinc-100 rounded-tl-3xl rounded-tr-3xl">
+      <div
+        className={`relative z-10 ${ONBOARDING_SHEET_INSET_CLASS} bg-zinc-100 rounded-tl-3xl rounded-tr-3xl`}
+        style={ONBOARDING_BOTTOM_INSET_STYLE}
+      >
         <div className="px-3 pb-12 flex flex-col items-center gap-5">
           <Text
             variant="extra-bold-28"

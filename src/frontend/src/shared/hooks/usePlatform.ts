@@ -1,6 +1,7 @@
 // src/shared/hooks/usePlatform.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
+import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { Capacitor } from "@capacitor/core";
 
 export type Platform = "ios" | "android" | "telegram" | "web";
@@ -24,6 +25,138 @@ interface PlatformInfo {
     selection: () => void;
   };
 }
+
+interface PickImagesOptions {
+  multiple?: boolean;
+  maxImages?: number;
+}
+
+const isNativePlatform = () => {
+  const platform = Capacitor.getPlatform();
+  return platform === "ios" || platform === "android";
+};
+
+const readFileAsDataUrl = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      const result = event.target?.result;
+      if (typeof result === "string") {
+        resolve(result);
+        return;
+      }
+
+      reject(new Error("Failed to read image file."));
+    };
+
+    reader.onerror = () => {
+      reject(reader.error ?? new Error("Failed to read image file."));
+    };
+
+    reader.readAsDataURL(file);
+  });
+
+const pickImagesFromBrowser = ({
+  multiple = false,
+  maxImages,
+}: PickImagesOptions = {}): Promise<string[]> => {
+  if (typeof document === "undefined") {
+    return Promise.resolve([]);
+  }
+
+  return new Promise((resolve) => {
+    const input = document.createElement("input");
+    let isSettled = false;
+
+    input.type = "file";
+    input.accept = "image/*";
+    input.multiple = multiple;
+    input.style.display = "none";
+
+    const cleanup = () => {
+      input.removeEventListener("change", handleChange);
+      input.removeEventListener("cancel", handleCancel);
+      window.removeEventListener("focus", handleWindowFocus);
+      input.remove();
+    };
+
+    const finalize = (images: string[]) => {
+      if (isSettled) {
+        return;
+      }
+
+      isSettled = true;
+      cleanup();
+      resolve(images);
+    };
+
+    const handleCancel = () => {
+      finalize([]);
+    };
+
+    const handleWindowFocus = () => {
+      window.setTimeout(() => {
+        if (!isSettled && (!input.files || input.files.length === 0)) {
+          finalize([]);
+        }
+      }, 0);
+    };
+
+    const handleChange = async () => {
+      const files = Array.from(input.files ?? []);
+      const limitedFiles =
+        typeof maxImages === "number" ? files.slice(0, maxImages) : files;
+
+      if (limitedFiles.length === 0) {
+        finalize([]);
+        return;
+      }
+
+      try {
+        const images = await Promise.all(
+          limitedFiles.map((file) => readFileAsDataUrl(file))
+        );
+        finalize(images);
+      } catch (error) {
+        console.error("Failed to read selected image files:", error);
+        finalize([]);
+      }
+    };
+
+    input.addEventListener("change", handleChange);
+    input.addEventListener("cancel", handleCancel);
+    window.addEventListener("focus", handleWindowFocus, { once: true });
+    document.body.appendChild(input);
+    input.click();
+  });
+};
+
+const pickImagesForCurrentPlatform = async ({
+  multiple = false,
+  maxImages,
+}: PickImagesOptions = {}): Promise<string[]> => {
+  if (isNativePlatform()) {
+    try {
+      const image = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Prompt,
+      });
+
+      return image.dataUrl ? [image.dataUrl] : [];
+    } catch (error) {
+      console.error("Native image picker failed:", error);
+      return [];
+    }
+  }
+
+  return pickImagesFromBrowser({
+    multiple,
+    maxImages,
+  });
+};
 
 export const usePlatform = (): PlatformInfo => {
   const [safeAreaInsets, setSafeAreaInsets] = useState({
@@ -184,5 +317,14 @@ export const platformUtils = {
       // postEvent("web_app_share", { text: data.text || data.title || data.url }); // Removed due to type error
       console.warn("Sharing is not supported on this platform.");
     }
+  },
+
+  media: {
+    pickImage: async () => {
+      const [image] = await pickImagesForCurrentPlatform();
+      return image ?? null;
+    },
+    pickImages: (options: PickImagesOptions = {}) =>
+      pickImagesForCurrentPlatform(options),
   },
 };

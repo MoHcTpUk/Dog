@@ -1,4 +1,11 @@
 import { reverseGeocode } from "./reverseGeocode";
+import {
+  extractPhotonCoordinates,
+  fetchPhotonFeatures,
+  formatPhotonAddress,
+  getCoordinateLabel,
+  type PhotonFeature,
+} from "./photonGeocoding";
 
 export interface GeocodeSuggestion {
   label: string;
@@ -8,23 +15,6 @@ export interface GeocodeSuggestion {
 interface RankedGeocodeSuggestion extends GeocodeSuggestion {
   score: number;
   key: string;
-}
-
-interface PhotonFeatureProperties {
-  name?: string;
-  housenumber?: string;
-  street?: string;
-  postcode?: string;
-  city?: string;
-  district?: string;
-  state?: string;
-}
-
-interface PhotonFeature {
-  geometry?: {
-    coordinates?: [number, number];
-  };
-  properties?: PhotonFeatureProperties;
 }
 
 const buildSuggestionKey = (
@@ -61,9 +51,9 @@ const formatPhotonSuggestion = (
   feature?: PhotonFeature,
 ): RankedGeocodeSuggestion | null => {
   const properties = feature?.properties;
-  const coordinates = feature?.geometry?.coordinates;
+  const coordinates = extractPhotonCoordinates(feature);
 
-  if (!properties || !Array.isArray(coordinates) || coordinates.length < 2) {
+  if (!properties || !coordinates) {
     return null;
   }
 
@@ -73,9 +63,14 @@ const formatPhotonSuggestion = (
   const locality = properties.city || properties.district || properties.state;
   const distinctName =
     properties.name && properties.name !== streetLine ? properties.name : null;
-  const label = [distinctName, streetLine || null, properties.postcode || null, locality || null]
-    .filter(Boolean)
-    .join(", ");
+
+  const label = formatPhotonAddress(properties, {
+    includePostcode: true,
+  });
+
+  if (!label) {
+    return null;
+  }
 
   let score = 0;
   if (properties.housenumber) score += 4;
@@ -84,7 +79,7 @@ const formatPhotonSuggestion = (
   if (properties.postcode) score += 1;
   if (locality) score += 1;
 
-  return createSuggestion(label, [coordinates[0], coordinates[1]], score);
+  return createSuggestion(label, coordinates, score);
 };
 
 const mergeSuggestions = (
@@ -120,15 +115,7 @@ const fetchPhotonSuggestions = async (
     lang: "default",
     limit: String(Math.max(limit, 1)),
   });
-  const response = await fetch(
-    `https://photon.komoot.io/api/?${params.toString()}`,
-    { signal },
-  );
-
-  if (!response.ok) return [];
-
-  const data = await response.json();
-  const features: PhotonFeature[] = Array.isArray(data?.features) ? data.features : [];
+  const features = await fetchPhotonFeatures("/api/", params, signal);
 
   return features
     .map((feature) => formatPhotonSuggestion(feature))
@@ -138,7 +125,7 @@ const fetchPhotonSuggestions = async (
 };
 
 const getReverseGeocodeFallbackLabel = (coordinates: [number, number]) =>
-  `${coordinates[1].toFixed(5)}, ${coordinates[0].toFixed(5)}`;
+  getCoordinateLabel(coordinates);
 
 export async function normalizeAddressSuggestion(
   suggestion: GeocodeSuggestion,

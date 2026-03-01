@@ -46,6 +46,7 @@ import NotificationMinusIcon from '@shared/assets/icons/notification-minus.svg?r
 import NotificationCheckIcon from '@shared/assets/icons/notification-check.svg?react';
 import NotificationTrashIcon from '@shared/assets/icons/notification-trash.svg?react';
 import NotificationEditIcon from '@shared/assets/icons/notification-edit.svg?react';
+import StepperSegmentIcon from '@shared/assets/icons/stepper-segment.svg?react';
 
 export type IconName =
   | 'plus'
@@ -94,11 +95,14 @@ export type IconName =
   | 'notification-minus'
   | 'notification-check'
   | 'notification-trash'
-  | 'notification-edit';
+  | 'notification-edit'
+  | 'stepper-segment';
 
 export interface IconProps {
   name: IconName;
   size?: number;
+  width?: number;
+  height?: number;
   color?: string;
   className?: string;
 }
@@ -151,11 +155,14 @@ const iconMap: Record<IconName, React.FC<React.SVGProps<SVGSVGElement>>> = {
   'notification-check': NotificationCheckIcon,
   'notification-trash': NotificationTrashIcon,
   'notification-edit': NotificationEditIcon,
+  'stepper-segment': StepperSegmentIcon,
 };
 
 export const Icon: React.FC<IconProps> = ({
   name,
   size = 24,
+  width,
+  height,
   color,
   className
 }) => {
@@ -168,8 +175,8 @@ export const Icon: React.FC<IconProps> = ({
 
   return (
     <IconComponent
-      width={size}
-      height={size}
+      width={width ?? size}
+      height={height ?? size}
       style={{ color }}
       className={className}
     />

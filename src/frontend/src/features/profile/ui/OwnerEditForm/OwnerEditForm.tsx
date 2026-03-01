@@ -1,7 +1,7 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { IonImg } from "@ionic/react";
+import { platformUtils } from "@shared/hooks";
 import { Text, Input, Button, Icon, BottomModal, DatePicker } from "@shared/ui";
 import { getMonthNames } from "@shared/lib/constants";
 import { parseDateParts } from "@shared/utils/date.utils";
@@ -29,7 +29,6 @@ export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
   onSave,
 }) => {
   const { t } = useTranslation();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [photo, setPhoto] = useState<string | null>(
     initialData?.photo || "https://placehold.co/173x173",
@@ -65,38 +64,9 @@ export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
   }, [initialData?.birth_date, parseBirthDate]);
 
   const handleImageCapture = async () => {
-    try {
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.DataUrl,
-        source: CameraSource.Prompt,
-      });
-
-      if (image.dataUrl) {
-        setPhoto(image.dataUrl);
-      }
-    } catch {
-      if (fileInputRef.current) {
-        fileInputRef.current.click();
-      }
-    }
-  };
-
-  const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        if (result) {
-          setPhoto(result);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-    if (event.target) {
-      event.target.value = "";
+    const image = await platformUtils.media.pickImage();
+    if (image) {
+      setPhoto(image);
     }
   };
 
@@ -198,14 +168,6 @@ export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
           Сохранить
         </Button>
       </div>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileInput}
-      />
 
       <BottomModal
         isOpen={isDatePickerOpen}

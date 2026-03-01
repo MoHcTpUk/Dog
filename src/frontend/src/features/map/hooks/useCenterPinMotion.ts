@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import type { MapInstance } from "@features/map/types/map.types";
+import type { MapInstance } from "../types/map.types";
 
 interface UseCenterPinMotionOptions {
   mapInstance: MapInstance | null;
@@ -34,6 +34,7 @@ export const useCenterPinMotion = ({
     if (pinRef.current) {
       pinRef.current.style.transform = liftedTransform;
     }
+
     if (shadowRef.current) {
       shadowRef.current.style.opacity = String(activeShadowOpacity);
       shadowRef.current.style.transform = activeShadowTransform;
@@ -44,6 +45,7 @@ export const useCenterPinMotion = ({
     if (pinRef.current) {
       pinRef.current.style.transform = restTransform;
     }
+
     if (shadowRef.current) {
       shadowRef.current.style.opacity = String(restShadowOpacity);
       shadowRef.current.style.transform = restShadowTransform;
@@ -54,6 +56,7 @@ export const useCenterPinMotion = ({
     if (!active) {
       isZoomingRef.current = false;
     }
+
     lowerPin();
   }, [active, lowerPin]);
 

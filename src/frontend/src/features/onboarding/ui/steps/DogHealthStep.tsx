@@ -1,7 +1,8 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Checkbox, Text } from "@shared/ui";
+import { Checkbox } from "@shared/ui";
 import { DogProfileData, StepErrors } from "../../model/types";
+import { OnboardingStepLayout } from "../StepLayout";
 
 interface DogHealthStepProps {
   data: DogProfileData;
@@ -25,11 +26,7 @@ export const DogHealthStep: React.FC<DogHealthStepProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-8">
-      <Text variant="bold-24" tag="h1" className="text-start">
-        {t("Health Information")}
-      </Text>
-
+    <OnboardingStepLayout title={t("Health Information")}>
       <div className="space-y-1">
         <Checkbox
           label={t("Spayed/Neutered")}
@@ -51,6 +48,6 @@ export const DogHealthStep: React.FC<DogHealthStepProps> = ({
           }
         />
       </div>
-    </div>
+    </OnboardingStepLayout>
   );
 };

@@ -1,34 +1,28 @@
 import React, { useRef, useMemo, useCallback, useEffect } from "react";
 import { useLocation, useHistory } from "react-router-dom";
-import { Geolocation } from "@capacitor/geolocation";
 import { MainLayout } from "@app/layouts/MainLayout";
-import { type Place, useMapGL } from "@features/map/context";
-import type { MapInstance } from "@features/map/types/map.types";
+import { useMapGL } from "@features/map/context";
+import {
+  centerMapOnInitialUserLocation,
+  centerMapOnUserLocation,
+  focusPlaceMarker,
+  focusWalkMarker,
+  MAP_CREATE_WALK_QUERY_PARAM,
+  MAP_MOCK_PLACES,
+} from "@features/map/lib";
 import { mockWalks } from "@shared/mocks/walks.mock";
+import {
+  createMapOverlayBackgroundLocation,
+  getMapPageState,
+  hasSearchParam,
+  removeSearchParam,
+} from "../../lib/mapPage.utils";
 
 let hasAutocenteredToUserLocation = false;
-const MAP_MARKER_FOCUS_ZOOM = 17;
-
-// Все места кластеризованы вокруг Парка Горького для демонстрации кластеров
-const BASE_MOCK_PLACES: Place[] = [
-  { id: "place-1", name: "Хлебник", coordinates: [37.6017, 55.7311], dogFriendly: true, category: "cafe" },
-  { id: "place-2", name: "CityMall", coordinates: [37.6025, 55.7318], dogFriendly: true, category: "mall" },
-  { id: "place-3", name: "Кофемания", coordinates: [37.6010, 55.7305], dogFriendly: true, category: "cafe" },
-  { id: "place-4", name: "Парк Горького", coordinates: [37.5950, 55.7280], dogFriendly: true, category: "park" },
-  { id: "place-5", name: "Бургер&Бар", coordinates: [37.6030, 55.7322], dogFriendly: true, category: "restaurant" },
-  { id: "place-6", name: "Шоколадница", coordinates: [37.6015, 55.7308], dogFriendly: true, category: "cafe" },
-  { id: "place-7", name: "Четыре лапы", coordinates: [37.6022, 55.7314], dogFriendly: true, category: "shop" },
-  { id: "place-8", name: "Белуга", coordinates: [37.6008, 55.7316], dogFriendly: true, category: "restaurant" },
-  { id: "place-9", name: "Собачья площадка ЦПКиО", coordinates: [37.6032, 55.7299], dogFriendly: true, category: "park" },
-  { id: "place-10", name: "Кофе Хауз", coordinates: [37.6018, 55.7325], dogFriendly: true, category: "cafe" },
-  { id: "place-11", name: "Бургер Кинг", coordinates: [37.6035, 55.7310], dogFriendly: true, category: "restaurant" },
-  { id: "place-12", name: "Пятёрочка", coordinates: [37.6005, 55.7320], dogFriendly: true, category: "shop" },
-];
 
 export const MapPage: React.FC = () => {
   const location = useLocation();
   const history = useHistory();
-  const mapRef = useRef<MapInstance | null>(null);
 
   const {
     setDisplayedWalks,
@@ -50,37 +44,34 @@ export const MapPage: React.FC = () => {
 
   const creationActive = walkCreationActive || placeCreationActive;
 
-  const allPlaces = useMemo<Place[]>(
-    () => [...BASE_MOCK_PLACES, ...userAddedPlaces],
-    [userAddedPlaces]
+  const { allPlaces, allWalks, displayedPlaces, displayedWalks } = useMemo(
+    () =>
+      getMapPageState({
+        activeTab,
+        creationActive,
+        basePlaces: MAP_MOCK_PLACES,
+        userAddedPlaces,
+        baseWalks: mockWalks,
+        userAddedWalks,
+        placesCategoryFilter,
+      }),
+    [
+      activeTab,
+      creationActive,
+      placesCategoryFilter,
+      userAddedPlaces,
+      userAddedWalks,
+    ],
   );
-  const allWalks = useMemo(() => [...userAddedWalks, ...mockWalks], [userAddedWalks]);
-
-  const displayedPlaces = useMemo(() => {
-    if (creationActive) return [];
-    if (activeTab !== "places") return [];
-    const dogFriendly = allPlaces.filter((p) => p.dogFriendly);
-    if (!placesCategoryFilter) return dogFriendly;
-    return dogFriendly.filter((p) => p.category === placesCategoryFilter);
-  }, [activeTab, creationActive, allPlaces, placesCategoryFilter]);
-
-  const displayedWalks = useMemo(() => {
-    if (creationActive) return [];
-    return activeTab === "walks" ? allWalks : [];
-  }, [activeTab, creationActive, allWalks]);
 
   const handleWalkClick = useCallback(
     (walkId: string) => {
       const walk = allWalks.find((item) => item.id === walkId);
-      if (walk && mapInstance) {
-        mapInstance.setCenter(walk.coordinates);
-        const currentZoom = mapInstance.getZoom();
-        if (currentZoom < MAP_MARKER_FOCUS_ZOOM) {
-          mapInstance.setZoom(MAP_MARKER_FOCUS_ZOOM);
-        }
+      if (walk) {
+        focusWalkMarker(mapInstance, walk);
       }
 
-      const cleanLocation = { ...locationRef.current, search: "" };
+      const cleanLocation = createMapOverlayBackgroundLocation(locationRef.current);
       history.push(`/walk/${walkId}`, { background: cleanLocation });
     },
     [allWalks, history, mapInstance],
@@ -89,14 +80,11 @@ export const MapPage: React.FC = () => {
   const handlePlaceClick = useCallback(
     (placeId: string) => {
       const place = allPlaces.find((p) => p.id === placeId);
-      if (place && mapInstance) {
-        mapInstance.setCenter(place.coordinates);
-        const currentZoom = mapInstance.getZoom();
-        if (currentZoom < MAP_MARKER_FOCUS_ZOOM) {
-          mapInstance.setZoom(MAP_MARKER_FOCUS_ZOOM);
-        }
+      if (place) {
+        focusPlaceMarker(mapInstance, place);
       }
-      const cleanLocation = { ...locationRef.current, search: "" };
+
+      const cleanLocation = createMapOverlayBackgroundLocation(locationRef.current);
       history.push(`/place/${placeId}`, { background: cleanLocation });
     },
     [history, allPlaces, mapInstance],
@@ -116,43 +104,25 @@ export const MapPage: React.FC = () => {
   }, [handlePlaceClick, setPlaceClickHandler]);
 
   useEffect(() => {
-    if (mapInstance) {
-      mapRef.current = mapInstance;
-    }
-  }, [mapInstance]);
-
-  useEffect(() => {
     if (!mapInstance || hasAutocenteredToUserLocation) return;
     hasAutocenteredToUserLocation = true;
 
-    Geolocation.getCurrentPosition({ timeout: 5000 })
-      .then((pos) => {
-        mapInstance.setCenter([pos.coords.longitude, pos.coords.latitude]);
-        mapInstance.setZoom(13);
-      })
-      .catch(() => {});
+    void centerMapOnInitialUserLocation(mapInstance);
   }, [mapInstance]);
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    if (!params.has('createWalk') || walkCreationActive) return;
+    if (!hasSearchParam(location.search, MAP_CREATE_WALK_QUERY_PARAM) || walkCreationActive) {
+      return;
+    }
 
-    params.delete('createWalk');
-    history.replace({ search: params.toString() });
+    history.replace({
+      search: removeSearchParam(location.search, MAP_CREATE_WALK_QUERY_PARAM),
+    });
 
-    Geolocation.getCurrentPosition({ timeout: 5000 })
-      .then((pos) => {
-        if (mapInstance) {
-          mapInstance.setCenter([pos.coords.longitude, pos.coords.latitude]);
-          mapInstance.setZoom(15);
-        }
-      })
-      .catch(() => {})
-      .finally(() => {
-        startWalkCreation();
-      });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.search]);
+    void centerMapOnUserLocation(mapInstance).finally(() => {
+      startWalkCreation();
+    });
+  }, [history, location.search, mapInstance, startWalkCreation, walkCreationActive]);
 
   return (
     <MainLayout withFooter>

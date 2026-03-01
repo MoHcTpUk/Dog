@@ -1,40 +1,19 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { IonContent, IonPage } from "@ionic/react";
 import { useHistory, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Button, Input, Tag, Toast } from "@shared/ui";
+import { Button, Icon, Input, Tag, Toast, RoundIconButton } from "@shared/ui";
 import { Text } from "@shared/ui/Text";
+import { useTransientFlag } from "@shared/hooks";
 import { CenterModal } from "@shared/ui/CenterModal";
 import { useMapGL } from "@features/map/context";
-import type { NearbyPlace } from "@shared/api/overpass";
-
-interface PlaceSelectLocationState {
-  nearbyPlaces?: NearbyPlace[];
-}
-
-const CATEGORY_LABELS: Record<NearbyPlace["category"], string> = {
-  cafe: "Кофейня",
-  restaurant: "Ресторан",
-  shop: "Магазин",
-  mall: "Торговый центр",
-  park: "Парк",
-  other: "Место",
-};
-
-const formatAddressFromTags = (place: NearbyPlace) => {
-  const street = place.tags["addr:street"];
-  const house = place.tags["addr:housenumber"];
-
-  if (street && house) {
-    return `${street} ${house}`;
-  }
-
-  if (street) {
-    return street;
-  }
-
-  return place.name;
-};
+import {
+  buildUserAddedPlace,
+  filterNearbyPlaces,
+  getNearbyPlacesFromLocationState,
+  type PlaceSelectLocationState,
+  toggleSelectedPlaceId,
+} from "../../lib/placeSelect.utils";
 
 export const PlaceSelectPage: React.FC = () => {
   const { t } = useTranslation();
@@ -42,13 +21,15 @@ export const PlaceSelectPage: React.FC = () => {
   const location = useLocation<PlaceSelectLocationState>();
   const { placeCreationActive, addUserPlace, cancelPlaceCreation } = useMapGL();
 
-  const nearbyPlaces = location.state?.nearbyPlaces ?? [];
+  const nearbyPlaces = useMemo(
+    () => getNearbyPlacesFromLocationState(location.state),
+    [location.state],
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
-  const [showSelectNotif, setShowSelectNotif] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-
-  const notifTimerRef = useRef<number | null>(null);
+  const { isVisible: showSelectNotif, show: showSelectNotification } =
+    useTransientFlag();
 
   useEffect(() => {
     if (!placeCreationActive && !showSuccessModal) {
@@ -56,64 +37,36 @@ export const PlaceSelectPage: React.FC = () => {
     }
   }, [placeCreationActive, showSuccessModal, history]);
 
-  useEffect(() => {
-    return () => {
-      if (notifTimerRef.current) {
-        window.clearTimeout(notifTimerRef.current);
-      }
-    };
-  }, []);
-
-  const displayedPlaces = useMemo(() => {
-    if (!searchQuery.trim()) return nearbyPlaces.slice(0, 15);
-    const q = searchQuery.toLowerCase().trim();
-    return nearbyPlaces.filter((place) => place.name.toLowerCase().includes(q));
-  }, [nearbyPlaces, searchQuery]);
+  const displayedPlaces = useMemo(
+    () => filterNearbyPlaces(nearbyPlaces, searchQuery),
+    [nearbyPlaces, searchQuery],
+  );
 
   const noSearchResults =
     searchQuery.trim().length > 0 && displayedPlaces.length === 0;
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     history.goBack();
-  };
+  }, [history]);
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     if (!selectedPlaceId) {
-      setShowSelectNotif(true);
-      if (notifTimerRef.current) window.clearTimeout(notifTimerRef.current);
-      notifTimerRef.current = window.setTimeout(() => {
-        setShowSelectNotif(false);
-        notifTimerRef.current = null;
-      }, 3000);
+      showSelectNotification();
       return;
     }
 
     const selected = nearbyPlaces.find((place) => place.id === selectedPlaceId);
     if (!selected) return;
 
-    addUserPlace({
-      id: selected.id,
-      name: selected.name,
-      coordinates: selected.coordinates,
-      dogFriendly: true,
-      category: selected.category,
-      categoryLabel: CATEGORY_LABELS[selected.category],
-      distance: "Новое место на карте",
-      address: formatAddressFromTags(selected),
-      workingHours: selected.tags.opening_hours,
-      description:
-        selected.tags.description ||
-        "Место добавлено пользователем и доступно для просмотра на карте",
-      isFavorite: false,
-    });
+    addUserPlace(buildUserAddedPlace(selected, t));
     setShowSuccessModal(true);
-  };
+  }, [addUserPlace, nearbyPlaces, selectedPlaceId, showSelectNotification, t]);
 
-  const handleSuccessClose = () => {
+  const handleSuccessClose = useCallback(() => {
     setShowSuccessModal(false);
     cancelPlaceCreation();
     history.goBack();
-  };
+  }, [cancelPlaceCreation, history]);
 
   return (
     <IonPage>
@@ -151,26 +104,12 @@ export const PlaceSelectPage: React.FC = () => {
         <div className="flex flex-col min-h-screen bg-zinc-100">
           <div className="px-3 pt-5 pb-3 flex flex-col gap-8">
             <div className="h-14 flex items-center gap-3.5">
-              <button
+              <RoundIconButton
                 onClick={handleBack}
-                className="w-10 h-10 bg-white rounded-full shadow-[0px_5px_9px_0px_rgba(66,58,58,0.06)] flex items-center justify-center flex-shrink-0"
+                className="w-10 h-10 flex-shrink-0"
               >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M14 18C14 18 8.00001 13.5811 8 12C7.99999 10.4188 14 6 14 6"
-                    stroke="#3F335A"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
+                <Icon name="arrow-left" size={24} color="#3F335A" />
+              </RoundIconButton>
               <Text variant="bold-24" color="primary">
                 {t("Dog-friendly place")}
               </Text>
@@ -198,11 +137,7 @@ export const PlaceSelectPage: React.FC = () => {
                       key={place.id}
                       size="medium"
                       selected={selectedPlaceId === place.id}
-                      onClick={() =>
-                        setSelectedPlaceId(
-                          selectedPlaceId === place.id ? null : place.id,
-                        )
-                      }
+                      onClick={() => setSelectedPlaceId((current) => toggleSelectedPlaceId(current, place.id))}
                     >
                       {place.name}
                     </Tag>

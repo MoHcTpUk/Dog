@@ -1,7 +1,7 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { IonImg } from "@ionic/react";
+import { platformUtils } from "@shared/hooks";
 import {
   Text,
   Input,
@@ -66,7 +66,6 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
   onSave,
 }) => {
   const { t } = useTranslation();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [photos, setPhotos] = useState<string[]>(initialData?.photos || []);
   const [gender, setGender] = useState<string>(initialData?.gender || "female");
@@ -129,38 +128,9 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
   }, [initialData?.birthDate, parseBirthDate]);
 
   const handleImageCapture = async () => {
-    try {
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.DataUrl,
-        source: CameraSource.Prompt,
-      });
-
-      if (image.dataUrl) {
-        setPhotos([...photos, image.dataUrl]);
-      }
-    } catch {
-      if (fileInputRef.current) {
-        fileInputRef.current.click();
-      }
-    }
-  };
-
-  const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        if (result) {
-          setPhotos([...photos, result]);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-    if (event.target) {
-      event.target.value = "";
+    const image = await platformUtils.media.pickImage();
+    if (image) {
+      setPhotos([...photos, image]);
     }
   };
 
@@ -422,14 +392,6 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
           Сохранить
         </Button>
       </div>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileInput}
-      />
 
       <BottomModal
         isOpen={isBreedDrawerOpen}

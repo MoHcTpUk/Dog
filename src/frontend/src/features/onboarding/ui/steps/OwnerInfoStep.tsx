@@ -1,10 +1,11 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { IonImg } from "@ionic/react";
+import { platformUtils } from "@shared/hooks/usePlatform";
 import { Input, BottomModal, DatePicker, Text, Button, Icon } from "@shared/ui";
 import { parseDateParts } from "@shared/utils/date.utils";
 import { DogProfileData, StepErrors } from "../../model/types";
+import { OnboardingStepField, OnboardingStepLayout } from "../StepLayout";
 
 interface OwnerInfoStepProps {
   data: DogProfileData;
@@ -34,7 +35,6 @@ export const OwnerInfoStep: React.FC<OwnerInfoStepProps> = ({
   }, [data.owner.birth_date]);
 
   const [selectedDate, setSelectedDate] = useState(getInitialDate());
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setSelectedDate(getInitialDate());
@@ -50,42 +50,9 @@ export const OwnerInfoStep: React.FC<OwnerInfoStepProps> = ({
   };
 
   const handleImageCapture = async () => {
-    try {
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.DataUrl,
-        source: CameraSource.Prompt,
-      });
-
-      if (image.dataUrl) {
-        handleOwnerUpdate("photo", image.dataUrl);
-      }
-    } catch (error) {
-      console.error(
-        "Capacitor camera not available, falling back to file input:",
-        error,
-      );
-      if (fileInputRef.current) {
-        fileInputRef.current.click();
-      }
-    }
-  };
-
-  const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        if (result) {
-          handleOwnerUpdate("photo", result);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-    if (event.target) {
-      event.target.value = "";
+    const image = await platformUtils.media.pickImage();
+    if (image) {
+      handleOwnerUpdate("photo", image);
     }
   };
 
@@ -135,10 +102,7 @@ export const OwnerInfoStep: React.FC<OwnerInfoStepProps> = ({
 
   return (
     <>
-      <div className="Frame237759 self-stretch inline-flex flex-col justify-start items-start gap-8 w-full">
-        <Text variant="bold-24" tag="h1" className="mb-2 text-start">
-          {t("About the owner")}
-        </Text>
+      <OnboardingStepLayout title={t("About the owner")}>
         <div className="Content self-stretch flex-1 pb-5 flex flex-col justify-start items-center gap-14 w-full">
           <div className="Container self-stretch flex-1 flex flex-col justify-start items-start gap-8 w-full">
             {/* Photo Upload */}
@@ -172,10 +136,7 @@ export const OwnerInfoStep: React.FC<OwnerInfoStepProps> = ({
             </div>
 
             {/* Owner Name */}
-            <div className="InputCover self-stretch flex flex-col justify-start items-center gap-3.5">
-              <Text variant="medium-16" className="self-stretch text-start">
-                {t("Owner name")}
-              </Text>
+            <OnboardingStepField label={t("Owner name")}>
               <Input
                 placeholder={t("Your name")}
                 value={data.owner.name}
@@ -183,13 +144,10 @@ export const OwnerInfoStep: React.FC<OwnerInfoStepProps> = ({
                 onInput={(value) => handleOwnerUpdate("name", value)}
                 className="border-0 bg-transparent p-0 h-auto"
               />
-            </div>
+            </OnboardingStepField>
 
             {/* Owner Birth Date */}
-            <div className="InputCover self-stretch flex flex-col justify-start items-center gap-3.5">
-              <Text variant="medium-16" className="self-stretch text-start">
-                {t("Owner birth date")}
-              </Text>
+            <OnboardingStepField label={t("Owner birth date")}>
               <div
                 className="Input self-stretch h-16 p-5 bg-white rounded-2xl flex flex-col justify-center items-center gap-5 overflow-hidden cursor-pointer"
                 onClick={openDatePicker}
@@ -201,19 +159,10 @@ export const OwnerInfoStep: React.FC<OwnerInfoStepProps> = ({
                   <div className="IconCover flex justify-end items-center gap-2.5" />
                 </div>
               </div>
-            </div>
+            </OnboardingStepField>
           </div>
         </div>
-      </div>
-
-      {/* Hidden file input for web fallback */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileInput}
-      />
+      </OnboardingStepLayout>
 
       {/* Date Picker Modal */}
       <BottomModal

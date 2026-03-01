@@ -1,7 +1,7 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { MainLayout } from "@app/layouts/MainLayout";
+import { platformUtils } from "@shared/hooks";
 import { Icon, Text, Textarea, Button } from "@shared/ui";
 
 export const FeedbackPage: React.FC = () => {
@@ -9,7 +9,6 @@ export const FeedbackPage: React.FC = () => {
   const [notificationCount] = useState(2);
   const [message, setMessage] = useState("");
   const [screenshots, setScreenshots] = useState<string[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleNotificationClick = () => {
     history.push("/notifications");
@@ -20,38 +19,9 @@ export const FeedbackPage: React.FC = () => {
   };
 
   const handleImageCapture = async () => {
-    try {
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.DataUrl,
-        source: CameraSource.Prompt,
-      });
-
-      if (image.dataUrl) {
-        setScreenshots([...screenshots, image.dataUrl]);
-      }
-    } catch (error) {
-      console.error("Camera not available, falling back to file input:", error);
-      if (fileInputRef.current) {
-        fileInputRef.current.click();
-      }
-    }
-  };
-
-  const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        if (result) {
-          setScreenshots([...screenshots, result]);
-        }
-      };
-      reader.readAsDataURL(file);
-      event.target.value = "";
+    const image = await platformUtils.media.pickImage();
+    if (image) {
+      setScreenshots([...screenshots, image]);
     }
   };
 
@@ -178,13 +148,6 @@ export const FeedbackPage: React.FC = () => {
         </div>
       </div>
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileInput}
-      />
     </MainLayout>
   );
 };

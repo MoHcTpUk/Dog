@@ -1,2 +1,2 @@
 export { MapView } from "./ui";
-export type { Place } from "./ui";
+export type { MapPlace as Place } from "@shared/types/place";

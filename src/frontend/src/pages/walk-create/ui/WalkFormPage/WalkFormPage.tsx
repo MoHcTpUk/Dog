@@ -7,6 +7,11 @@ import { Text } from "@shared/ui/Text";
 import { TimePicker, TimePickerValue } from "@shared/ui/TimePicker";
 import { useMapGL } from "@features/map/context";
 import { mockWalks } from "@shared/mocks/walks.mock";
+import {
+  DEFAULT_WALK_LOCATION_COORDS,
+  formatWalkFormDateTime,
+  getTimeValueFromWalkDate,
+} from "../../lib/walkForm.utils";
 
 interface WalkFormPageProps {
   mode?: "create" | "edit";
@@ -48,47 +53,22 @@ export const WalkFormPage: React.FC<WalkFormPageProps> = ({
     setLocationAddress(walk.location || "");
     setLocationCoords(walk.coordinates);
     setDescription(walk.description || "");
-    // Compute dayOffset, hour, minute from walk.time
-    const now = new Date();
-    const walkDate = new Date(walk.time);
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const walkDayStart = new Date(walkDate.getFullYear(), walkDate.getMonth(), walkDate.getDate());
-    const dayOffset = Math.max(0, Math.round((walkDayStart.getTime() - todayStart.getTime()) / (1000 * 60 * 60 * 24)));
-    const tv: TimePickerValue = {
-      dayOffset,
-      hour: walkDate.getHours(),
-      minute: Math.floor(walkDate.getMinutes() / 10) * 10,
-    };
+    const tv = getTimeValueFromWalkDate(walk.time);
     setTimeValue(tv);
     setTempTimeValue(tv);
   }, [mode, id, availableWalks]);
 
-  const formattedTime = useMemo(() => {
-    const dayLabel =
-      timeValue.dayOffset === 0
-        ? t("Today")
-        : timeValue.dayOffset === 1
-          ? t("Tomorrow")
-          : (() => {
-              const d = new Date();
-              d.setDate(d.getDate() + timeValue.dayOffset);
-              return d.toLocaleDateString("ru-RU", {
-                weekday: "short",
-                day: "numeric",
-                month: "short",
-              });
-            })();
-    const hh = String(timeValue.hour).padStart(2, "0");
-    const mm = String(timeValue.minute).padStart(2, "0");
-    return `${dayLabel}, ${hh}:${mm}`;
-  }, [timeValue, t]);
+  const formattedTime = useMemo(
+    () => formatWalkFormDateTime(timeValue, t),
+    [timeValue, t],
+  );
 
   const handleBack = () => {
     history.goBack();
   };
 
   const handleLocationTap = () => {
-    const coords = locationCoords || [37.6173, 55.7558];
+    const coords = locationCoords || DEFAULT_WALK_LOCATION_COORDS;
     startLocationPicker(coords, (newCoords, newAddress) => {
       setLocationCoords(newCoords);
       setLocationAddress(newAddress);

@@ -2,208 +2,111 @@ import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMapGL } from '@features/map/context';
-import { Button, Tag, Icon, CenterMapPin, Toast } from '@shared/ui';
-import { useCenterPinMotion } from '@shared/hooks';
+import {
+  useMapAddressLookup,
+  useCenterPinMotion,
+  useMapPinViewport,
+} from '@features/map/hooks';
+import {
+  isMapOverlayRoute,
+  type MapOverlayLocationState,
+  MAP_CENTER_PIN_LIFTED_TRANSFORM,
+  MAP_CENTER_PIN_REST_TRANSFORM,
+  MAP_CENTER_PIN_SHADOW_ACTIVE_TRANSFORM,
+  MAP_CENTER_PIN_SHADOW_REST_TRANSFORM,
+  MAP_STEP_DRAWER_TRANSITION,
+  setOverlayDrawerVisibility,
+} from '@features/map/lib';
+import { BottomSheetHandle, Button, Tag, Icon, CenterMapPin, Toast } from '@shared/ui';
 import { Text } from '@shared/ui/Text';
+import { useTransientFlag } from '@shared/hooks';
 import { TimePicker, getDefaultTimeValue } from '@shared/ui/TimePicker';
 import type { TimePickerValue } from '@shared/ui/TimePicker';
 import { Textarea } from '@shared/ui/Textarea';
-import { reverseGeocode } from '@shared/utils/reverseGeocode';
 import type { Walk } from '@shared/types/walk';
-import type { Location } from 'history';
-
-interface LocationState {
-  background?: Location;
-}
 
 type WalkStep = 'location' | 'time' | 'comment';
 
-const STEP_TRANSITION = 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease';
-const WALK_PIN_REST_TRANSFORM = 'translate(-50%, calc(-100% + 1px))';
-const WALK_PIN_LIFTED_TRANSFORM = 'translate(-50%, calc(-100% - 9px))';
-const WALK_SHADOW_REST_TRANSFORM = 'translate(-50%, -50%) scale(1)';
-const WALK_SHADOW_ACTIVE_TRANSFORM = 'translate(-50%, -50%) scale(1.18)';
 const DEFAULT_WALK_DOG_AVATAR =
   'https://images.unsplash.com/photo-1561037404-61cd46aa615b?w=40&h=40&fit=crop';
 
 export const WalkCreationOverlay: React.FC = () => {
   const { t } = useTranslation();
-  const location = useLocation<LocationState>();
+  const location = useLocation<MapOverlayLocationState>();
   const { walkCreationActive, cancelWalkCreation, mapInstance, addUserWalk } = useMapGL();
-
-  const background = location.state?.background;
-  const currentPath = background ? background.pathname : location.pathname;
-  const isMapRoute = currentPath.startsWith('/map');
+  const isMapRoute = isMapOverlayRoute(location.pathname, location.state);
 
   const [step, setStep] = useState<WalkStep>('location');
-  const [center, setCenter] = useState<[number, number] | null>(null);
-  const [address, setAddress] = useState('');
-  const [isLoadingAddress, setIsLoadingAddress] = useState(false);
   const [timeValue, setTimeValue] = useState<TimePickerValue>(getDefaultTimeValue);
   const [comment, setComment] = useState('');
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [pinViewportCenter, setPinViewportCenter] = useState({
-    left: '50%',
-    top: '50%',
+  const locationDrawerRef = useRef<HTMLDivElement>(null);
+  const isLocationStep = walkCreationActive && step === 'location';
+  const { isVisible: showSuccess, show: showSuccessToast } = useTransientFlag();
+
+  const { pinViewportCenter, getCoordsUnderPin } = useMapPinViewport({
+    active: isLocationStep,
+    mapInstance,
   });
 
-  // Direct DOM refs — avoid React re-renders on map move events
-  const isMapMovingRef = useRef(false);
-  const locationDrawerRef = useRef<HTMLDivElement>(null);
-
-  const geocodeAbortRef = useRef<AbortController | null>(null);
-  const geocodeDebounceRef = useRef<number | null>(null);
-  const successTimerRef = useRef<number | null>(null);
-
-  const syncPinViewportCenter = useCallback(() => {
-    const mapContainer = document.getElementById('map-container');
-    if (!mapContainer) return;
-
-    const rect = mapContainer.getBoundingClientRect();
-    setPinViewportCenter({
-      left: `${rect.left + rect.width / 2}px`,
-      top: `${rect.top + rect.height / 2}px`,
-    });
-  }, []);
-
-  const getCoordsUnderPin = useCallback((): [number, number] | null => {
-    if (!mapInstance) return null;
-
-    const mapContainer = document.getElementById('map-container');
-    if (mapContainer && typeof mapInstance.unproject === 'function') {
-      const coords = mapInstance.unproject([
-        mapContainer.clientWidth / 2,
-        mapContainer.clientHeight / 2,
-      ]);
-
-      if (Array.isArray(coords) && coords.length >= 2) {
-        return [coords[0], coords[1]];
-      }
-    }
-
-    try {
-      const c = mapInstance.getCenter();
-      return [c.lng ?? c[0], c.lat ?? c[1]];
-    } catch {
-      return null;
-    }
-  }, [mapInstance]);
+  const {
+    center,
+    setCenter,
+    address,
+    isLoadingAddress,
+    resetAddressLookup,
+    scheduleAddressLookup,
+    cancelAddressLookup,
+  } = useMapAddressLookup({
+    active: walkCreationActive,
+  });
 
   useEffect(() => {
     if (walkCreationActive) {
       setStep('location');
+      resetAddressLookup();
       setComment('');
       setTimeValue(getDefaultTimeValue());
-      setAddress('');
-      isMapMovingRef.current = false;
-    } else {
-      if (geocodeDebounceRef.current) {
-        window.clearTimeout(geocodeDebounceRef.current);
-        geocodeDebounceRef.current = null;
-      }
-      geocodeAbortRef.current?.abort();
     }
-  }, [walkCreationActive]);
+  }, [resetAddressLookup, walkCreationActive]);
 
   useEffect(() => {
     if (!walkCreationActive || !mapInstance) return;
-    syncPinViewportCenter();
+
     const coords = getCoordsUnderPin();
     if (coords) {
       setCenter(coords);
-      fetchAddressForCoords(coords);
+      scheduleAddressLookup(coords, 0);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [walkCreationActive, mapInstance, syncPinViewportCenter, getCoordsUnderPin]);
-
-  useEffect(() => {
-    if (!walkCreationActive || step !== 'location') return;
-
-    syncPinViewportCenter();
-
-    const handleResize = () => {
-      syncPinViewportCenter();
-    };
-
-    window.addEventListener('resize', handleResize);
-    window.visualViewport?.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.visualViewport?.removeEventListener('resize', handleResize);
-    };
-  }, [walkCreationActive, step, syncPinViewportCenter]);
-
-  useEffect(() => {
-    if (step === 'location') return;
-    if (geocodeDebounceRef.current) {
-      window.clearTimeout(geocodeDebounceRef.current);
-      geocodeDebounceRef.current = null;
-    }
-    geocodeAbortRef.current?.abort();
-  }, [step]);
-
-  const fetchAddressForCoords = useCallback(async (coords: [number, number]) => {
-    geocodeAbortRef.current?.abort();
-    const controller = new AbortController();
-    geocodeAbortRef.current = controller;
-    setIsLoadingAddress(true);
-    try {
-      const addr = await reverseGeocode(coords[0], coords[1], controller.signal);
-      if (!controller.signal.aborted) {
-        setAddress(addr);
-      }
-    } catch (e) {
-      if (e instanceof DOMException && e.name === 'AbortError') return;
-    } finally {
-      if (!controller.signal.aborted) {
-        setIsLoadingAddress(false);
-      }
-    }
-  }, []);
+  }, [walkCreationActive, mapInstance, getCoordsUnderPin, scheduleAddressLookup, setCenter]);
 
   const handlePinMoveStart = useCallback(() => {
-      isMapMovingRef.current = true;
-      if (geocodeDebounceRef.current) {
-        window.clearTimeout(geocodeDebounceRef.current);
-        geocodeDebounceRef.current = null;
-      }
-      // Direct DOM — no React re-render
-      if (locationDrawerRef.current) {
-        locationDrawerRef.current.style.transform = 'translateY(100%)';
-        locationDrawerRef.current.style.opacity = '0';
-        locationDrawerRef.current.style.pointerEvents = 'none';
-      }
-    }, []);
+      cancelAddressLookup();
+      setOverlayDrawerVisibility(locationDrawerRef.current, false, {
+        includeOpacity: true,
+        includePointerEvents: true,
+      });
+    }, [cancelAddressLookup]);
 
   const handlePinMoveEnd = useCallback(() => {
-      isMapMovingRef.current = false;
-      if (locationDrawerRef.current) {
-        locationDrawerRef.current.style.transform = 'translateY(0)';
-        locationDrawerRef.current.style.opacity = '1';
-        locationDrawerRef.current.style.pointerEvents = 'auto';
-      }
-      try {
-        const coords = getCoordsUnderPin();
-        if (!coords) return;
-        setCenter(coords);
-        if (geocodeDebounceRef.current) window.clearTimeout(geocodeDebounceRef.current);
-        geocodeDebounceRef.current = window.setTimeout(() => {
-          fetchAddressForCoords(coords);
-          geocodeDebounceRef.current = null;
-        }, 500);
-      } catch {
-        // ignore
-      }
-    }, [fetchAddressForCoords, getCoordsUnderPin]);
+      setOverlayDrawerVisibility(locationDrawerRef.current, true, {
+        includeOpacity: true,
+        includePointerEvents: true,
+      });
+
+      const coords = getCoordsUnderPin();
+      if (!coords) return;
+
+      setCenter(coords);
+      scheduleAddressLookup(coords);
+    }, [getCoordsUnderPin, scheduleAddressLookup, setCenter]);
 
   const { pinRef, shadowRef: pinShadowRef } = useCenterPinMotion({
     mapInstance,
-    active: walkCreationActive && step === 'location',
-    restTransform: WALK_PIN_REST_TRANSFORM,
-    liftedTransform: WALK_PIN_LIFTED_TRANSFORM,
-    restShadowTransform: WALK_SHADOW_REST_TRANSFORM,
-    activeShadowTransform: WALK_SHADOW_ACTIVE_TRANSFORM,
+    active: isLocationStep,
+    restTransform: MAP_CENTER_PIN_REST_TRANSFORM,
+    liftedTransform: MAP_CENTER_PIN_LIFTED_TRANSFORM,
+    restShadowTransform: MAP_CENTER_PIN_SHADOW_REST_TRANSFORM,
+    activeShadowTransform: MAP_CENTER_PIN_SHADOW_ACTIVE_TRANSFORM,
     restShadowOpacity: 0.45,
     activeShadowOpacity: 0.72,
     onMoveStart: handlePinMoveStart,
@@ -215,9 +118,15 @@ export const WalkCreationOverlay: React.FC = () => {
   }, [cancelWalkCreation]);
 
   const handleNext = useCallback(() => {
-    if (step === 'location') setStep('time');
+    if (step === 'location') {
+      if (isLoadingAddress || !address) {
+        return;
+      }
+
+      setStep('time');
+    }
     else if (step === 'time') setStep('comment');
-  }, [step]);
+  }, [address, isLoadingAddress, step]);
 
   const handleBack = useCallback(() => {
     if (step === 'location') cancelWalkCreation();
@@ -249,13 +158,8 @@ export const WalkCreationOverlay: React.FC = () => {
     addUserWalk(newWalk);
     console.log('Publish walk:', newWalk);
     cancelWalkCreation();
-    setShowSuccess(true);
-    if (successTimerRef.current) window.clearTimeout(successTimerRef.current);
-    successTimerRef.current = window.setTimeout(() => {
-      setShowSuccess(false);
-      successTimerRef.current = null;
-    }, 3000);
-  }, [center, address, comment, buildWalkDate, addUserWalk, cancelWalkCreation]);
+    showSuccessToast();
+  }, [center, address, comment, buildWalkDate, addUserWalk, cancelWalkCreation, showSuccessToast]);
 
   const formattedTime = useMemo(() => {
     const now = new Date();
@@ -290,7 +194,7 @@ export const WalkCreationOverlay: React.FC = () => {
     zIndex: isActive ? 36 : 35,
     transform: visible ? 'translateY(0)' : 'translateY(100%)',
     opacity: visible ? 1 : 0,
-    transition: STEP_TRANSITION,
+    transition: MAP_STEP_DRAWER_TRANSITION,
     pointerEvents: visible ? 'auto' : 'none',
   });
 
@@ -313,8 +217,8 @@ export const WalkCreationOverlay: React.FC = () => {
               left={pinViewportCenter.left}
               pinRef={pinRef}
               shadowRef={pinShadowRef}
-              initialPinTransform={WALK_PIN_REST_TRANSFORM}
-              initialShadowTransform={WALK_SHADOW_REST_TRANSFORM}
+              initialPinTransform={MAP_CENTER_PIN_REST_TRANSFORM}
+              initialShadowTransform={MAP_CENTER_PIN_SHADOW_REST_TRANSFORM}
               initialShadowOpacity={0.45}
               shadow={
                 <div
@@ -371,9 +275,7 @@ export const WalkCreationOverlay: React.FC = () => {
             style={drawerStyle(locationVisible, step === 'location')}
             className="bg-zinc-100 rounded-t-3xl px-5 pt-3 pb-10 flex flex-col gap-5 shadow-[0_-4px_24px_rgba(0,0,0,0.08)]"
           >
-            <div className="flex justify-center">
-              <div className="w-14 h-1 bg-zinc-300 rounded-full" />
-            </div>
+            <BottomSheetHandle />
 
             <div className="flex items-start gap-3 min-h-[44px]">
               <div className="mt-1 flex-shrink-0">
@@ -404,7 +306,7 @@ export const WalkCreationOverlay: React.FC = () => {
                   size="L"
                   fullWidth
                   onClick={handleNext}
-                  disabled={!address && !isLoadingAddress}
+                  disabled={isLoadingAddress || !address}
                 >
                   {t('Next')}
                 </Button>
@@ -417,9 +319,7 @@ export const WalkCreationOverlay: React.FC = () => {
             style={drawerStyle(timeVisible, step === 'time')}
             className="bg-zinc-100 rounded-t-3xl px-5 pt-3 pb-10 flex flex-col gap-5 shadow-[0_-4px_24px_rgba(0,0,0,0.12)]"
           >
-            <div className="flex justify-center">
-              <div className="w-14 h-1 bg-zinc-300 rounded-full" />
-            </div>
+            <BottomSheetHandle />
 
             <Text variant="bold-24" color="primary">{t('Date and Time')}</Text>
 
@@ -444,9 +344,7 @@ export const WalkCreationOverlay: React.FC = () => {
             style={drawerStyle(commentVisible, step === 'comment')}
             className="bg-zinc-100 rounded-t-3xl px-5 pt-3 pb-10 flex flex-col gap-5 shadow-[0_-4px_24px_rgba(0,0,0,0.12)]"
           >
-            <div className="flex justify-center">
-              <div className="w-14 h-1 bg-zinc-300 rounded-full" />
-            </div>
+            <BottomSheetHandle />
 
             <div className="flex flex-wrap gap-2">
               {address && <Tag variant="outline" size="small">{address}</Tag>}

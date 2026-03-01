@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { TagRadioGroup, TagRadioOption, Input, Text } from "@shared/ui";
+import { TagRadioGroup, TagRadioOption, Input } from "@shared/ui";
 import { DogProfileData, StepErrors } from "../../model/types";
+import { OnboardingStepField, OnboardingStepLayout } from "../StepLayout";
 
 const mockBreeds = [
   "Лабрадор",
@@ -44,11 +45,7 @@ export const DogBreedStep: React.FC<DogBreedStepProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-8">
-      <Text variant="bold-24" tag="h1" className="text-start">
-        {t("Breed")}
-      </Text>
-
+    <OnboardingStepLayout title={t("Breed")}>
       <Input
         placeholder={t("Start typing breed")}
         value={searchValue}
@@ -63,11 +60,13 @@ export const DogBreedStep: React.FC<DogBreedStepProps> = ({
         className="justify-start"
       />
 
-      {errors.breed && (
-        <Text variant="medium-14" color="error" className="text-center">
-          {t("Please select your pet's breed")}
-        </Text>
-      )}
-    </div>
+      <OnboardingStepField
+        error={errors.breed ? t("Please select your pet's breed") : undefined}
+        errorAlign="center"
+        className="gap-0"
+      >
+        {null}
+      </OnboardingStepField>
+    </OnboardingStepLayout>
   );
 };

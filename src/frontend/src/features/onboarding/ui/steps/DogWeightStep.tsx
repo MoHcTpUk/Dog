@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Slider, Text } from "@shared/ui";
 import { DogProfileData, StepErrors } from "../../model/types";
+import { OnboardingStepLayout } from "../StepLayout";
 
 interface DogWeightStepProps {
   data: DogProfileData;
@@ -16,11 +17,7 @@ export const DogWeightStep: React.FC<DogWeightStepProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col gap-8">
-      <Text variant="bold-24" tag="h1" className="text-start">
-        {t("Pet Weight")}
-      </Text>
-
+    <OnboardingStepLayout title={t("Pet Weight")}>
       <div className="w-full h-7 inline-flex justify-start items-start gap-6">
         <div className="flex-1 h-7 relative">
           <Slider
@@ -37,6 +34,6 @@ export const DogWeightStep: React.FC<DogWeightStepProps> = ({
           </Text>
         </div>
       </div>
-    </div>
+    </OnboardingStepLayout>
   );
 };

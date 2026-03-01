@@ -7,159 +7,103 @@ import React, {
 import { useHistory, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useMapGL } from "@features/map/context";
-import { Button, CenterMapPin, Toast } from "@shared/ui";
-import { useCenterPinMotion } from "@shared/hooks";
+import {
+  isMapOverlayRoute,
+  type MapOverlayLocationState,
+  MAP_BOTTOM_SHEET_TRANSITION,
+  MAP_CENTER_PIN_LIFTED_TRANSFORM,
+  MAP_CENTER_PIN_REST_TRANSFORM,
+  MAP_CENTER_PIN_SHADOW_ACTIVE_TRANSFORM,
+  MAP_CENTER_PIN_SHADOW_REST_TRANSFORM,
+  setOverlayDrawerVisibility,
+} from "@features/map/lib";
+import {
+  useAbortableMapRequest,
+  useCenterPinMotion,
+  useMapPinViewport,
+} from "@features/map/hooks";
+import { BottomSheetHandle, Button, CenterMapPin, Toast } from "@shared/ui";
 import { Text } from "@shared/ui/Text";
+import { useTransientFlag } from "@shared/hooks";
 import { fetchNearbyPlaces, type NearbyPlace } from "@shared/api/overpass";
-import type { Location } from "history";
-
-interface LocationState {
-  background?: Location;
-}
-const PLACE_PIN_REST_TRANSFORM = "translate(-50%, calc(-100% + 1px))";
-const PLACE_PIN_LIFTED_TRANSFORM = "translate(-50%, calc(-100% - 9px))";
-const PLACE_SHADOW_REST_TRANSFORM = "translate(-50%, -50%) scale(1)";
-const PLACE_SHADOW_ACTIVE_TRANSFORM = "translate(-50%, -50%) scale(1.18)";
 
 export const PlaceCreationOverlay: React.FC = () => {
   const { t } = useTranslation();
   const history = useHistory();
-  const location = useLocation<LocationState>();
+  const location = useLocation<MapOverlayLocationState>();
   const {
     placeCreationActive,
     cancelPlaceCreation,
     mapInstance,
   } = useMapGL();
 
-  const background = location.state?.background;
-  const currentPath = background ? background.pathname : location.pathname;
-  const isMapRoute = currentPath.startsWith("/map");
+  const isMapRoute = isMapOverlayRoute(location.pathname, location.state);
 
   const [nearbyCount, setNearbyCount] = useState(0);
   const [isLoadingCount, setIsLoadingCount] = useState(false);
-  const [showNoPlacesNotif, setShowNoPlacesNotif] = useState(false);
-  const [pinViewportCenter, setPinViewportCenter] = useState({
-    left: "50%",
-    top: "50%",
-  });
-
   const [allNearbyPlaces, setAllNearbyPlaces] = useState<NearbyPlace[]>([]);
-
-  const notifTimerRef = useRef<number | null>(null);
-  const countAbortRef = useRef<AbortController | null>(null);
-  const countDebounceRef = useRef<number | null>(null);
+  const { isVisible: showNoPlacesNotif, show: showNoPlacesNotification } =
+    useTransientFlag();
   const previousPathRef = useRef(location.pathname);
   const drawerEnterFrameRef = useRef<number | null>(null);
 
   // Direct DOM refs — avoid React re-renders on map move events
-  const isMapMovingRef = useRef(false);
   const locationDrawerRef = useRef<HTMLDivElement>(null);
   const [isDrawerEntering, setIsDrawerEntering] = useState(false);
+  const { pinViewportCenter, getCoordsUnderPin } = useMapPinViewport({
+    active: placeCreationActive,
+    mapInstance,
+  });
 
-  const syncPinViewportCenter = useCallback(() => {
-    const mapContainer = document.getElementById("map-container");
-    if (!mapContainer) return;
-
-    const rect = mapContainer.getBoundingClientRect();
-    setPinViewportCenter({
-      left: `${rect.left + rect.width / 2}px`,
-      top: `${rect.top + rect.height / 2}px`,
-    });
-  }, []);
-
-  const getCoordsUnderPin = useCallback((): [number, number] | null => {
-    if (!mapInstance) return null;
-
-    const mapContainer = document.getElementById("map-container");
-    if (mapContainer && typeof mapInstance.unproject === "function") {
-      const coords = mapInstance.unproject([
-        mapContainer.clientWidth / 2,
-        mapContainer.clientHeight / 2,
-      ]);
-
-      if (Array.isArray(coords) && coords.length >= 2) {
-        return [coords[0], coords[1]];
-      }
-    }
-
-    try {
-      const c = mapInstance.getCenter();
-      return [c.lng ?? c[0], c.lat ?? c[1]];
-    } catch {
-      return null;
-    }
-  }, [mapInstance]);
+  const {
+    runRequest: runNearbyPlacesRequest,
+    scheduleRequest: scheduleNearbyPlacesRequest,
+    cancelRequest: cancelNearbyPlacesRequest,
+  } = useAbortableMapRequest<NearbyPlace[]>({
+    request: (coords, signal) =>
+      fetchNearbyPlaces(coords[0], coords[1], 100, 40, signal),
+    onStart: () => {
+      setIsLoadingCount(true);
+    },
+    onSuccess: (places) => {
+      setNearbyCount(places.length);
+      setAllNearbyPlaces(places);
+    },
+    onError: () => {
+      setNearbyCount(0);
+      setAllNearbyPlaces([]);
+    },
+    onFinally: () => {
+      setIsLoadingCount(false);
+    },
+  });
 
   // Reset flow
   useEffect(() => {
     if (placeCreationActive) {
-      isMapMovingRef.current = false;
       setNearbyCount(0);
       setAllNearbyPlaces([]);
+      setIsLoadingCount(false);
+    } else {
+      cancelNearbyPlacesRequest();
+      setIsLoadingCount(false);
     }
-  }, [placeCreationActive]);
-
-  const fetchCountForCoords = useCallback(async (coords: [number, number]) => {
-    countAbortRef.current?.abort();
-    const controller = new AbortController();
-    countAbortRef.current = controller;
-    setIsLoadingCount(true);
-    try {
-      const places = await fetchNearbyPlaces(
-        coords[0],
-        coords[1],
-        100,
-        40,
-        controller.signal,
-      );
-      if (!controller.signal.aborted) {
-        setNearbyCount(places.length);
-        setAllNearbyPlaces(places);
-      }
-    } catch (e) {
-      if (e instanceof DOMException && e.name === "AbortError") return;
-      if (!controller.signal.aborted) {
-        setNearbyCount(0);
-        setAllNearbyPlaces([]);
-      }
-    } finally {
-      if (!controller.signal.aborted) setIsLoadingCount(false);
-    }
-  }, []);
+  }, [cancelNearbyPlacesRequest, placeCreationActive]);
 
   // Get initial center and count
   useEffect(() => {
     if (!placeCreationActive || !mapInstance) return;
-    syncPinViewportCenter();
+
     const coords = getCoordsUnderPin();
     if (coords) {
-      fetchCountForCoords(coords);
+      void runNearbyPlacesRequest(coords);
     }
-    return () => {
-      if (countDebounceRef.current) {
-        window.clearTimeout(countDebounceRef.current);
-        countDebounceRef.current = null;
-      }
-      countAbortRef.current?.abort();
-    };
-  }, [placeCreationActive, mapInstance, fetchCountForCoords, syncPinViewportCenter, getCoordsUnderPin]);
-
-  useEffect(() => {
-    if (!placeCreationActive) return;
-    syncPinViewportCenter();
-
-    const handleResize = () => {
-      syncPinViewportCenter();
-    };
-
-    window.addEventListener("resize", handleResize);
-    window.visualViewport?.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      window.visualViewport?.removeEventListener("resize", handleResize);
-    };
-  }, [placeCreationActive, syncPinViewportCenter]);
+  }, [
+    getCoordsUnderPin,
+    mapInstance,
+    placeCreationActive,
+    runNearbyPlacesRequest,
+  ]);
 
   useEffect(() => {
     const cameBackFromPlaceSelect =
@@ -193,47 +137,32 @@ export const PlaceCreationOverlay: React.FC = () => {
 
   // Map move events for step 1
   const handlePinMoveStart = useCallback(() => {
-      isMapMovingRef.current = true;
-      if (countDebounceRef.current) {
-        window.clearTimeout(countDebounceRef.current);
-        countDebounceRef.current = null;
-      }
-      countAbortRef.current?.abort();
-      if (locationDrawerRef.current) {
-        locationDrawerRef.current.style.transform = "translateY(100%)";
-        locationDrawerRef.current.style.opacity = "0";
-        locationDrawerRef.current.style.pointerEvents = "none";
-      }
-    }, []);
+      cancelNearbyPlacesRequest();
+      setOverlayDrawerVisibility(locationDrawerRef.current, false, {
+        includeOpacity: true,
+        includePointerEvents: true,
+      });
+    }, [cancelNearbyPlacesRequest]);
 
   const handlePinMoveEnd = useCallback(() => {
-      isMapMovingRef.current = false;
-      if (locationDrawerRef.current) {
-        locationDrawerRef.current.style.transform = "translateY(0)";
-        locationDrawerRef.current.style.opacity = "1";
-        locationDrawerRef.current.style.pointerEvents = "auto";
-      }
-      try {
-        const coords = getCoordsUnderPin();
-        if (!coords) return;
-        if (countDebounceRef.current)
-          window.clearTimeout(countDebounceRef.current);
-        countDebounceRef.current = window.setTimeout(() => {
-          fetchCountForCoords(coords);
-          countDebounceRef.current = null;
-        }, 500);
-      } catch {
-        // ignore
-      }
-    }, [fetchCountForCoords, getCoordsUnderPin]);
+      setOverlayDrawerVisibility(locationDrawerRef.current, true, {
+        includeOpacity: true,
+        includePointerEvents: true,
+      });
+
+      const coords = getCoordsUnderPin();
+      if (!coords) return;
+
+      scheduleNearbyPlacesRequest(coords);
+    }, [getCoordsUnderPin, scheduleNearbyPlacesRequest]);
 
   const { pinRef, shadowRef: pinShadowRef } = useCenterPinMotion({
     mapInstance,
     active: placeCreationActive,
-    restTransform: PLACE_PIN_REST_TRANSFORM,
-    liftedTransform: PLACE_PIN_LIFTED_TRANSFORM,
-    restShadowTransform: PLACE_SHADOW_REST_TRANSFORM,
-    activeShadowTransform: PLACE_SHADOW_ACTIVE_TRANSFORM,
+    restTransform: MAP_CENTER_PIN_REST_TRANSFORM,
+    liftedTransform: MAP_CENTER_PIN_LIFTED_TRANSFORM,
+    restShadowTransform: MAP_CENTER_PIN_SHADOW_REST_TRANSFORM,
+    activeShadowTransform: MAP_CENTER_PIN_SHADOW_ACTIVE_TRANSFORM,
     restShadowOpacity: 0.3,
     activeShadowOpacity: 0.7,
     onMoveStart: handlePinMoveStart,
@@ -246,18 +175,13 @@ export const PlaceCreationOverlay: React.FC = () => {
 
   const handleNextFromLocation = useCallback(() => {
     if (nearbyCount === 0 && !isLoadingCount) {
-      setShowNoPlacesNotif(true);
-      if (notifTimerRef.current) window.clearTimeout(notifTimerRef.current);
-      notifTimerRef.current = window.setTimeout(() => {
-        setShowNoPlacesNotif(false);
-        notifTimerRef.current = null;
-      }, 3000);
+      showNoPlacesNotification();
       return;
     }
     history.push("/place/create/select", {
       nearbyPlaces: allNearbyPlaces,
     });
-  }, [nearbyCount, isLoadingCount, history, allNearbyPlaces]);
+  }, [nearbyCount, isLoadingCount, history, allNearbyPlaces, showNoPlacesNotification]);
 
   if (!isMapRoute && !showNoPlacesNotif) return null;
 
@@ -283,8 +207,8 @@ export const PlaceCreationOverlay: React.FC = () => {
             left={pinViewportCenter.left}
             pinRef={pinRef}
             shadowRef={pinShadowRef}
-            initialPinTransform={PLACE_PIN_REST_TRANSFORM}
-            initialShadowTransform={PLACE_SHADOW_REST_TRANSFORM}
+            initialPinTransform={MAP_CENTER_PIN_REST_TRANSFORM}
+            initialShadowTransform={MAP_CENTER_PIN_SHADOW_REST_TRANSFORM}
             initialShadowOpacity={0.3}
             shadow={
               <svg
@@ -416,14 +340,11 @@ export const PlaceCreationOverlay: React.FC = () => {
               transform: isDrawerEntering ? "translateY(100%)" : "translateY(0)",
               opacity: isDrawerEntering ? 0 : 1,
               pointerEvents: isDrawerEntering ? "none" : "auto",
-              transition:
-                "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease",
+              transition: MAP_BOTTOM_SHEET_TRANSITION,
             }}
             className="bg-zinc-100 rounded-t-3xl px-5 pt-3 pb-10 flex flex-col gap-5 shadow-[0_-4px_24px_rgba(0,0,0,0.08)]"
           >
-            <div className="flex justify-center">
-              <div className="w-14 h-1 bg-zinc-300 rounded-full" />
-            </div>
+            <BottomSheetHandle />
 
             <div className="flex flex-col gap-1">
               <Text variant="medium-16" color="primary">

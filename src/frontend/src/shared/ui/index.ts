@@ -38,6 +38,9 @@ export type { ConfirmModalProps } from "./ConfirmModal";
 export { BottomDrawer } from "./BottomDrawer";
 export type { BottomDrawerProps } from "./BottomDrawer";
 
+export { BottomSheetHandle } from "./BottomSheetHandle";
+export type { BottomSheetHandleProps } from "./BottomSheetHandle";
+
 export { Tag, TagRadioGroup, TagCheckboxGroup } from "./Tag";
 export type {
   TagProps,
@@ -55,6 +58,9 @@ export type { RadioButtonProps } from "./RadioButton";
 
 export { Icon } from "./Icon";
 export type { IconProps, IconName } from "./Icon";
+
+export { RoundIconButton } from "./RoundIconButton";
+export type { RoundIconButtonProps } from "./RoundIconButton";
 
 export { Text } from "./Text";
 export type { TextProps, TextVariant, TextTag } from "./Text";

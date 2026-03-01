@@ -1,7 +1,8 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Textarea, Text } from "@shared/ui";
+import { Textarea } from "@shared/ui";
 import { DogProfileData, StepErrors } from "../../model/types";
+import { OnboardingStepLayout } from "../StepLayout";
 
 interface DogCommentStepProps {
   data: DogProfileData;
@@ -16,11 +17,7 @@ export const DogCommentStep: React.FC<DogCommentStepProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col gap-8">
-      <Text variant="bold-24" tag="h1" className="text-start">
-        {t("Tell us about your pet")}
-      </Text>
-
+    <OnboardingStepLayout title={t("Tell us about your pet")}>
       <Textarea
         placeholder={t("Tell what other owners should know before walks")}
         value={data.comment}
@@ -28,6 +25,6 @@ export const DogCommentStep: React.FC<DogCommentStepProps> = ({
         showCharCount
         onInput={(value) => onUpdate({ comment: value })}
       />
-    </div>
+    </OnboardingStepLayout>
   );
 };
