@@ -13,7 +13,7 @@ public class CreateRegistrationRequestHandler(
     IMapper mapper)
     : ICommandHandler<CreateRegistrationRequestCommand, RegistrationRequestDto>
 {
-    private const int VerificationCodeLength = 6;
+    private const int VerificationCodeLength = 4;
 
     public async Task<RegistrationRequestDto> Handle(CreateRegistrationRequestCommand requestCommand,
         CancellationToken cancellationToken)
