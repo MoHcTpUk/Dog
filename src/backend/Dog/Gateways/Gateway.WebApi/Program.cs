@@ -1,9 +1,9 @@
 using Gateway.Api;
-using Gateway.Api.Filters;
 using Dog.Api;
 using Users.Api;
 using Environments = Shared.Environments;
 using Microsoft.AspNetCore.OpenApi;
+using Shared.Api.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 

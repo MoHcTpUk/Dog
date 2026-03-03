@@ -46,9 +46,9 @@ public class VerifyRegistrationRequestHandler(
             UserName = username,
             Password = password
         };
-
+        
         await identityService.CreateUserAsync(createUserCommand);
-
+        
         return new UserDto
         {
             Email = registrationRequest.Email,

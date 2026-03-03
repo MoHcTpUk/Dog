@@ -1,5 +1,6 @@
 using Identity.WebApi;
 using Identity.WebApi.Middleware;
+using Shared.Api.Filters;
 using Environments = Shared.Environments;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,8 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddControllers();
-
+builder.Services.AddControllers(options => { options.Filters.Add<RemoteProblemDetailsExceptionFilter>(); });
 builder.Services.AddIdentityWebApi(builder.Configuration);
 
 builder.Services.AddHostedService<AppInitializer>();
@@ -25,9 +25,9 @@ if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName =
                     {
                         var uri = new Uri(origin);
                         var isLocalhost = uri.Host == "localhost" || uri.Host == "127.0.0.1";
-                        
+
                         var isDogappaLocal = uri.Host == "dogappa.local" || uri.Host.EndsWith(".dogappa.local");
-                        
+
                         return isLocalhost || isDogappaLocal;
                     }
                     catch
@@ -46,15 +46,11 @@ var app = builder.Build();
 if (app.Environment.IsProduction()) app.UseHttpsRedirection();
 
 if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == Environments.Local)
-{
     app.UseCors("NoLocalCORS");
-}
 
 // Map OpenAPI before authentication middleware to ensure it's accessible
 if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == Environments.Local)
-{
     app.MapOpenApi().AllowAnonymous();
-}
 
 // Allows issuing tokens from /Users/VerifyRegistrationRequest by translating the request
 // to an internal /connect/token password grant flow within the same HTTP request.

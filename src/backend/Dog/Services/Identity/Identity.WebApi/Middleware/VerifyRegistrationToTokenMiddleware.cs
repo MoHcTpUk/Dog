@@ -1,4 +1,7 @@
 using System.Text;
+using System.Text.Json;
+using Shared.Messaging.Messaging;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Primitives;
 using OpenIddict.Abstractions;
@@ -52,7 +55,19 @@ public sealed class VerifyRegistrationToTokenMiddleware(RequestDelegate next)
             VerificationCode = verificationCode
         };
 
-        var verifiedUser = await userService.VerifyRegistrationRequest(command);
+        string userName;
+        string password;
+        try
+        {
+            var verifiedUser = await userService.VerifyRegistrationRequest(command);
+            userName = verifiedUser.UserName;
+            password = verifiedUser.Password;
+        }
+        catch (RemoteProblemDetailsException ex)
+        {
+            await WriteProblemDetailsAsync(context, ex.Problem);
+            return;
+        }
 
         var scope = string.Join(' ', new[]
         {
@@ -65,8 +80,8 @@ public sealed class VerifyRegistrationToTokenMiddleware(RequestDelegate next)
         var form = new Dictionary<string, string?>
         {
             ["grant_type"] = OpenIddictConstants.GrantTypes.Password,
-            ["username"] = verifiedUser.UserName,
-            ["password"] = verifiedUser.Password,
+            ["username"] = userName,
+            ["password"] = password,
             ["scope"] = scope,
             ["client_id"] = "dog-app"
         };
@@ -87,5 +102,33 @@ public sealed class VerifyRegistrationToTokenMiddleware(RequestDelegate next)
         context.Features.Set<IFormFeature>(new FormFeature(replacedForm));
 
         await next(context);
+    }
+
+    private static async Task WriteProblemDetailsAsync(HttpContext context, Rfc7807ProblemDetails problem)
+    {
+        var statusCode = problem.Status ?? StatusCodes.Status500InternalServerError;
+
+        context.Response.StatusCode = statusCode;
+        context.Response.ContentType = "application/problem+json";
+
+        var extensions = problem.Extensions is null
+            ? new Dictionary<string, object?>()
+            : new Dictionary<string, object?>(problem.Extensions);
+
+        if (!extensions.ContainsKey("traceId"))
+            extensions["traceId"] = Activity.Current?.Id ?? context.TraceIdentifier;
+
+        var responseProblem = new Rfc7807ProblemDetails
+        {
+            Type = problem.Type,
+            Title = problem.Title,
+            Status = problem.Status,
+            Detail = problem.Detail,
+            Instance = problem.Instance,
+            Errors = problem.Errors,
+            Extensions = extensions
+        };
+
+        await context.Response.WriteAsync(JsonSerializer.Serialize(responseProblem));
     }
 }

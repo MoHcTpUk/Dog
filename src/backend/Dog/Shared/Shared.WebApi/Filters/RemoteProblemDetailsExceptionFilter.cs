@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Shared.Messaging.Messaging;
 
-namespace Gateway.Api.Filters;
+namespace Shared.Api.Filters;
 
 /// <summary>
 /// Converts RemoteProblemDetailsException to RFC7807 HTTP response for all MVC controllers.
