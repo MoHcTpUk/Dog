@@ -152,6 +152,9 @@ public class NatsCommandBus : ICommandBus
 
     private static Rfc7807ProblemDetails CreateProblemDetails(Exception exception, string? instance)
     {
+        if (exception is RemoteProblemDetailsException remoteProblemDetailsException)
+            return remoteProblemDetailsException.Problem;
+
         var ex = exception is AggregateException { InnerException: not null } agg ? agg.InnerException! : exception;
 
         var status = ex switch
