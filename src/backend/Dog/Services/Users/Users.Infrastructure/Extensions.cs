@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Domain.Interfaces;
 using Shared.Infrastructure;
 using Users.Infrastructure.Repositories;
 
@@ -12,6 +13,7 @@ public static class Extensions
     {
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRegistrationRequestRepository, RegistrationRequestRepository>();
+        services.AddScoped<IDatabaseMigrator, EfCoreDatabaseMigrator<UserDbContext>>();
         
         services.AddSharedInfrastructure();
 

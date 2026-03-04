@@ -1,16 +1,19 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Shared.Domain.Interfaces;
 using Shared.Messaging.Messaging;
-using DbContext = Microsoft.EntityFrameworkCore.DbContext;
 
 namespace Shared.Service;
 
-public class AppInitializer(IConfiguration configuration, ICommandBus bus) : IHostedService
+public class AppInitializer(
+    IConfiguration configuration,
+    ICommandBus bus,
+    IServiceProvider serviceProvider) : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        await MigrateDatabaseAsync();
+        await MigrateDatabaseAsync(cancellationToken);
         RegisterNatsStreamsAsync(bus, configuration);
     }
 
@@ -26,19 +29,13 @@ public class AppInitializer(IConfiguration configuration, ICommandBus bus) : IHo
         streams?.ToList().ForEach(stream => bus.RegisterHandler($"{stream}.>"));
     }
 
-    private async Task MigrateDatabaseAsync()
+    private async Task MigrateDatabaseAsync(CancellationToken cancellationToken)
     {
-        var factoryInterfaceType = typeof(Infrastructure.IDbContextFactory<>);
-
-        var factoryTypes = Utilities.GetTypes(factoryInterfaceType);
-
-        foreach (var factoryType in factoryTypes)
+        using var scope = serviceProvider.CreateScope();
+        var migrators = scope.ServiceProvider.GetServices<IDatabaseMigrator>();
+        foreach (var migrator in migrators)
         {
-            var factory = (Infrastructure.IDbContextFactory<DbContext>)Activator.CreateInstance(factoryType)!;
-
-            var dbContext = factory.CreateDbContext(configuration);
-
-            await dbContext.Database.MigrateAsync();
+            await migrator.MigrateAsync(cancellationToken);
         }
     }
 }

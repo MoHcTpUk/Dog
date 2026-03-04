@@ -1,12 +1,10 @@
+using System.Data.Entity;
 using System.Linq.Expressions;
 using AutoMapper;
 using LinqKit;
-using Microsoft.EntityFrameworkCore;
 using Shared.Api.Query;
-using Shared.Domain;
 using Shared.Domain.Interfaces;
 using Shared.Dtos;
-using Shared.Infrastructure.Repository;
 using Shared.Messaging.Interfaces;
 
 namespace Shared.Application.Handlers;

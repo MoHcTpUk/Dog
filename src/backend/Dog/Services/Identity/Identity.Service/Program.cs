@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Hosting;
 using Shared.Service;
 using Identity.Application;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Identity.Service;
 
@@ -13,7 +12,6 @@ public static class Program
             .CreateHostBuilder(args, (services, config) =>
             {
                 services.AddIdentityApplication(config);
-                services.AddHostedService<AppInitializer>();
             }).Build();
 
         await host.RunAsync();

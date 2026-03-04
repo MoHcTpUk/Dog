@@ -1,3 +1,4 @@
+using Shared.Domain.Interfaces;
 using Shared.Infrastructure.Repository;
 using Users.Domain.Aggregates;
 

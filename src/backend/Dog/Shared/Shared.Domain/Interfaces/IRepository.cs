@@ -1,7 +1,4 @@
-using Shared.Domain;
-using Shared.Domain.Interfaces;
-
-namespace Shared.Infrastructure.Repository;
+namespace Shared.Domain.Interfaces;
 
 public interface IRepository<TEntity>
     where TEntity : IBaseModel

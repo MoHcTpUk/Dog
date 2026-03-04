@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using OpenIddict.Abstractions;
+using Shared.Domain.Interfaces;
 using Shared.Infrastructure;
 using Identity.Infrastructure.Repositories;
 
@@ -12,6 +12,7 @@ public static class Extensions
         IConfiguration configuration)
     {
         services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
+        services.AddScoped<IDatabaseMigrator, EfCoreDatabaseMigrator<IdentityDbContext>>();
         
         services.AddSharedInfrastructure();
 
