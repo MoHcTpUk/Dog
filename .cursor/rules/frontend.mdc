@@ -1,0 +1,9 @@
+---
+description: Rules for frontend (TypeScript/React) in src/frontend
+globs: src/frontend/**/*.{ts,tsx,js,jsx,vue}
+alwaysApply: false
+---
+
+# Frontend (src/frontend)
+
+- Follow the existing structure and code style in `src/frontend/CLAUDE.md`.

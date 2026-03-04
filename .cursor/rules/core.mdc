@@ -1,0 +1,35 @@
+---
+description: General project rules and context for DogApp
+alwaysApply: true
+---
+
+# DogApp — General Rules
+
+## Project structure
+
+- **src/frontend** — frontend (npm, dev: `npm run dev`)
+- **src/backend/Dog** — .NET backend: Gateway, services (Identity, Dog), APIs
+- **scripts/** — image build and publish; run from `scripts/`
+- **deploy/** — Docker Swarm: `docker-compose.*.yml`, deploy scripts
+
+## Enviroments
+- Local - to run locally
+- Development - to run locally from Docker Swarm
+- Stage - to run on stage server, not locally (pre-prod enviroment)
+
+## Communication
+
+- Reply in the same language the user used (English or otherwise).
+- In code: comments and names follow repository context (either language is fine).
+- Do not comment on code unnecessarily or if it is obvious from the code.
+
+## Before making changes
+
+- Do not duplicate existing logic; check `src/` and `deploy/` before suggesting changes.
+- Backend build: from `scripts/` — `./build_backend.sh`; full build — `./build_all.sh`.
+- Deploy: from `deploy/` — `./start_local.sh`
+
+## References
+
+- Quick Start and port mappings — see `README.md`.
+- Gateway switch (Docker / local) — see `deploy/GATEWAY-SWITCH-MODE.md` (if present).

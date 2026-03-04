@@ -1,0 +1,10 @@
+---
+description: Rules for .NET backend (Gateway, Identity, Dog) in src/backend/Dog
+globs: src/backend/Dog/**/*.cs
+alwaysApply: false
+---
+
+# Backend (.NET)
+
+- Stack: .NET 9; structure — Gateway, services (Identity, Dog) with Domain/Application/Infrastructure/WebApi or Api layers.
+- Image build: from `scripts/` — `./build_backend.sh`;

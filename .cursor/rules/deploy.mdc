@@ -1,0 +1,12 @@
+---
+description: Rules for deploy and Docker (deploy/, docker-compose, scripts)
+globs: deploy/**/*.{yml,yaml,sh,ps1}
+alwaysApply: false
+---
+
+# Deploy and Docker
+
+- Deploy is Docker Swarm; order: management → infra → app (see README.md).
+- Compose files in `deploy/`: do not change network or stack names without aligning with README and scripts.
+- Local domain: `*.dogappa.local`; certs in `deploy/certs/` (generate-local-certs).
+- Run scripts in `scripts/` from the `scripts/` folder; run scripts in `deploy/` from `deploy/`.
