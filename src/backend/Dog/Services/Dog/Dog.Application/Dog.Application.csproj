@@ -13,8 +13,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\Api\Dog.Contracts\Dog.Contracts.csproj" />
       <ProjectReference Include="..\..\..\Shared\Shared.Application\Shared.Application.csproj" />
+      <ProjectReference Include="..\Dog.Contracts\Dog.Contracts.csproj" />
       <ProjectReference Include="..\Dog.Domain\Dog.Domain.csproj" />
     </ItemGroup>
 

@@ -14,9 +14,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\..\Api\Users.Contracts\Users.Contracts.csproj" />
-        <ProjectReference Include="..\..\..\Api\Identity.Contracts\Identity.Contracts.csproj" />
         <ProjectReference Include="..\..\..\Shared\Shared.Application\Shared.Application.csproj"/>
+        <ProjectReference Include="..\..\Identity\Identity.Contracts\Identity.Contracts.csproj" />
+        <ProjectReference Include="..\Users.Contracts\Users.Contracts.csproj" />
         <ProjectReference Include="..\Users.Domain\Users.Domain.csproj" />
     </ItemGroup>
 

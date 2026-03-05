@@ -1,6 +1,3 @@
-using Identity.Contracts.Services;
-using Identity.Api;
-using Identity.Api.Services;
 using Shared.Api;
 
 namespace Gateway.Api;
@@ -11,8 +8,6 @@ public static class Extensions
         IConfiguration configuration)
     {
         services.AddSharedApi(configuration);
-
-        services.AddScoped<IIdentityService, IdentityService>();
 
         return services;
     }
