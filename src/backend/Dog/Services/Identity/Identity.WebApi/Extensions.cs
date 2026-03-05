@@ -15,6 +15,7 @@ public static class Extensions
     {
         services.AddSharedApi(configuration);
 
+        services.AddIdentityInfrastructure(configuration);
         services.AddIdentityApplication(configuration);
         
         // Identity.WebApi уже регистрирует Shared.Api (NATS + CommandBus).
