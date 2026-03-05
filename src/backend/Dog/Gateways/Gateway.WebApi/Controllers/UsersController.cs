@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Users.Api.Commands.RegistrationRequest;
-using Users.Api.Dtos;
+using Users.Contracts.Commands.RegistrationRequest;
+using Users.Contracts.Dtos;
 using Users.Api.Services;
 
 namespace Gateway.Api.Controllers;

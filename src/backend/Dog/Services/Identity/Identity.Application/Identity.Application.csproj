@@ -12,10 +12,11 @@
         <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
         <PackageReference Include="OpenIddict.Abstractions" Version="5.7.0" />
+        <PackageReference Include="OpenIddict.Server.AspNetCore" Version="5.7.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\..\Api\Identity.Api\Identity.Api.csproj" />
+        <ProjectReference Include="..\..\..\Api\Identity.Contracts\Identity.Contracts.csproj" />
         <ProjectReference Include="..\..\..\Shared\Shared.Application\Shared.Application.csproj"/>
         <ProjectReference Include="..\Identity.Domain\Identity.Domain.csproj" />
     </ItemGroup>

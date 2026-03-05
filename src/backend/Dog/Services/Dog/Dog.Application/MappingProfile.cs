@@ -1,6 +1,6 @@
-using Dog.Api.Commands.Dog;
-using Dog.Api.Commands.Owner;
-using Dog.Api.Dtos;
+using Dog.Contracts.Commands.Dog;
+using Dog.Contracts.Commands.Owner;
+using Dog.Contracts.Dtos;
 using Dog.Domain.Aggregates;
 using Shared.Application;
 using DomainActivity = Shared.Enums.Activity;

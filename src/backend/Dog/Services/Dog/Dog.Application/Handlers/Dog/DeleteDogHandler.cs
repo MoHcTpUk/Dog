@@ -1,6 +1,6 @@
 using AutoMapper;
-using Dog.Api.Commands.Dog;
-using Dog.Api.Dtos;
+using Dog.Contracts.Commands.Dog;
+using Dog.Contracts.Dtos;
 using Dog.Domain;
 using Dog.Domain.Aggregates;
 using Shared.Application.Handlers;

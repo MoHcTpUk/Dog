@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using Identity.Api.Commands;
+using Identity.Contracts.Commands;
 using Identity.Application.Services;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;

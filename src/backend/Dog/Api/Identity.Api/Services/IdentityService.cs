@@ -1,4 +1,5 @@
-using Identity.Api.Commands;
+using Identity.Contracts.Commands;
+using Identity.Contracts.Services;
 using Shared.Messaging.Messaging;
 
 namespace Identity.Api.Services;

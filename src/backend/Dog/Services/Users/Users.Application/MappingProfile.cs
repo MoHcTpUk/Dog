@@ -1,6 +1,6 @@
 using Shared.Application;
-using Users.Api.Commands.User;
-using Users.Api.Dtos;
+using Users.Contracts.Commands.User;
+using Users.Contracts.Dtos;
 using Users.Domain.Aggregates;
 
 namespace Users.Application;

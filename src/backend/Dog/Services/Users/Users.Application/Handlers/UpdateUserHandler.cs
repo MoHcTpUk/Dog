@@ -1,7 +1,7 @@
 using AutoMapper;
 using Shared.Application.Handlers;
-using Users.Api.Commands.User;
-using Users.Api.Dtos;
+using Users.Contracts.Commands.User;
+using Users.Contracts.Dtos;
 using Users.Application.Interfaces;
 using Users.Domain.Aggregates;
 

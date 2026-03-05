@@ -5,7 +5,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Primitives;
 using OpenIddict.Abstractions;
-using Users.Api.Commands.RegistrationRequest;
+using Users.Contracts.Commands.RegistrationRequest;
 using Users.Api.Services;
 
 namespace Identity.WebApi.Middleware;

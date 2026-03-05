@@ -1,4 +1,4 @@
-using Identity.Api.Commands;
+using Identity.Contracts.Commands;
 using Identity.Application.Services;
 using Shared.Messaging.Interfaces;
 

@@ -1,3 +1,4 @@
+using Identity.Api;
 using Microsoft.Extensions.Hosting;
 using Shared.Service;
 using Users.Application;
@@ -14,6 +15,7 @@ public static class Program
             {
                 services.AddUsersApplication(config);
                 services.AddUsersInfrastructure(config);
+                services.AddIdentityApi(config);
             }).Build();
 
         await host.RunAsync();

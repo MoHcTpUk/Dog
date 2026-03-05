@@ -1,6 +1,6 @@
-using Dog.Api.Commands.Owner;
-using Dog.Api.Dtos;
-using Dog.Api.Queries;
+using Dog.Contracts.Commands.Owner;
+using Dog.Contracts.Dtos;
+using Dog.Contracts.Queries;
 using Shared.Api.Services;
 
 namespace Dog.Api.Services;

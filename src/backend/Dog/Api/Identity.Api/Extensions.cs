@@ -1,3 +1,4 @@
+using Identity.Contracts.Services;
 using Identity.Api.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using AutoMapper;
-using Dog.Api.Dtos;
-using Dog.Api.Queries;
+using Dog.Contracts.Dtos;
+using Dog.Contracts.Queries;
 using Dog.Domain;
 using Dog.Domain.Aggregates;
 using Shared.Application.Handlers;

@@ -1,6 +1,6 @@
-using Dog.Api.Commands.Dog;
-using Dog.Api.Dtos;
-using Dog.Api.Queries;
+using Dog.Contracts.Commands.Dog;
+using Dog.Contracts.Dtos;
+using Dog.Contracts.Queries;
 using Shared.Api.Services;
 using Shared.Dtos;
 using Shared.Messaging.Messaging;

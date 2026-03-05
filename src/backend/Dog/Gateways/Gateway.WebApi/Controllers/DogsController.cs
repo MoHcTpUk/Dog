@@ -1,6 +1,6 @@
-using Dog.Api.Commands.Dog;
-using Dog.Api.Dtos;
-using Dog.Api.Queries;
+using Dog.Contracts.Commands.Dog;
+using Dog.Contracts.Dtos;
+using Dog.Contracts.Queries;
 using Dog.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Api;

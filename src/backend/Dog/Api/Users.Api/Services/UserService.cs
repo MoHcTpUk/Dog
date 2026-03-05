@@ -1,9 +1,9 @@
 using Shared.Api.Services;
 using Shared.Messaging.Messaging;
-using Users.Api.Commands.RegistrationRequest;
-using Users.Api.Commands.User;
-using Users.Api.Dtos;
-using Users.Api.Queries;
+using Users.Contracts.Commands.RegistrationRequest;
+using Users.Contracts.Commands.User;
+using Users.Contracts.Dtos;
+using Users.Contracts.Queries;
 
 namespace Users.Api.Services;
 

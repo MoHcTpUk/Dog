@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Dog.Contracts\Dog.Contracts.csproj" />
       <ProjectReference Include="..\..\Shared\Shared.Api\Shared.Api.csproj" />
       <ProjectReference Include="..\..\Shared\Shared\Shared.csproj" />
     </ItemGroup>

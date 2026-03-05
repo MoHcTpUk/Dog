@@ -1,8 +1,8 @@
 using System.Text;
 using AutoMapper;
 using Shared.Messaging.Interfaces;
-using Users.Api.Commands.RegistrationRequest;
-using Users.Api.Dtos;
+using Users.Contracts.Commands.RegistrationRequest;
+using Users.Contracts.Dtos;
 using Users.Application.Interfaces;
 using Users.Domain.Aggregates;
 

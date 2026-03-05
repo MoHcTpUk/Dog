@@ -14,8 +14,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Api\Dog.Api\Dog.Api.csproj" />
+    <ProjectReference Include="..\..\Api\Dog.Contracts\Dog.Contracts.csproj" />
     <ProjectReference Include="..\..\Api\Identity.Api\Identity.Api.csproj" />
+    <ProjectReference Include="..\..\Api\Identity.Contracts\Identity.Contracts.csproj" />
     <ProjectReference Include="..\..\Api\Users.Api\Users.Api.csproj" />
+    <ProjectReference Include="..\..\Api\Users.Contracts\Users.Contracts.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.Api\Shared.Api.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.WebApi\Shared.WebApi.csproj" />
     <ProjectReference Include="..\..\Shared\Shared\Shared.csproj" />

@@ -1,9 +1,9 @@
-using Identity.Api.Commands;
-using Identity.Api.Services;
+using Identity.Contracts.Commands;
+using Identity.Contracts.Services;
 using Microsoft.EntityFrameworkCore;
 using Shared.Messaging.Interfaces;
-using Users.Api.Commands.RegistrationRequest;
-using Users.Api.Dtos;
+using Users.Contracts.Commands.RegistrationRequest;
+using Users.Contracts.Dtos;
 using Users.Application.Interfaces;
 using Users.Domain.Aggregates;
 
