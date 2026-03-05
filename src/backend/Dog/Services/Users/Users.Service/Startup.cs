@@ -1,3 +1,4 @@
+using Identity.Api;
 using Microsoft.Extensions.Hosting;
 using Shared.Service;
 using Users.Application;
@@ -12,6 +13,7 @@ public static class Program
         var host = HostBuilderHelper
             .CreateHostBuilder(args, (services, config) =>
             {
+                services.AddIdentityApi(config);
                 services.AddUsersApplication(config);
                 services.AddUsersInfrastructure(config);
             }).Build();
