@@ -1,6 +1,6 @@
 using System.Security.Claims;
+using Identity.Application.Interfaces;
 using Identity.Domain.Aggregates;
-using Identity.Infrastructure.Repositories;
 using OpenIddict.Abstractions;
 
 namespace Identity.Application.Services;

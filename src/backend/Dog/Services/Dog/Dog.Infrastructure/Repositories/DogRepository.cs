@@ -1,3 +1,4 @@
+using Dog.Domain;
 using Dog.Domain.Aggregates;
 using Shared.Infrastructure.Repository;
 

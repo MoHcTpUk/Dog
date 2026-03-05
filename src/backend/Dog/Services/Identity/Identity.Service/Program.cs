@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Shared.Service;
 using Identity.Application;
+using Identity.Infrastructure;
 
 namespace Identity.Service;
 
@@ -11,6 +12,7 @@ public static class Program
         var host = HostBuilderHelper
             .CreateHostBuilder(args, (services, config) =>
             {
+                services.AddIdentityInfrastructure(config);
                 services.AddIdentityApplication(config);
             }).Build();
 

@@ -24,7 +24,7 @@ public class MappingProfile : BaseMappingProfile
         CreateMap<DomainGender, DomainGender>().ConvertUsing(x => x);
         CreateMap<DomainSpecies, DomainSpecies>().ConvertUsing(x => x);
         CreateMap<DomainActivity, DomainActivity>().ConvertUsing(x => x);
-        
+
         CreateMap<CreateOwnerCommand, OwnerAggregate>();
         CreateMap<UpdateOwnerCommand, OwnerAggregate>();
         CreateMap<OwnerAggregate, OwnerDto>();

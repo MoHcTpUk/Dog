@@ -3,8 +3,8 @@ using AutoMapper;
 using Shared.Application.Handlers;
 using Users.Api.Dtos;
 using Users.Api.Queries;
+using Users.Application.Interfaces;
 using Users.Domain.Aggregates;
-using Users.Infrastructure.Repositories;
 
 namespace Users.Application.Handlers;
 

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Shared.Service;
 using Users.Application;
+using Users.Infrastructure;
 
 namespace Users.Service;
 
@@ -12,6 +13,7 @@ public static class Program
             .CreateHostBuilder(args, (services, config) =>
             {
                 services.AddUsersApplication(config);
+                services.AddUsersInfrastructure(config);
             }).Build();
 
         await host.RunAsync();

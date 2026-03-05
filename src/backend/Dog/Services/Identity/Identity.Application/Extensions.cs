@@ -2,7 +2,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Application;
 using Identity.Application.Services;
-using Identity.Infrastructure;
 
 namespace Identity.Application;
 
@@ -14,9 +13,8 @@ public static class Extensions
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<ITokenService, TokenService>();
         
-        services.AddHttpClient();
-
-        services.AddIdentityInfrastructure(configuration);
+        // services.AddHttpClient();
+        
         services.AddSharedApplication(configuration);
 
         return services;

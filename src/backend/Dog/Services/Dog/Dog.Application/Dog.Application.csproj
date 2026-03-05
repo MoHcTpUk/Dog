@@ -15,7 +15,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\Api\Dog.Api\Dog.Api.csproj" />
       <ProjectReference Include="..\..\..\Shared\Shared.Application\Shared.Application.csproj" />
-      <ProjectReference Include="..\Dog.Infrastructure\Dog.Infrastructure.csproj" />
+      <ProjectReference Include="..\Dog.Domain\Dog.Domain.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,4 +1,5 @@
 using Dog.Application;
+using Dog.Infrastructure;
 using Microsoft.Extensions.Hosting;
 using Shared.Service;
 
@@ -11,6 +12,7 @@ public static class Program
         var host = HostBuilderHelper
             .CreateHostBuilder(args, (services, config) =>
             {
+                services.AddDogInfrastructure(config);
                 services.AddDogApplication(config);
             }).Build();
 

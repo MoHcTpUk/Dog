@@ -2,8 +2,8 @@ using System.Linq.Expressions;
 using AutoMapper;
 using Dog.Api.Dtos;
 using Dog.Api.Queries;
+using Dog.Domain;
 using Dog.Domain.Aggregates;
-using Dog.Infrastructure.Repositories;
 using Shared.Application.Handlers;
 
 namespace Dog.Application.Handlers.Owner;

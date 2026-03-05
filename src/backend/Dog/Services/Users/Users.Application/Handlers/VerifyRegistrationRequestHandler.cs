@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Shared.Messaging.Interfaces;
 using Users.Api.Commands.RegistrationRequest;
 using Users.Api.Dtos;
+using Users.Application.Interfaces;
 using Users.Domain.Aggregates;
-using Users.Infrastructure.Repositories;
 
 namespace Users.Application.Handlers;
 
@@ -26,7 +26,7 @@ public class VerifyRegistrationRequestHandler(
 
         if (registrationRequest is null || !registrationRequest.ActivationCode.Equals(request.VerificationCode))
             throw new Exception("Invalid verification code");
-        
+
         var username = registrationRequest.Email.Split('@')[0].ToLowerInvariant();
 
         var password = GenerateTemporaryPassword();
@@ -46,9 +46,9 @@ public class VerifyRegistrationRequestHandler(
             UserName = username,
             Password = password
         };
-        
+
         await identityService.CreateUserAsync(createUserCommand);
-        
+
         return new UserDto
         {
             Email = registrationRequest.Email,

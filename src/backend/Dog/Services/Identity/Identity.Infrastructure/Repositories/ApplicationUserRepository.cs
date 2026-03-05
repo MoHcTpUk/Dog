@@ -1,3 +1,4 @@
+using Identity.Application.Interfaces;
 using Identity.Domain.Aggregates;
 using Microsoft.EntityFrameworkCore;
 using Shared.Infrastructure.Repository;

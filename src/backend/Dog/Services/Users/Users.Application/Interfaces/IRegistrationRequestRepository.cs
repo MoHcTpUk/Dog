@@ -1,7 +1,6 @@
 using Shared.Domain.Interfaces;
-using Shared.Infrastructure.Repository;
 using Users.Domain.Aggregates;
 
-namespace Users.Infrastructure.Repositories;
+namespace Users.Application.Interfaces;
 
 public interface IRegistrationRequestRepository : IRepository<RegistrationRequest>;

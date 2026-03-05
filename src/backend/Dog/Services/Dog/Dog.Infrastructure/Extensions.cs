@@ -1,3 +1,4 @@
+using Dog.Domain;
 using Dog.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +15,7 @@ public static class Extensions
         services.AddScoped<IDogRepository, DogRepository>();
         services.AddScoped<IOwnerRepository, OwnerRepository>();
         services.AddScoped<IDatabaseMigrator, EfCoreDatabaseMigrator<DogDbContext>>();
-        
+
         services.AddSharedInfrastructure();
 
         return services;

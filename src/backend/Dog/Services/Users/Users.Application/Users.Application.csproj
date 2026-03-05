@@ -14,15 +14,13 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\..\Api\Users.Api\Users.Api.csproj" />
-        <ProjectReference Include="..\..\..\Api\Identity.Api\Identity.Api.csproj" />
         <ProjectReference Include="..\..\..\Shared\Shared.Application\Shared.Application.csproj"/>
-        <ProjectReference Include="..\Users.Infrastructure\Users.Infrastructure.csproj"/>
+        <ProjectReference Include="..\..\Identity\Identity.Application\Identity.Application.csproj" />
+        <ProjectReference Include="..\Users.Domain\Users.Domain.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <Folder Include="Interfaces\" />
-      <Folder Include="Models\" />
-      <Folder Include="Services\" />
     </ItemGroup>
 
 </Project>

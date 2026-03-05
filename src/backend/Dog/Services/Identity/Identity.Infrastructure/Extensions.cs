@@ -1,3 +1,4 @@
+using Identity.Application.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Domain.Interfaces;

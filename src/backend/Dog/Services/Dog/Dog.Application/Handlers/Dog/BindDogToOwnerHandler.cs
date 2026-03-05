@@ -1,7 +1,7 @@
 using AutoMapper;
 using Dog.Api.Commands.Dog;
 using Dog.Api.Dtos;
-using Dog.Infrastructure.Repositories;
+using Dog.Domain;
 using MediatR;
 using Shared.Dtos;
 
@@ -10,7 +10,8 @@ namespace Dog.Application.Handlers.Dog;
 public class BindDogToOwnerHandler(IDogRepository dogRepository, IOwnerRepository ownerRepository, IMapper mapper)
     : IRequestHandler<BindDogToOwnerCommand, ResultContainer<DogDto>>
 {
-    public async Task<ResultContainer<DogDto>> Handle(BindDogToOwnerCommand request, CancellationToken cancellationToken)
+    public async Task<ResultContainer<DogDto>> Handle(BindDogToOwnerCommand request,
+        CancellationToken cancellationToken)
     {
         var dog = await dogRepository.GetAsync(request.DogId, cancellationToken);
         if (dog == null)
