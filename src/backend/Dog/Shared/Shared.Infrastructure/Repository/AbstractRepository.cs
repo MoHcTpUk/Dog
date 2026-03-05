@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Shared.Domain;
 using Shared.Domain.Interfaces;
 
 namespace Shared.Infrastructure.Repository;

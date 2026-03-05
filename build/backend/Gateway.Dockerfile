@@ -5,6 +5,8 @@ WORKDIR /app
 COPY ./Api ./Api
 COPY ./Gateways ./Gateways
 COPY ./Services/Identity ./Services/Identity
+COPY ./Services/Dog ./Services/Dog
+COPY ./Services/Users ./Services/Users
 COPY ./Shared ./Shared
 
 RUN dotnet restore ./Gateways/Gateway.WebApi/Gateway.WebApi.csproj

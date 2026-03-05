@@ -10,11 +10,13 @@ namespace Dog.Api.Services;
 public class DogService(ICommandBus commandBus)
     : Service<CreateDogCommand, UpdateDogCommand, DeleteDogCommand, DogQuery, DogDto>(commandBus), IDogService
 {
+    private readonly ICommandBus _commandBus = commandBus;
+
     protected override string Subject => MessagingSubject.DogService;
 
     public async Task<ResultContainer<DogDto>> BindToOwnerAsync(BindDogToOwnerCommand command)
     {
-        var result = await commandBus.SendAsync<BindDogToOwnerCommand, ResultContainer<DogDto>>(command, Subject);
+        var result = await _commandBus.SendAsync<BindDogToOwnerCommand, ResultContainer<DogDto>>(command, Subject);
         if (result is null)
             throw new Exception($"Failed to process command {nameof(BindDogToOwnerCommand)}");
         return result;
@@ -22,7 +24,7 @@ public class DogService(ICommandBus commandBus)
 
     public async Task<ResultContainer<DogDto>> UnbindFromOwnerAsync(UnbindDogFromOwnerCommand command)
     {
-        var result = await commandBus.SendAsync<UnbindDogFromOwnerCommand, ResultContainer<DogDto>>(command, Subject);
+        var result = await _commandBus.SendAsync<UnbindDogFromOwnerCommand, ResultContainer<DogDto>>(command, Subject);
         if (result is null)
             throw new Exception($"Failed to process command {nameof(UnbindDogFromOwnerCommand)}");
         return result;

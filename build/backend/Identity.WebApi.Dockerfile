@@ -3,8 +3,8 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /app
 
 COPY ./Api/Identity.Api ./Api/Identity.Api
-COPY ./Api/Users.Api ./Api/Users.Api
 COPY ./Services/Identity ./Services/Identity
+COPY ./Services/Users ./Services/Users
 COPY ./Shared ./Shared
 
 RUN dotnet restore ./Services/Identity/Identity.WebApi/Identity.WebApi.csproj

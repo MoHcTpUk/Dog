@@ -4,7 +4,6 @@ using Identity.Application.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http.Features;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 

@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using OpenIddict.EntityFrameworkCore.Models;
 using Identity.Domain.Aggregates;
 
 namespace Identity.Infrastructure;
