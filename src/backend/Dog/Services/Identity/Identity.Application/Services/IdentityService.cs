@@ -42,6 +42,16 @@ public class IdentityService(
         return user;
     }
 
+    public async Task SetUserPasswordAsync(string email, string password, CancellationToken cancellationToken)
+    {
+        var user = await userRepository.GetByEmailAsync(email, cancellationToken);
+        if (user is null)
+            throw new InvalidOperationException($"User with email {email} does not exist");
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(password);
+        await userRepository.SaveChangesAsync();
+    }
+
     public async Task<ApplicationUser?> GetUserByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await userRepository.GetAsync(id, cancellationToken);

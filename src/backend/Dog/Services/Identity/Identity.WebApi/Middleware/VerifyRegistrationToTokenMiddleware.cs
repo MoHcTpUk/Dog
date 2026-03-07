@@ -5,6 +5,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Primitives;
 using OpenIddict.Abstractions;
+using Users.Contracts.Commands.AuthorizationRequest;
 using Users.Contracts.Commands.RegistrationRequest;
 using Users.Api.Services;
 
@@ -40,28 +41,55 @@ public sealed class VerifyRegistrationToTokenMiddleware(RequestDelegate next)
         var hasVerificationCode = incomingForm.TryGetValue("verificationCode", out var verificationCodeValue);
         var verificationCode = hasVerificationCode ? verificationCodeValue.ToString() : string.Empty;
 
+        var hasAuthorizationId = incomingForm.TryGetValue("authorizationId", out var authorizationIdValue);
         var hasVerificationId = incomingForm.TryGetValue("id", out var verificationIdValue);
-        var verificationId = hasVerificationId ? Guid.Parse(verificationIdValue!) : Guid.Empty;
-        
-        if (!hasVerificationCode || !hasVerificationId)
+
+        if (!hasVerificationCode || (!hasVerificationId && !hasAuthorizationId))
         {
             await next(context);
             return;
         }
-        
-        var command = new VerifyRegistrationRequestCommand
-        {
-            Id = verificationId,
-            VerificationCode = verificationCode
-        };
 
-        string userName;
+        string email;
         string password;
         try
         {
-            var verifiedUser = await userService.VerifyRegistrationRequest(command);
-            userName = verifiedUser.UserName;
-            password = verifiedUser.Password;
+            if (hasAuthorizationId)
+            {
+                if (!Guid.TryParse(authorizationIdValue.ToString(), out var authorizationId))
+                {
+                    await WriteBadRequestAsync(context, "Invalid authorizationId format.");
+                    return;
+                }
+
+                var command = new VerifyAuthorizationRequestCommand
+                {
+                    Id = authorizationId,
+                    VerificationCode = verificationCode
+                };
+
+                var verifiedUser = await userService.VerifyAuthorizationRequest(command);
+                email = verifiedUser.Email;
+                password = verifiedUser.Password;
+            }
+            else
+            {
+                if (!Guid.TryParse(verificationIdValue.ToString(), out var verificationId))
+                {
+                    await WriteBadRequestAsync(context, "Invalid id format.");
+                    return;
+                }
+
+                var command = new VerifyRegistrationRequestCommand
+                {
+                    Id = verificationId,
+                    VerificationCode = verificationCode
+                };
+
+                var verifiedUser = await userService.VerifyRegistrationRequest(command);
+                email = verifiedUser.Email;
+                password = verifiedUser.Password;
+            }
         }
         catch (RemoteProblemDetailsException ex)
         {
@@ -80,7 +108,7 @@ public sealed class VerifyRegistrationToTokenMiddleware(RequestDelegate next)
         var form = new Dictionary<string, string?>
         {
             ["grant_type"] = OpenIddictConstants.GrantTypes.Password,
-            ["username"] = userName,
+            ["username"] = email,
             ["password"] = password,
             ["scope"] = scope,
             ["client_id"] = "dog-app"
@@ -130,5 +158,23 @@ public sealed class VerifyRegistrationToTokenMiddleware(RequestDelegate next)
         };
 
         await context.Response.WriteAsync(JsonSerializer.Serialize(responseProblem));
+    }
+
+    private static Task WriteBadRequestAsync(HttpContext context, string detail)
+    {
+        var problem = new Rfc7807ProblemDetails
+        {
+            Type = "https://httpstatuses.com/400",
+            Title = "Bad Request",
+            Status = StatusCodes.Status400BadRequest,
+            Detail = detail,
+            Instance = context.Request.Path,
+            Extensions = new Dictionary<string, object?>
+            {
+                ["traceId"] = Activity.Current?.Id ?? context.TraceIdentifier
+            }
+        };
+
+        return WriteProblemDetailsAsync(context, problem);
     }
 }

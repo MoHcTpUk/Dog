@@ -20,6 +20,18 @@ public class IdentityService(ICommandBus commandBus) : IIdentityService
         };
     }
 
+    public async Task<SetIdentityUserPasswordResult> SetUserPasswordAsync(SetIdentityUserPasswordCommand command)
+    {
+        var result = await commandBus.SendAsync<SetIdentityUserPasswordCommand, SetIdentityUserPasswordResult>(
+            command, IdentityServiceSubject);
+
+        return result ?? new SetIdentityUserPasswordResult
+        {
+            Success = false,
+            ErrorMessage = "No response from IdentityService"
+        };
+    }
+
     public async Task<GenerateTokenResult> GenerateTokenAsync(GenerateTokenCommand command)
     {
         var result = await commandBus.SendAsync<GenerateTokenCommand, GenerateTokenResult>(

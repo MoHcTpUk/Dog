@@ -52,7 +52,7 @@ if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == Enviro
 if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == Environments.Local)
     app.MapOpenApi().AllowAnonymous();
 
-// Allows issuing tokens from /Users/VerifyRegistrationRequest by translating the request
+// Allows issuing tokens from verification flows by translating custom request payloads
 // to an internal /connect/token password grant flow within the same HTTP request.
 app.UseMiddleware<VerifyRegistrationToTokenMiddleware>();
 
