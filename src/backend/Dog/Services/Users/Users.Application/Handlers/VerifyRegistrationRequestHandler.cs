@@ -27,9 +27,39 @@ public class VerifyRegistrationRequestHandler(
         if (registrationRequest is null || !registrationRequest.ActivationCode.Equals(request.VerificationCode))
             throw new Exception("Invalid verification code");
 
-        var username = registrationRequest.Email.Split('@')[0].ToLowerInvariant();
-
         var password = GenerateTemporaryPassword();
+
+        var existingUser = await userRepository.AsQueryable()
+            .FirstOrDefaultAsync(item => item.Email == registrationRequest.Email, cancellationToken);
+
+        if (existingUser is not null)
+        {
+            var updatePasswordCommand = new SetIdentityUserPasswordCommand
+            {
+                Email = registrationRequest.Email,
+                Password = password
+            };
+
+            var updatePasswordResult = await identityService.SetUserPasswordAsync(updatePasswordCommand);
+
+            if (!updatePasswordResult.Success)
+                throw new Exception(updatePasswordResult.ErrorMessage ?? "Unable to update user password.");
+
+            registrationRequestRepository.DeleteAsync([registrationRequest]);
+            await registrationRequestRepository.SaveChangesAsync();
+
+            return new UserDto
+            {
+                Email = registrationRequest.Email,
+                Id = existingUser.Id,
+                UserName = registrationRequest.Email,
+                Password = password,
+                FirstName = string.Empty,
+                LastName = string.Empty
+            };
+        }
+
+        var username = registrationRequest.Email.Split('@')[0].ToLowerInvariant();
 
         var newUser = new UserAggregate
         {
@@ -48,6 +78,9 @@ public class VerifyRegistrationRequestHandler(
         };
 
         await identityService.CreateUserAsync(createUserCommand);
+
+        registrationRequestRepository.DeleteAsync([registrationRequest]);
+        await registrationRequestRepository.SaveChangesAsync();
 
         return new UserDto
         {

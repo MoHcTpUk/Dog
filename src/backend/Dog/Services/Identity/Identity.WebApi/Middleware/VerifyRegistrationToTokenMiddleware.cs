@@ -5,7 +5,6 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Primitives;
 using OpenIddict.Abstractions;
-using Users.Contracts.Commands.AuthorizationRequest;
 using Users.Contracts.Commands.RegistrationRequest;
 using Users.Api.Services;
 
@@ -41,12 +40,17 @@ public sealed class VerifyRegistrationToTokenMiddleware(RequestDelegate next)
         var hasVerificationCode = incomingForm.TryGetValue("verificationCode", out var verificationCodeValue);
         var verificationCode = hasVerificationCode ? verificationCodeValue.ToString() : string.Empty;
 
-        var hasAuthorizationId = incomingForm.TryGetValue("authorizationId", out var authorizationIdValue);
         var hasVerificationId = incomingForm.TryGetValue("id", out var verificationIdValue);
 
-        if (!hasVerificationCode || (!hasVerificationId && !hasAuthorizationId))
+        if (!hasVerificationCode || !hasVerificationId)
         {
             await next(context);
+            return;
+        }
+
+        if (!Guid.TryParse(verificationIdValue.ToString(), out var verificationId))
+        {
+            await WriteBadRequestAsync(context, "Invalid id format.");
             return;
         }
 
@@ -54,42 +58,15 @@ public sealed class VerifyRegistrationToTokenMiddleware(RequestDelegate next)
         string password;
         try
         {
-            if (hasAuthorizationId)
+            var command = new VerifyRegistrationRequestCommand
             {
-                if (!Guid.TryParse(authorizationIdValue.ToString(), out var authorizationId))
-                {
-                    await WriteBadRequestAsync(context, "Invalid authorizationId format.");
-                    return;
-                }
+                Id = verificationId,
+                VerificationCode = verificationCode
+            };
 
-                var command = new VerifyAuthorizationRequestCommand
-                {
-                    Id = authorizationId,
-                    VerificationCode = verificationCode
-                };
-
-                var verifiedUser = await userService.VerifyAuthorizationRequest(command);
-                email = verifiedUser.Email;
-                password = verifiedUser.Password;
-            }
-            else
-            {
-                if (!Guid.TryParse(verificationIdValue.ToString(), out var verificationId))
-                {
-                    await WriteBadRequestAsync(context, "Invalid id format.");
-                    return;
-                }
-
-                var command = new VerifyRegistrationRequestCommand
-                {
-                    Id = verificationId,
-                    VerificationCode = verificationCode
-                };
-
-                var verifiedUser = await userService.VerifyRegistrationRequest(command);
-                email = verifiedUser.Email;
-                password = verifiedUser.Password;
-            }
+            var verifiedUser = await userService.VerifyRegistrationRequest(command);
+            email = verifiedUser.Email;
+            password = verifiedUser.Password;
         }
         catch (RemoteProblemDetailsException ex)
         {
