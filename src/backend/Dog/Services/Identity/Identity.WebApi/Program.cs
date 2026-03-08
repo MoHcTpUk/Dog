@@ -54,7 +54,7 @@ if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == Enviro
 
 // Allows issuing tokens from verification flows by translating custom request payloads
 // to an internal /connect/token password grant flow within the same HTTP request.
-app.UseMiddleware<VerifyRegistrationToTokenMiddleware>();
+app.UseMiddleware<VerifyAuthToTokenMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -2,41 +2,41 @@ using Identity.Contracts.Commands;
 using Identity.Contracts.Services;
 using Microsoft.EntityFrameworkCore;
 using Shared.Messaging.Interfaces;
-using Users.Contracts.Commands.RegistrationRequest;
-using Users.Contracts.Dtos;
 using Users.Application.Interfaces;
+using Users.Contracts.Commands.AuthRequest;
+using Users.Contracts.Dtos;
 using Users.Domain.Aggregates;
 
 namespace Users.Application.Handlers;
 
-public class VerifyRegistrationRequestHandler(
+public class VerifyAuthRequestHandler(
     IRegistrationRequestRepository registrationRequestRepository,
     IUserRepository userRepository,
     IIdentityService identityService
 )
-    : ICommandHandler<VerifyRegistrationRequestCommand, UserDto>
+    : ICommandHandler<VerifyAuthRequestCommand, UserDto>
 {
     private const int TemporaryPasswordLength = 20;
 
-    public async Task<UserDto> Handle(VerifyRegistrationRequestCommand request,
+    public async Task<UserDto> Handle(VerifyAuthRequestCommand request,
         CancellationToken cancellationToken)
     {
-        var registrationRequest = await registrationRequestRepository.AsQueryable()
+        var authRequest = await registrationRequestRepository.AsQueryable()
             .FirstOrDefaultAsync(item => item.Id == request.Id, cancellationToken);
 
-        if (registrationRequest is null || !registrationRequest.ActivationCode.Equals(request.VerificationCode))
+        if (authRequest is null || !authRequest.ActivationCode.Equals(request.VerificationCode))
             throw new Exception("Invalid verification code");
 
         var password = GenerateTemporaryPassword();
 
         var existingUser = await userRepository.AsQueryable()
-            .FirstOrDefaultAsync(item => item.Email == registrationRequest.Email, cancellationToken);
+            .FirstOrDefaultAsync(item => item.Email == authRequest.Email, cancellationToken);
 
         if (existingUser is not null)
         {
             var updatePasswordCommand = new SetIdentityUserPasswordCommand
             {
-                Email = registrationRequest.Email,
+                Email = authRequest.Email,
                 Password = password
             };
 
@@ -45,25 +45,25 @@ public class VerifyRegistrationRequestHandler(
             if (!updatePasswordResult.Success)
                 throw new Exception(updatePasswordResult.ErrorMessage ?? "Unable to update user password.");
 
-            registrationRequestRepository.DeleteAsync([registrationRequest]);
+            registrationRequestRepository.DeleteAsync([authRequest]);
             await registrationRequestRepository.SaveChangesAsync();
 
             return new UserDto
             {
-                Email = registrationRequest.Email,
+                Email = authRequest.Email,
                 Id = existingUser.Id,
-                UserName = registrationRequest.Email,
+                UserName = authRequest.Email,
                 Password = password,
                 FirstName = string.Empty,
                 LastName = string.Empty
             };
         }
 
-        var username = registrationRequest.Email.Split('@')[0].ToLowerInvariant();
+        var username = authRequest.Email.Split('@')[0].ToLowerInvariant();
 
         var newUser = new UserAggregate
         {
-            Email = registrationRequest.Email,
+            Email = authRequest.Email,
             Id = Guid.NewGuid()
         };
 
@@ -72,19 +72,19 @@ public class VerifyRegistrationRequestHandler(
 
         var createUserCommand = new CreateIdentityUserCommand
         {
-            Email = registrationRequest.Email,
+            Email = authRequest.Email,
             UserName = username,
             Password = password
         };
 
         await identityService.CreateUserAsync(createUserCommand);
 
-        registrationRequestRepository.DeleteAsync([registrationRequest]);
+        registrationRequestRepository.DeleteAsync([authRequest]);
         await registrationRequestRepository.SaveChangesAsync();
 
         return new UserDto
         {
-            Email = registrationRequest.Email,
+            Email = authRequest.Email,
             Id = newUser.Id,
             UserName = username,
             Password = password,

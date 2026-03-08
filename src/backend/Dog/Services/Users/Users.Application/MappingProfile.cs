@@ -1,4 +1,5 @@
 using Shared.Application;
+using Users.Contracts.Commands.AuthRequest;
 using Users.Contracts.Commands.User;
 using Users.Contracts.Dtos;
 using Users.Domain.Aggregates;
@@ -13,6 +14,8 @@ public class MappingProfile : BaseMappingProfile
         CreateMap<UpdateUserCommand, UserAggregate>();
         CreateMap<UserAggregate, UserDto>();
 
-        CreateMap<RegistrationRequest, RegistrationRequestDto>();
+        CreateMap<CreateAuthRequestCommand, RegistrationRequest>();
+        CreateMap<RegistrationRequest, AuthRequestDto>()
+            .ForMember(item => item.VerificationCode, cfg => cfg.MapFrom(src => src.ActivationCode));
     }
 }

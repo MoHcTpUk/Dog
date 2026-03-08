@@ -1,6 +1,6 @@
 using Shared.Api.Services;
 using Shared.Messaging.Messaging;
-using Users.Contracts.Commands.RegistrationRequest;
+using Users.Contracts.Commands.AuthRequest;
 using Users.Contracts.Commands.User;
 using Users.Contracts.Dtos;
 using Users.Contracts.Queries;
@@ -14,26 +14,26 @@ public class UserService(ICommandBus commandBus)
 
     private readonly ICommandBus _commandBus = commandBus;
 
-    public async Task<RegistrationRequestDto> CreateRegistrationRequest(CreateRegistrationRequestCommand command)
+    public async Task<AuthRequestDto> CreateAuthRequest(CreateAuthRequestCommand command)
     {
         var result =
-            await _commandBus.SendAsync<CreateRegistrationRequestCommand, RegistrationRequestDto>(
+            await _commandBus.SendAsync<CreateAuthRequestCommand, AuthRequestDto>(
                 command, Subject);
         
         if (result is null)
-            throw new InvalidOperationException("Registration request could not be created.");
+            throw new InvalidOperationException("Auth request could not be created.");
 
         return result;
     }
 
-    public async Task<UserDto> VerifyRegistrationRequest(VerifyRegistrationRequestCommand command)
+    public async Task<UserDto> VerifyAuthRequest(VerifyAuthRequestCommand command)
     {
         var result =
-            await _commandBus.SendAsync<VerifyRegistrationRequestCommand, UserDto>(
+            await _commandBus.SendAsync<VerifyAuthRequestCommand, UserDto>(
                 command, Subject);
 
         if (result is null)
-            throw new InvalidOperationException("User could not be verified.");
+            throw new InvalidOperationException("Auth request could not be verified.");
 
         return result;
     }

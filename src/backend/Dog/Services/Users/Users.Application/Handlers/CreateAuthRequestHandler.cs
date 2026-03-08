@@ -1,21 +1,21 @@
 using System.Text;
 using AutoMapper;
 using Shared.Messaging.Interfaces;
-using Users.Contracts.Commands.RegistrationRequest;
-using Users.Contracts.Dtos;
 using Users.Application.Interfaces;
+using Users.Contracts.Commands.AuthRequest;
+using Users.Contracts.Dtos;
 using Users.Domain.Aggregates;
 
 namespace Users.Application.Handlers;
 
-public class CreateRegistrationRequestHandler(
+public class CreateAuthRequestHandler(
     IRegistrationRequestRepository registrationRequestRepository,
     IMapper mapper)
-    : ICommandHandler<CreateRegistrationRequestCommand, RegistrationRequestDto>
+    : ICommandHandler<CreateAuthRequestCommand, AuthRequestDto>
 {
     private const int VerificationCodeLength = 4;
 
-    public async Task<RegistrationRequestDto> Handle(CreateRegistrationRequestCommand requestCommand,
+    public async Task<AuthRequestDto> Handle(CreateAuthRequestCommand requestCommand,
         CancellationToken cancellationToken)
     {
         var activationCodeBuilder = new StringBuilder();
@@ -23,7 +23,7 @@ public class CreateRegistrationRequestHandler(
         for (var i = 0; i < VerificationCodeLength; i++) activationCodeBuilder.Append(random.Next(10));
         var activationCode = activationCodeBuilder.ToString();
 
-        var registrationRequest = new RegistrationRequest
+        var authRequest = new RegistrationRequest
         {
             Email = requestCommand.Email,
             ActivationCode = activationCode,
@@ -31,12 +31,11 @@ public class CreateRegistrationRequestHandler(
         };
 
         var result =
-            await registrationRequestRepository.CreateAsync(new List<RegistrationRequest> { registrationRequest },
-                CancellationToken.None);
+            await registrationRequestRepository.CreateAsync([authRequest], cancellationToken);
 
         await registrationRequestRepository.SaveChangesAsync();
 
-        var dto = mapper.Map<RegistrationRequestDto>(result.First());
+        var dto = mapper.Map<AuthRequestDto>(result.First());
 
         return dto;
     }

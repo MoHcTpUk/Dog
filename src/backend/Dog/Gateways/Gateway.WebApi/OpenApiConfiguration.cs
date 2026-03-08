@@ -109,7 +109,7 @@ public static class OpenApiConfiguration
                                                     new OpenApiSchema
                                                     {
                                                         Type = "string",
-                                                        Description = "Registration verification code"
+                                                        Description = "Email verification code for auth flow"
                                                     }
                                                 },
                                                 {
@@ -117,7 +117,7 @@ public static class OpenApiConfiguration
                                                     new OpenApiSchema
                                                     {
                                                         Type = "string",
-                                                        Description = "Registration id"
+                                                        Description = "Auth request id"
                                                     }
                                                 }
                                             }

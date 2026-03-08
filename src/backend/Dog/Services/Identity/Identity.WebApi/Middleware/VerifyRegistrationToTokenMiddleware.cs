@@ -5,17 +5,17 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Primitives;
 using OpenIddict.Abstractions;
-using Users.Contracts.Commands.RegistrationRequest;
+using Users.Contracts.Commands.AuthRequest;
 using Users.Api.Services;
 
 namespace Identity.WebApi.Middleware;
 
 /// <summary>
-///     Allows returning an OpenIddict SignIn (token response) "from" /Users/VerifyRegistrationRequest
+///     Allows returning an OpenIddict SignIn (token response) "from" auth code verification
 ///     by translating the JSON payload to a regular password grant request and re-executing the
 ///     existing /connect/token pipeline within the same HTTP request.
 /// </summary>
-public sealed class VerifyRegistrationToTokenMiddleware(RequestDelegate next)
+public sealed class VerifyAuthToTokenMiddleware(RequestDelegate next)
 {
     public async Task InvokeAsync(HttpContext context, IUserService userService)
     {
@@ -58,13 +58,13 @@ public sealed class VerifyRegistrationToTokenMiddleware(RequestDelegate next)
         string password;
         try
         {
-            var command = new VerifyRegistrationRequestCommand
+            var command = new VerifyAuthRequestCommand
             {
                 Id = verificationId,
                 VerificationCode = verificationCode
             };
 
-            var verifiedUser = await userService.VerifyRegistrationRequest(command);
+            var verifiedUser = await userService.VerifyAuthRequest(command);
             email = verifiedUser.Email;
             password = verifiedUser.Password;
         }

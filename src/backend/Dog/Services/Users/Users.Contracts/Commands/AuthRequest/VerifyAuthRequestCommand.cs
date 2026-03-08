@@ -1,9 +1,9 @@
 using Shared.Messaging.Interfaces;
 using Users.Contracts.Dtos;
 
-namespace Users.Contracts.Commands.RegistrationRequest;
+namespace Users.Contracts.Commands.AuthRequest;
 
-public class VerifyRegistrationRequestCommand : ICommand<UserDto>
+public class VerifyAuthRequestCommand : ICommand<UserDto>
 {
     public required Guid Id { get; set; }
 
