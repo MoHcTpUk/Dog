@@ -12,7 +12,7 @@ namespace Users.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "RegistrationRequest",
+                name: "AuthRequest",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -21,7 +21,7 @@ namespace Users.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RegistrationRequest", x => x.Id);
+                    table.PrimaryKey("PK_AuthRequest", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -41,7 +41,7 @@ namespace Users.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "RegistrationRequest");
+                name: "AuthRequest");
 
             migrationBuilder.DropTable(
                 name: "Users");

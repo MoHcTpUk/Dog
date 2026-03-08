@@ -7,7 +7,7 @@ public class UserDbContext(DbContextOptions<UserDbContext> options) : DbContext(
 {
     public DbSet<UserAggregate> Users { get; set; }
 
-    public DbSet<AuthRequest> RegistrationRequest { get; set; }
+    public DbSet<AuthRequest> AuthRequest { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -38,7 +38,7 @@ namespace Users.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RegistrationRequest");
+                    b.ToTable("AuthRequest");
                 });
 
             modelBuilder.Entity("Users.Domain.Aggregates.UserAggregate", b =>

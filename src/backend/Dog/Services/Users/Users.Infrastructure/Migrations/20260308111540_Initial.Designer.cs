@@ -12,7 +12,7 @@ using Users.Infrastructure;
 namespace Users.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20260117140619_Initial")]
+    [Migration("20260308111540_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -25,7 +25,7 @@ namespace Users.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Users.Domain.Aggregates.RegistrationRequest", b =>
+            modelBuilder.Entity("Users.Domain.Aggregates.AuthRequest", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -41,7 +41,7 @@ namespace Users.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RegistrationRequest");
+                    b.ToTable("AuthRequest");
                 });
 
             modelBuilder.Entity("Users.Domain.Aggregates.UserAggregate", b =>
