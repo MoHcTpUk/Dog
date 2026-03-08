@@ -38,11 +38,12 @@ public class VerifyAuthRequestHandler(
     private async Task<UserDto> ProcessNewUser(AuthRequest authRequest, CancellationToken cancellationToken)
     {
         var username = authRequest.Email.Split('@')[0].ToLowerInvariant();
-        var password = GenerateTemporaryPassword();
+        var temporaryPassword = GenerateTemporaryPassword();
 
         var newUser = new UserAggregate
         {
             Email = authRequest.Email,
+            UserName = username,
             Id = Guid.NewGuid()
         };
 
@@ -53,11 +54,11 @@ public class VerifyAuthRequestHandler(
         {
             Email = authRequest.Email,
             UserName = username,
-            Password = password
+            Password = temporaryPassword
         };
 
         await identityService.CreateUserAsync(createUserCommand);
-
+        
         authRequestRepository.DeleteAsync([authRequest]);
         await authRequestRepository.SaveChangesAsync();
 
@@ -66,7 +67,7 @@ public class VerifyAuthRequestHandler(
             Email = authRequest.Email,
             Id = newUser.Id,
             UserName = username,
-            Password = password,
+            Password = temporaryPassword,
             FirstName = string.Empty,
             LastName = string.Empty
         };
@@ -75,12 +76,12 @@ public class VerifyAuthRequestHandler(
     private async Task<UserDto> ProcessExistUser(UserAggregate existingUser, AuthRequest authRequest,
         CancellationToken cancellationToken)
     {
-        var password = GenerateTemporaryPassword();
+        var temporaryPassword = GenerateTemporaryPassword();
 
         var updatePasswordCommand = new SetIdentityUserPasswordCommand
         {
             Email = authRequest.Email,
-            Password = password
+            Password = temporaryPassword
         };
 
         var updatePasswordResult = await identityService.SetUserPasswordAsync(updatePasswordCommand);
@@ -95,8 +96,8 @@ public class VerifyAuthRequestHandler(
         {
             Email = authRequest.Email,
             Id = existingUser.Id,
-            UserName = authRequest.Email,
-            Password = password,
+            UserName = existingUser.UserName,
+            Password = temporaryPassword,
             FirstName = string.Empty,
             LastName = string.Empty
         };

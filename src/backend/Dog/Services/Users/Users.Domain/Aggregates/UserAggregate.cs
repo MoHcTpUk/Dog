@@ -6,5 +6,7 @@ public class UserAggregate : IAggregateRoot
 {
     public required string Email { get; set; }
 
+    public required string UserName { get; set; }
+
     public required Guid Id { get; set; }
 }
