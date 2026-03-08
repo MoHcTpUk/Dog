@@ -14,8 +14,8 @@ public class MappingProfile : BaseMappingProfile
         CreateMap<UpdateUserCommand, UserAggregate>();
         CreateMap<UserAggregate, UserDto>();
 
-        CreateMap<CreateAuthRequestCommand, RegistrationRequest>();
-        CreateMap<RegistrationRequest, AuthRequestDto>()
+        CreateMap<CreateAuthRequestCommand, AuthRequest>();
+        CreateMap<AuthRequest, AuthRequestDto>()
             .ForMember(item => item.VerificationCode, cfg => cfg.MapFrom(src => src.ActivationCode));
     }
 }

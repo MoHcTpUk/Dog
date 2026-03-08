@@ -9,7 +9,7 @@ using Users.Domain.Aggregates;
 namespace Users.Application.Handlers;
 
 public class CreateAuthRequestHandler(
-    IRegistrationRequestRepository registrationRequestRepository,
+    IAuthRequestRepository authRequestRepository,
     IMapper mapper)
     : ICommandHandler<CreateAuthRequestCommand, AuthRequestDto>
 {
@@ -23,7 +23,7 @@ public class CreateAuthRequestHandler(
         for (var i = 0; i < VerificationCodeLength; i++) activationCodeBuilder.Append(random.Next(10));
         var activationCode = activationCodeBuilder.ToString();
 
-        var authRequest = new RegistrationRequest
+        var authRequest = new AuthRequest
         {
             Email = requestCommand.Email,
             ActivationCode = activationCode,
@@ -31,9 +31,9 @@ public class CreateAuthRequestHandler(
         };
 
         var result =
-            await registrationRequestRepository.CreateAsync([authRequest], cancellationToken);
+            await authRequestRepository.CreateAsync([authRequest], cancellationToken);
 
-        await registrationRequestRepository.SaveChangesAsync();
+        await authRequestRepository.SaveChangesAsync();
 
         var dto = mapper.Map<AuthRequestDto>(result.First());
 

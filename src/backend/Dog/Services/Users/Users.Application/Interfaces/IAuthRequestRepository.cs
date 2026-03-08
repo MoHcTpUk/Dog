@@ -3,4 +3,4 @@ using Users.Domain.Aggregates;
 
 namespace Users.Application.Interfaces;
 
-public interface IRegistrationRequestRepository : IRepository<RegistrationRequest>;
+public interface IAuthRequestRepository : IRepository<AuthRequest>;

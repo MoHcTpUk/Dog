@@ -13,8 +13,6 @@ public static class Extensions
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<ITokenService, TokenService>();
         
-        // services.AddHttpClient();
-        
         services.AddSharedApplication(configuration);
 
         return services;

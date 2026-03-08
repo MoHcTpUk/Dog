@@ -22,7 +22,7 @@ namespace Users.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Users.Domain.Aggregates.RegistrationRequest", b =>
+            modelBuilder.Entity("Users.Domain.Aggregates.AuthRequest", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()

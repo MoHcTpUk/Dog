@@ -7,11 +7,11 @@ public class UserDbContext(DbContextOptions<UserDbContext> options) : DbContext(
 {
     public DbSet<UserAggregate> Users { get; set; }
 
-    public DbSet<RegistrationRequest> RegistrationRequest { get; set; }
+    public DbSet<AuthRequest> RegistrationRequest { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserAggregate>(entity => { entity.HasKey(e => e.Id); });
-        modelBuilder.Entity<RegistrationRequest>(entity => { entity.HasKey(e => e.Id); });
+        modelBuilder.Entity<AuthRequest>(entity => { entity.HasKey(e => e.Id); });
     }
 }

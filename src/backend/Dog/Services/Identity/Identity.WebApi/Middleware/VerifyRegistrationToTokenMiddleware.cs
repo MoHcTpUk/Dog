@@ -10,11 +10,6 @@ using Users.Api.Services;
 
 namespace Identity.WebApi.Middleware;
 
-/// <summary>
-///     Allows returning an OpenIddict SignIn (token response) "from" auth code verification
-///     by translating the JSON payload to a regular password grant request and re-executing the
-///     existing /connect/token pipeline within the same HTTP request.
-/// </summary>
 public sealed class VerifyAuthToTokenMiddleware(RequestDelegate next)
 {
     public async Task InvokeAsync(HttpContext context, IUserService userService)

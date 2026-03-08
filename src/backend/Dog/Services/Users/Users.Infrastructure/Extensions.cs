@@ -13,7 +13,7 @@ public static class Extensions
         IConfiguration configuration)
     {
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IRegistrationRequestRepository, RegistrationRequestRepository>();
+        services.AddScoped<IAuthRequestRepository, AuthRequestRepository>();
         services.AddScoped<IDatabaseMigrator, EfCoreDatabaseMigrator<UserDbContext>>();
 
         services.AddSharedInfrastructure();

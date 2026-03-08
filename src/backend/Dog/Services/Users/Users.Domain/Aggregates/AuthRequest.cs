@@ -2,7 +2,7 @@ using Shared.Domain.Interfaces;
 
 namespace Users.Domain.Aggregates;
 
-public class RegistrationRequest : IAggregateRoot
+public class AuthRequest : IAggregateRoot
 {
     public required string Email { get; set; }
     
