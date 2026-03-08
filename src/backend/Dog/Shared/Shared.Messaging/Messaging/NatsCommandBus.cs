@@ -159,6 +159,7 @@ public class NatsCommandBus : ICommandBus
 
         var status = ex switch
         {
+            RequestValidationException => 400,
             UnauthorizedAccessException => 401,
             KeyNotFoundException => 404,
             TimeoutException => 504,
@@ -187,6 +188,7 @@ public class NatsCommandBus : ICommandBus
             Status = status,
             Detail = ex.Message,
             Instance = instance,
+            Errors = ex is RequestValidationException validationException ? validationException.Errors : null,
             Extensions = new Dictionary<string, object?>
             {
                 ["traceId"] = traceId,

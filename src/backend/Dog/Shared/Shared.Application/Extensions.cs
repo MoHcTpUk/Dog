@@ -1,8 +1,10 @@
 using AutoMapper;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NATS.Client;
 using Shared.Messaging.Messaging;
+using Shared.Application.Validation;
 
 namespace Shared.Application;
 
@@ -12,6 +14,7 @@ public static class Extensions
         IConfiguration configuration)
     {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies()));
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(DataAnnotationsValidationBehavior<,>));
 
         services.RegisterAutoMapper();
 
