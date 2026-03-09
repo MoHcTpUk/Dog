@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Diagnostics;
 using Identity.Application.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -15,9 +14,11 @@ public class TokenController(
     IIdentityService identityService)
     : ControllerBase
 {
+    private const string OAuthErrorUri = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
+
     [HttpPost("token")]
     [AllowAnonymous]
-    [Produces("application/json", "application/problem+json")]
+    [Produces("application/json")]
 
     public async Task<IActionResult> Exchange(CancellationToken cancellationToken)
     {
@@ -30,7 +31,7 @@ public class TokenController(
                 return await ExchangePasswordAsync(request, cancellationToken);
 
             if (request.IsRefreshTokenGrantType())
-                return await ExchangeRefreshTokenAsync(request, cancellationToken);
+                return await ExchangeRefreshTokenAsync(cancellationToken);
 
             return Forbid(
                 new AuthenticationProperties(new Dictionary<string, string?>
@@ -44,11 +45,17 @@ public class TokenController(
         }
         catch (InvalidOperationException e)
         {
-            return ToProblemDetailsResult(statusCode: StatusCodes.Status400BadRequest, title: "Bad Request", detail: e.Message);
+            return OAuthErrorResult(
+                StatusCodes.Status400BadRequest,
+                OpenIddictConstants.Errors.InvalidRequest,
+                e.Message);
         }
         catch (Exception e)
         {
-            return ToProblemDetailsResult(statusCode: StatusCodes.Status500InternalServerError, title: "Internal Server Error", detail: e.Message);
+            return OAuthErrorResult(
+                StatusCodes.Status500InternalServerError,
+                OpenIddictConstants.Errors.ServerError,
+                e.Message);
         }
     }
 
@@ -77,7 +84,7 @@ public class TokenController(
         return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
     }
 
-    private async Task<IActionResult> ExchangeRefreshTokenAsync(OpenIddictRequest request, CancellationToken cancellationToken)
+    private async Task<IActionResult> ExchangeRefreshTokenAsync(CancellationToken cancellationToken)
     {
         var authenticateResult =
             await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
@@ -127,23 +134,19 @@ public class TokenController(
         return SignIn(principal, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
     }
 
-    private ObjectResult ToProblemDetailsResult(int statusCode, string title, string detail)
+    private ObjectResult OAuthErrorResult(int statusCode, string error, string description)
     {
-        var problem = new ProblemDetails
+        var payload = new
         {
-            Type = $"https://httpstatuses.com/{statusCode}",
-            Title = title,
-            Status = statusCode,
-            Detail = detail,
-            Instance = HttpContext.Request.Path
+            error,
+            error_description = description,
+            error_uri = OAuthErrorUri
         };
 
-        problem.Extensions["traceId"] = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
-
-        return new ObjectResult(problem)
+        return new ObjectResult(payload)
         {
             StatusCode = statusCode,
-            ContentTypes = { "application/problem+json" }
+            ContentTypes = { "application/json" }
         };
     }
 

@@ -1,7 +1,6 @@
 using System.Text;
 using System.Text.Json;
 using Shared.Messaging.Messaging;
-using System.Diagnostics;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Primitives;
 using OpenIddict.Abstractions;
@@ -12,6 +11,8 @@ namespace Identity.WebApi.Middleware;
 
 public sealed class VerifyAuthToTokenMiddleware(RequestDelegate next)
 {
+    private const string OAuthErrorUri = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
+
     public async Task InvokeAsync(HttpContext context, IUserService userService)
     {
         var path = (context.Request.Path.Value ?? string.Empty).TrimEnd('/');
@@ -37,6 +38,16 @@ public sealed class VerifyAuthToTokenMiddleware(RequestDelegate next)
 
         var hasVerificationId = incomingForm.TryGetValue("id", out var verificationIdValue);
 
+        if (hasVerificationCode ^ hasVerificationId)
+        {
+            await WriteOAuthErrorAsync(
+                context,
+                StatusCodes.Status400BadRequest,
+                OpenIddictConstants.Errors.InvalidRequest,
+                "Both 'id' and 'verificationCode' must be provided together.");
+            return;
+        }
+
         if (!hasVerificationCode || !hasVerificationId)
         {
             await next(context);
@@ -45,7 +56,11 @@ public sealed class VerifyAuthToTokenMiddleware(RequestDelegate next)
 
         if (!Guid.TryParse(verificationIdValue.ToString(), out var verificationId))
         {
-            await WriteBadRequestAsync(context, "Invalid id format.");
+            await WriteOAuthErrorAsync(
+                context,
+                StatusCodes.Status400BadRequest,
+                OpenIddictConstants.Errors.InvalidRequest,
+                "Invalid id format.");
             return;
         }
 
@@ -65,7 +80,11 @@ public sealed class VerifyAuthToTokenMiddleware(RequestDelegate next)
         }
         catch (RemoteProblemDetailsException ex)
         {
-            await WriteProblemDetailsAsync(context, ex.Problem);
+            await WriteOAuthErrorAsync(
+                context,
+                MapStatusCode(ex.Problem.Status),
+                MapOAuthError(ex.Problem.Status),
+                ex.Problem.Detail ?? ex.Message);
             return;
         }
 
@@ -104,49 +123,37 @@ public sealed class VerifyAuthToTokenMiddleware(RequestDelegate next)
         await next(context);
     }
 
-    private static async Task WriteProblemDetailsAsync(HttpContext context, Rfc7807ProblemDetails problem)
+    private static async Task WriteOAuthErrorAsync(
+        HttpContext context,
+        int statusCode,
+        string error,
+        string description)
     {
-        var statusCode = problem.Status ?? StatusCodes.Status500InternalServerError;
-
         context.Response.StatusCode = statusCode;
-        context.Response.ContentType = "application/problem+json";
+        context.Response.ContentType = "application/json";
 
-        var extensions = problem.Extensions is null
-            ? new Dictionary<string, object?>()
-            : new Dictionary<string, object?>(problem.Extensions);
-
-        if (!extensions.ContainsKey("traceId"))
-            extensions["traceId"] = Activity.Current?.Id ?? context.TraceIdentifier;
-
-        var responseProblem = new Rfc7807ProblemDetails
+        var payload = new
         {
-            Type = problem.Type,
-            Title = problem.Title,
-            Status = problem.Status,
-            Detail = problem.Detail,
-            Instance = problem.Instance,
-            Errors = problem.Errors,
-            Extensions = extensions
+            error,
+            error_description = description,
+            error_uri = OAuthErrorUri
         };
 
-        await context.Response.WriteAsync(JsonSerializer.Serialize(responseProblem));
+        await context.Response.WriteAsync(JsonSerializer.Serialize(payload));
     }
 
-    private static Task WriteBadRequestAsync(HttpContext context, string detail)
+    private static string MapOAuthError(int? status)
     {
-        var problem = new Rfc7807ProblemDetails
+        return status switch
         {
-            Type = "https://httpstatuses.com/400",
-            Title = "Bad Request",
-            Status = StatusCodes.Status400BadRequest,
-            Detail = detail,
-            Instance = context.Request.Path,
-            Extensions = new Dictionary<string, object?>
-            {
-                ["traceId"] = Activity.Current?.Id ?? context.TraceIdentifier
-            }
+            StatusCodes.Status400BadRequest => OpenIddictConstants.Errors.InvalidRequest,
+            StatusCodes.Status401Unauthorized => OpenIddictConstants.Errors.InvalidClient,
+            StatusCodes.Status403Forbidden => OpenIddictConstants.Errors.InvalidGrant,
+            StatusCodes.Status404NotFound => OpenIddictConstants.Errors.InvalidRequest,
+            _ => OpenIddictConstants.Errors.ServerError
         };
-
-        return WriteProblemDetailsAsync(context, problem);
     }
+
+    private static int MapStatusCode(int? status) =>
+        status is > 0 ? status.Value : StatusCodes.Status400BadRequest;
 }
