@@ -3,6 +3,7 @@ using Dog.Api;
 using Users.Api;
 using Environments = Shared.Environments;
 using Shared.Api.Filters;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<RemoteProblemDetailsExceptionFilter>();
+    options.Filters.Add<ModelStateProblemDetailsFilter>();
+});
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
 });
 
 builder.Services.AddReverseProxy()
