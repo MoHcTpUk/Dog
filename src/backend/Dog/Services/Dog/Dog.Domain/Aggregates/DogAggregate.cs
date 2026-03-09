@@ -20,6 +20,8 @@ public class DogAggregate : IAggregateRoot
 
     public string? About { get; set; }
 
+    public List<Guid> PhotoIds { get; set; } = [];
+
     public Guid? OwnerId { get; set; }
 
     public required Guid Id { get; set; }

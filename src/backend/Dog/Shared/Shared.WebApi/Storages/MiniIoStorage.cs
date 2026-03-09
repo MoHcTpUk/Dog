@@ -52,4 +52,11 @@ public class MiniIoStorage(IConfiguration config) : IStorage
             throw;
         }
     }
+
+    public async Task DeleteFileAsync(Guid fileId)
+    {
+        await _minioClient.RemoveObjectAsync(new RemoveObjectArgs()
+            .WithBucket(_bucketName)
+            .WithObject(fileId.ToString()));
+    }
 }

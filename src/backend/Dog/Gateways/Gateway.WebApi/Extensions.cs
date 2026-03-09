@@ -7,7 +7,7 @@ public static class Extensions
     public static IServiceCollection AddIdentityApi(this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddSharedApi(configuration);
+        services.AddSharedWebApi(configuration);
 
         return services;
     }

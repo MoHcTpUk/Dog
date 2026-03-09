@@ -21,4 +21,6 @@ public class CreateDogCommand : CreateCommand<ResultContainer<DogDto>>
     public Activity Activity { get; set; }
 
     public string? About { get; set; }
+
+    public List<Guid> PhotoIds { get; set; } = [];
 }

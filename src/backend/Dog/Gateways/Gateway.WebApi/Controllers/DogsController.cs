@@ -4,6 +4,7 @@ using Dog.Contracts.Queries;
 using Dog.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Api;
+using Shared.Api.Services;
 using Shared.Dtos;
 using Shared.Enumeration;
 
@@ -11,7 +12,7 @@ namespace Gateway.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class DogsController(IDogService service)
+public class DogsController(IDogService service, IFileStorageService fileStorageService)
     : AbstractController<IDogService, ResultContainer<DogDto>, CreateDogCommand, UpdateDogCommand, DeleteDogCommand,
         DogQuery, DogDto>(service)
 {
@@ -21,10 +22,39 @@ public class DogsController(IDogService service)
         return base.Create(command);
     }
 
+    [HttpPost("{dogId:guid}/Photos")]
+    [Consumes("multipart/form-data")]
+    public async Task<ResultContainer<DogDto>> AddPhoto(Guid dogId, [FromForm] IFormFile photo)
+    {
+        var uploadedPhoto = await fileStorageService.UploadFileAsync(photo);
+        var command = new AddDogPhotoCommand
+        {
+            DogId = dogId,
+            PhotoId = uploadedPhoto.Id
+        };
+
+        return await service.AddPhotoAsync(command);
+    }
+
     [HttpPut(nameof(Update))]
     public new Task<ResultContainer<DogDto>> Update([FromBody] UpdateDogCommand command)
     {
         return base.Update(command);
+    }
+
+    [HttpDelete("{dogId:guid}/Photos/{photoId:guid}")]
+    public async Task<ResultContainer<DogDto>> RemovePhoto(Guid dogId, Guid photoId)
+    {
+        var command = new RemoveDogPhotoCommand
+        {
+            DogId = dogId,
+            PhotoId = photoId
+        };
+
+        var result = await service.RemovePhotoAsync(command);
+        await fileStorageService.DeleteFileAsync(photoId);
+
+        return result;
     }
 
     [HttpDelete(nameof(Delete))]
@@ -63,4 +93,5 @@ public class DogsController(IDogService service)
             Items = items
         };
     }
+
 }

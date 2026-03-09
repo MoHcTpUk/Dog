@@ -11,4 +11,8 @@ public interface IDogService : IService<CreateDogCommand, UpdateDogCommand, Dele
     Task<ResultContainer<DogDto>> BindToOwnerAsync(BindDogToOwnerCommand command);
 
     Task<ResultContainer<DogDto>> UnbindFromOwnerAsync(UnbindDogFromOwnerCommand command);
+
+    Task<ResultContainer<DogDto>> AddPhotoAsync(AddDogPhotoCommand command);
+
+    Task<ResultContainer<DogDto>> RemovePhotoAsync(RemoveDogPhotoCommand command);
 }

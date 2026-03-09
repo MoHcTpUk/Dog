@@ -27,4 +27,9 @@ public class FileStorageService(IStorage storage) : IFileStorageService
         
         return result;
     }
+
+    public async Task DeleteFileAsync(Guid fileId)
+    {
+        await storage.DeleteFileAsync(fileId);
+    }
 }

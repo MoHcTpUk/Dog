@@ -22,5 +22,7 @@ public record DogDto : Dto
 
     public string? About { get; set; }
 
+    public List<Guid> PhotoIds { get; set; } = [];
+
     public Guid? OwnerId { get; set; }
 }

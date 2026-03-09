@@ -28,6 +28,7 @@ builder.Services.AddReverseProxy()
 
 builder.Services.AddUsersApi(builder.Configuration);
 builder.Services.AddDogApi(builder.Configuration);
+builder.Services.AddIdentityApi(builder.Configuration);
 
 if (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName == Environments.Local)
     builder.Services.AddCors(options =>

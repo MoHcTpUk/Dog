@@ -29,4 +29,20 @@ public class DogService(ICommandBus commandBus)
             throw new Exception($"Failed to process command {nameof(UnbindDogFromOwnerCommand)}");
         return result;
     }
+
+    public async Task<ResultContainer<DogDto>> AddPhotoAsync(AddDogPhotoCommand command)
+    {
+        var result = await _commandBus.SendAsync<AddDogPhotoCommand, ResultContainer<DogDto>>(command, Subject);
+        if (result is null)
+            throw new Exception($"Failed to process command {nameof(AddDogPhotoCommand)}");
+        return result;
+    }
+
+    public async Task<ResultContainer<DogDto>> RemovePhotoAsync(RemoveDogPhotoCommand command)
+    {
+        var result = await _commandBus.SendAsync<RemoveDogPhotoCommand, ResultContainer<DogDto>>(command, Subject);
+        if (result is null)
+            throw new Exception($"Failed to process command {nameof(RemoveDogPhotoCommand)}");
+        return result;
+    }
 }
