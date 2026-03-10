@@ -11,7 +11,11 @@ public class FileController(IFileStorageService fileStorageService) : Controller
     public async Task<IActionResult> GetFile(Guid fileId)
     {
         var result = await fileStorageService.DownloadFileAsync(fileId);
+        var downloadName = result.FileName;
 
-        return File(result.Stream, "application/octet-stream");
+        if (string.IsNullOrWhiteSpace(downloadName))
+            downloadName = $"{fileId}{result.FileExtension}";
+
+        return File(result.Stream, result.ContentType ?? "application/octet-stream", downloadName);
     }
 }

@@ -11,7 +11,7 @@ public class FileStorageService(IStorage storage) : IFileStorageService
         
         await using var stream = file.OpenReadStream();
 
-        await storage.UploadFileAsync(fileId, stream, file.ContentType);
+        await storage.UploadFileAsync(fileId, stream, file.ContentType, file.FileName);
 
         return new FileUploadResult
         {
