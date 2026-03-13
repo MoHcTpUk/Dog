@@ -21,7 +21,7 @@ public abstract class AbstractRepository<TEntity, TContext>(TContext context) : 
 
     public IQueryable<TEntity> AsQueryable()
     {
-        return _context.Set<TEntity>();
+        return _context.Set<TEntity>().AsQueryable();
     }
 
     public async Task<TEntity?> GetAsync(Guid id, CancellationToken cancellationToken)
