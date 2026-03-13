@@ -30,7 +30,7 @@ export const AppHeader: FC<AppHeaderProps> = ({
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
-  const { user } = useApp();
+  const { owner } = useApp();
 
   const isActivitiesPage = location.pathname === "/activities";
   const notificationCount = 0; // TODO: implement notifications
@@ -79,19 +79,12 @@ export const AppHeader: FC<AppHeaderProps> = ({
             </IonButton>
           ) : (
             <IonButton fill="clear" onClick={handleProfile}>
-              {user?.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt={user.firstName}
-                  className="w-8 h-8 rounded-full"
-                />
-              ) : (
-                <IonIcon
-                  icon="person-circle-outline"
-                  className="text-3xl"
-                  style={{ color: transparent ? "var(--color-text-primary)" : "var(--color-text-on-primary)" }}
-                />
-              )}
+              <IonIcon
+                icon="person-circle-outline"
+                className="text-3xl"
+                aria-label={owner?.name || t("Profile")}
+                style={{ color: transparent ? "var(--color-text-primary)" : "var(--color-text-on-primary)" }}
+              />
             </IonButton>
           )}
         </IonButtons>

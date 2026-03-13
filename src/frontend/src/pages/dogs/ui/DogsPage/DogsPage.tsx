@@ -1,54 +1,37 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { Icon, Text } from "@shared/ui";
+import {
+  mapDogProfileToCurrentDog,
+  type DogProfile,
+  useMyDogs,
+} from "@entities/dog";
 import { MainLayout } from "@app/layouts/MainLayout";
-import { mockNearbyDogs, NearbyDog } from "@shared/mocks/walks.mock";
+import { Icon, Text } from "@shared/ui";
+import { useAppStore } from "@shared/store/app.store";
+
+const DOG_PLACEHOLDER_IMAGE = "https://placehold.co/384x384?text=Dog";
 
 interface DogCardProps {
-  dog: NearbyDog;
-  onClick: (id: string) => void;
+  dog: DogProfile;
+  onClick: (dog: DogProfile) => void;
 }
 
 const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
-  const isSinglePhoto = dog.photos.length === 1;
+  const subtitle = dog.species?.name ?? "Порода не указана";
+  const secondaryLine = dog.weight ? `${dog.weight} кг` : "Фото пока нет";
 
   return (
     <div
       className="w-full px-2 pt-2 pb-5 bg-white rounded-3xl flex flex-col justify-end items-center gap-5 overflow-hidden cursor-pointer"
-      onClick={() => onClick(dog.id)}
+      onClick={() => onClick(dog)}
     >
-      <style>
-        {`
-          .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-          }
-        `}
-      </style>
       <div className="self-stretch flex flex-col justify-start items-start gap-3.5">
-        <div
-          className="hide-scrollbar self-stretch flex justify-start items-start gap-1 overflow-x-auto"
-          style={{
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-            WebkitOverflowScrolling: "touch",
-          }}
-        >
-          {dog.photos.map((photo, index) => (
-            <div
-              key={index}
-              className={`relative rounded-2xl overflow-hidden flex-shrink-0 ${
-                isSinglePhoto ? "flex-1 h-60" : "size-60"
-              }`}
-            >
-              <img
-                className={`${
-                  isSinglePhoto ? "w-full" : "size-60"
-                } h-60 object-cover`}
-                src={photo}
-                alt={`${dog.name} ${index + 1}`}
-              />
-            </div>
-          ))}
+        <div className="self-stretch rounded-2xl overflow-hidden h-60">
+          <img
+            className="w-full h-60 object-cover"
+            src={dog.avatar ?? DOG_PLACEHOLDER_IMAGE}
+            alt={dog.name}
+          />
         </div>
         <div className="self-stretch px-3 inline-flex justify-start items-center gap-2.5">
           <div className="flex-1 inline-flex flex-col justify-center items-start gap-[5px]">
@@ -56,7 +39,10 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
               {dog.name}
             </Text>
             <Text variant="regular-14" color="muted" className="leading-4">
-              {dog.distance} м от вас
+              {subtitle}
+            </Text>
+            <Text variant="regular-14" color="muted" className="leading-4">
+              {secondaryLine}
             </Text>
           </div>
           <div className="p-2 -rotate-90 bg-zinc-100 rounded-full inline-flex flex-col justify-start items-start overflow-hidden">
@@ -72,14 +58,20 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
 
 export const DogsPage: React.FC = () => {
   const history = useHistory();
+  const setCurrentDog = useAppStore((state) => state.setCurrentDog);
+  const { dogs, isLoading } = useMyDogs();
   const [notificationCount] = useState(2);
 
   const handleNotificationClick = () => {
     history.push("/notifications");
   };
 
-  const handleDogClick = (dogId: string) => {
-    history.push(`/dog/${dogId}`);
+  const handleDogClick = (dog: DogProfile) => {
+    setCurrentDog(mapDogProfileToCurrentDog(dog));
+
+    if (dog.id) {
+      history.push(`/dog/${dog.id}`);
+    }
   };
 
   return (
@@ -87,7 +79,7 @@ export const DogsPage: React.FC = () => {
       <div className="px-3 py-5 flex flex-col justify-start items-start gap-8">
         <div className="self-stretch h-14 pl-2.5 inline-flex justify-between items-center">
           <Text variant="bold-24" color="primary" className="flex-1 leading-6">
-            Собаки рядом
+            Мои собаки
           </Text>
           <div
             className="relative cursor-pointer"
@@ -109,9 +101,25 @@ export const DogsPage: React.FC = () => {
         </div>
 
         <div className="self-stretch flex flex-col justify-start items-start gap-6">
+          {isLoading ? (
+            <Text variant="regular-14" color="muted">
+              Загружаем профили собак...
+            </Text>
+          ) : null}
+
+          {!isLoading && dogs.length === 0 ? (
+            <Text variant="regular-14" color="muted">
+              У вас пока нет добавленных собак.
+            </Text>
+          ) : null}
+
           <div className="self-stretch flex flex-col justify-start items-start gap-1">
-            {mockNearbyDogs.map((dog) => (
-              <DogCard key={dog.id} dog={dog} onClick={handleDogClick} />
+            {dogs.map((dog) => (
+              <DogCard
+                key={dog.id ?? dog.name}
+                dog={dog}
+                onClick={handleDogClick}
+              />
             ))}
           </div>
         </div>

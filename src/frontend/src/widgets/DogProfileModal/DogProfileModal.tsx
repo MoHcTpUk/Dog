@@ -3,8 +3,12 @@ import { IonPage, IonContent, IonImg } from '@ionic/react';
 import { Text, Icon, Tag, Button } from '@shared/ui';
 import { Dog } from '@shared/types/walk';
 
+type DogProfileModalDog = Omit<Dog, 'gender'> & {
+  gender: 'male' | 'female' | 'unknown';
+};
+
 export interface DogProfileModalProps {
-  dog: Dog | null;
+  dog: DogProfileModalDog | null;
   onClose?: () => void;
   onInviteClick?: () => void;
 }
@@ -53,6 +57,12 @@ export const DogProfileModal: React.FC<DogProfileModalProps> = ({
   if (dog.isSterilized) healthTags.push('Стерилизована');
   if (dog.isVaccinated) healthTags.push('Вакцинирована');
   if (dog.isTreatedForParasites) healthTags.push('Обработана от паразитов');
+  const genderLabel =
+    dog.gender === 'female'
+      ? 'Девочка'
+      : dog.gender === 'male'
+        ? 'Мальчик'
+        : 'Пол не указан';
 
   const handleClose = () => {
     if (onClose) {
@@ -146,14 +156,18 @@ export const DogProfileModal: React.FC<DogProfileModalProps> = ({
 
                 <div className="inline-flex justify-start items-start gap-1 flex-wrap">
                   <Tag variant="outline" size="small" className="text-text-secondary outline-border">
-                    {dog.gender === 'female' ? 'Девочка' : 'Мальчик'}
+                    {genderLabel}
                   </Tag>
-                  <Tag variant="outline" size="small" className="text-text-secondary outline-border">
-                    {dog.age} {dog.age === 1 ? 'год' : dog.age < 5 ? 'года' : 'лет'}
-                  </Tag>
-                  <Tag variant="outline" size="small" className="text-text-secondary outline-border">
-                    {dog.weight} кг
-                  </Tag>
+                  {dog.age > 0 && (
+                    <Tag variant="outline" size="small" className="text-text-secondary outline-border">
+                      {dog.age} {dog.age === 1 ? 'год' : dog.age < 5 ? 'года' : 'лет'}
+                    </Tag>
+                  )}
+                  {dog.weight > 0 && (
+                    <Tag variant="outline" size="small" className="text-text-secondary outline-border">
+                      {dog.weight} кг
+                    </Tag>
+                  )}
                 </div>
               </div>
 
@@ -204,12 +218,16 @@ export const DogProfileModal: React.FC<DogProfileModalProps> = ({
                       <Text variant="semibold-18" color="primary">
                         {dog.owner.name}
                       </Text>
-                      <Text variant="semibold-18" color="primary">
-                        ·
-                      </Text>
-                      <Text variant="semibold-18" color="primary">
-                        {dog.owner.age} лет
-                      </Text>
+                      {dog.owner.age > 0 && (
+                        <>
+                          <Text variant="semibold-18" color="primary">
+                            ·
+                          </Text>
+                          <Text variant="semibold-18" color="primary">
+                            {dog.owner.age} лет
+                          </Text>
+                        </>
+                      )}
                     </div>
                     <Text variant="regular-14" color="secondary" className="leading-[18px]">
                       Хозяин

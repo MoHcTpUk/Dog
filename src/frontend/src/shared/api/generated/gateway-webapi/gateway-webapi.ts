@@ -27,6 +27,8 @@ import type {
   UseSuspenseQueryResult,
 } from "@tanstack/react-query";
 
+import type { Rfc7807ProblemDetailsType } from ".././types";
+
 import { customInstance } from "../../client";
 
 export const getTest = (signal?: AbortSignal) => {
@@ -39,7 +41,7 @@ export const getGetTestQueryKey = () => {
 
 export const getGetTestInfiniteQueryOptions = <
   TData = InfiniteData<Awaited<ReturnType<typeof getTest>>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(options?: {
   query?: Partial<
     UseInfiniteQueryOptions<Awaited<ReturnType<typeof getTest>>, TError, TData>
@@ -63,11 +65,11 @@ export const getGetTestInfiniteQueryOptions = <
 export type GetTestInfiniteQueryResult = NonNullable<
   Awaited<ReturnType<typeof getTest>>
 >;
-export type GetTestInfiniteQueryError = unknown;
+export type GetTestInfiniteQueryError = Rfc7807ProblemDetailsType;
 
 export function useGetTestInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getTest>>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   options: {
     query: Partial<
@@ -92,7 +94,7 @@ export function useGetTestInfinite<
 };
 export function useGetTestInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getTest>>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   options?: {
     query?: Partial<
@@ -117,7 +119,7 @@ export function useGetTestInfinite<
 };
 export function useGetTestInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getTest>>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   options?: {
     query?: Partial<
@@ -135,7 +137,7 @@ export function useGetTestInfinite<
 
 export function useGetTestInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getTest>>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   options?: {
     query?: Partial<
@@ -166,7 +168,7 @@ export function useGetTestInfinite<
 
 export const getGetTestQueryOptions = <
   TData = Awaited<ReturnType<typeof getTest>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getTest>>, TError, TData>
@@ -190,11 +192,11 @@ export const getGetTestQueryOptions = <
 export type GetTestQueryResult = NonNullable<
   Awaited<ReturnType<typeof getTest>>
 >;
-export type GetTestQueryError = unknown;
+export type GetTestQueryError = Rfc7807ProblemDetailsType;
 
 export function useGetTest<
   TData = Awaited<ReturnType<typeof getTest>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   options: {
     query: Partial<
@@ -215,7 +217,7 @@ export function useGetTest<
 };
 export function useGetTest<
   TData = Awaited<ReturnType<typeof getTest>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   options?: {
     query?: Partial<
@@ -236,7 +238,7 @@ export function useGetTest<
 };
 export function useGetTest<
   TData = Awaited<ReturnType<typeof getTest>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   options?: {
     query?: Partial<
@@ -250,7 +252,7 @@ export function useGetTest<
 
 export function useGetTest<
   TData = Awaited<ReturnType<typeof getTest>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   options?: {
     query?: Partial<
@@ -275,7 +277,7 @@ export function useGetTest<
 
 export const getGetTestSuspenseQueryOptions = <
   TData = Awaited<ReturnType<typeof getTest>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(options?: {
   query?: Partial<
     UseSuspenseQueryOptions<Awaited<ReturnType<typeof getTest>>, TError, TData>
@@ -299,11 +301,11 @@ export const getGetTestSuspenseQueryOptions = <
 export type GetTestSuspenseQueryResult = NonNullable<
   Awaited<ReturnType<typeof getTest>>
 >;
-export type GetTestSuspenseQueryError = unknown;
+export type GetTestSuspenseQueryError = Rfc7807ProblemDetailsType;
 
 export function useGetTestSuspense<
   TData = Awaited<ReturnType<typeof getTest>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   options: {
     query: Partial<
@@ -320,7 +322,7 @@ export function useGetTestSuspense<
 };
 export function useGetTestSuspense<
   TData = Awaited<ReturnType<typeof getTest>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   options?: {
     query?: Partial<
@@ -337,7 +339,7 @@ export function useGetTestSuspense<
 };
 export function useGetTestSuspense<
   TData = Awaited<ReturnType<typeof getTest>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   options?: {
     query?: Partial<
@@ -355,7 +357,7 @@ export function useGetTestSuspense<
 
 export function useGetTestSuspense<
   TData = Awaited<ReturnType<typeof getTest>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   options?: {
     query?: Partial<

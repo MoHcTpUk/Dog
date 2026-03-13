@@ -3,7 +3,6 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /app
 
 COPY ./Services/Dog ./Services/Dog
-COPY ./Api ./Api
 COPY ./Shared ./Shared
 
 RUN dotnet restore ./Services/Dog/Dog.Service/Dog.Service.csproj

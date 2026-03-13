@@ -1,21 +1,9 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useDogSpecies } from "@entities/dog";
 import { TagRadioGroup, TagRadioOption, Input } from "@shared/ui";
 import { DogProfileData, StepErrors } from "../../model/types";
 import { OnboardingStepField, OnboardingStepLayout } from "../StepLayout";
-
-const mockBreeds = [
-  "Лабрадор",
-  "Немецкая овчарка",
-  "Золотистый ретривер",
-  "Французский бульдог",
-  "Бульдог",
-  "Пудель",
-  "Бигль",
-  "Ротвейлер",
-  "Йоркширский терьер",
-  "Далматин",
-];
 
 interface DogBreedStepProps {
   data: DogProfileData;
@@ -30,18 +18,22 @@ export const DogBreedStep: React.FC<DogBreedStepProps> = ({
 }) => {
   const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState("");
+  const { species } = useDogSpecies();
 
-  const filteredBreeds = mockBreeds.filter((breed) =>
-    breed.toLowerCase().includes(searchValue.toLowerCase())
+  const filteredSpecies = species.filter((item) =>
+    item.name.toLowerCase().includes(searchValue.toLowerCase())
   );
 
-  const breedOptions: TagRadioOption[] = filteredBreeds.map((breed) => ({
-    value: breed,
-    label: t(breed),
+  const breedOptions: TagRadioOption[] = filteredSpecies.map((item) => ({
+    value: String(item.value),
+    label: item.name,
   }));
 
   const handleBreedChange = (value: string) => {
-    onUpdate({ breed: value });
+    const selectedSpecies =
+      species.find((item) => String(item.value) === value) ?? null;
+
+    onUpdate({ breed: selectedSpecies });
   };
 
   return (
@@ -54,7 +46,7 @@ export const DogBreedStep: React.FC<DogBreedStepProps> = ({
 
       <TagRadioGroup
         options={breedOptions}
-        value={data.breed || ""}
+        value={data.breed ? String(data.breed.value) : ""}
         onChange={handleBreedChange}
         size="medium"
         className="justify-start"

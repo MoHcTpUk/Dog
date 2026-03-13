@@ -1,8 +1,10 @@
+import type { DogSpecies } from "@entities/dog";
+
 export interface DogProfileData {
   name: string;
   gender: "male" | "female" | "";
   weight: number;
-  breed: string;
+  breed: DogSpecies | null;
   birthDate: { day: number; month: number; year: number };
   health: {
     sterilized: boolean;

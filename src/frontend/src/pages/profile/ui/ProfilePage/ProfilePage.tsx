@@ -21,7 +21,7 @@ interface MenuItemConfig {
 export const ProfilePage: React.FC = () => {
   const history = useHistory();
   const { t } = useTranslation();
-  const { currentDog, user, logout } = useAppStore();
+  const { currentDog, owner, logout } = useAppStore();
   const [notificationCount] = useState(2);
   const [isReferralDrawerOpen, setIsReferralDrawerOpen] = useState(false);
   const [isThankYouModalOpen, setIsThankYouModalOpen] = useState(false);
@@ -153,7 +153,7 @@ export const ProfilePage: React.FC = () => {
                       color="muted"
                       className="leading-4"
                     >
-                      {t("Owner")} {user?.firstName || ""}
+                      {t("Owner")} {owner?.name || ""}
                     </Text>
                   </div>
                 </div>

@@ -1,5 +1,15 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  usePostOwnersCreate,
+  usePostDogsCreate,
+  usePostDogsBindToOwner,
+  getGetOwnersGetQueryKey,
+  getGetDogsGetQueryKey,
+} from "@shared/api/generated";
+import { useAppStore } from "@shared/store/app.store";
+import { Activity, Gender } from "@entities/dog";
 import { DogProfileData, StepErrors } from "./types";
 
 type StepperToastVariant = "info" | "error" | "success";
@@ -17,7 +27,7 @@ const initialData: DogProfileData = {
   name: "",
   gender: "",
   weight: 20,
-  breed: "",
+  breed: null,
   birthDate: getCurrentDate(),
   health: {
     sterilized: false,
@@ -43,17 +53,36 @@ const initialData: DogProfileData = {
   },
 };
 
+const GENDER_MAP: Record<string, number> = {
+  male: Gender.Male,
+  female: Gender.Female,
+};
+
+const ACTIVITY_MAP: Record<string, number> = {
+  low: Activity.Low,
+  medium: Activity.Medium,
+  high: Activity.High,
+};
+
 export const useDogProfileStepper = (
   onComplete: () => void,
   onExit: () => void
 ) => {
   const { t } = useTranslation();
+  const { setOnboarded } = useAppStore();
+  const queryClient = useQueryClient();
+
   const [currentStep, setCurrentStep] = useState(1);
   const [stepperData, setStepperData] = useState<DogProfileData>(initialData);
   const [errors, setErrors] = useState<StepErrors>({});
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastVariant, setToastVariant] = useState<StepperToastVariant>("info");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { mutateAsync: createOwner } = usePostOwnersCreate();
+  const { mutateAsync: createDog } = usePostDogsCreate();
+  const { mutateAsync: bindDogToOwner } = usePostDogsBindToOwner();
 
   const showToastMessage = (
     message: string,
@@ -67,7 +96,6 @@ export const useDogProfileStepper = (
   const updateStepperData = (updates: Partial<DogProfileData>) => {
     setStepperData((prev) => ({ ...prev, ...updates }));
 
-    // Clear relevant errors when data is updated
     setErrors((prevErrors) => {
       const newErrors = { ...prevErrors };
       let hasChanges = false;
@@ -121,11 +149,6 @@ export const useDogProfileStepper = (
           return false;
         }
         break;
-      case 9:
-        if (dataToValidate.photos.length === 0) {
-          return false; // Special case for photo step
-        }
-        break;
       case 10:
         if (!dataToValidate.owner.name.trim()) {
           newErrors.ownerName = t("Please enter your name");
@@ -139,6 +162,55 @@ export const useDogProfileStepper = (
     return true;
   };
 
+  const submitProfile = async (data: DogProfileData) => {
+    setIsSubmitting(true);
+
+    try {
+      const ownerResult = await createOwner({
+        data: {
+          name: data.owner.name,
+          ...(data.owner.birth_date && { birthdate: data.owner.birth_date }),
+        },
+      });
+
+      const owner = ownerResult?.items?.[0];
+      if (!owner?.id) throw new Error("Failed to create owner");
+
+      const { year, month, day } = data.birthDate;
+      const birthdate = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+      const dogResult = await createDog({
+        data: {
+          name: data.name,
+          ...(data.gender && { gender: GENDER_MAP[data.gender] }),
+          weight: data.weight,
+          ...(data.breed && { species: data.breed }),
+          birthdate,
+          ...(data.character.activity && {
+            activity: ACTIVITY_MAP[data.character.activity],
+          }),
+          about: data.comment || null,
+        },
+      });
+
+      const dog = dogResult?.items?.[0];
+      if (!dog?.id) throw new Error("Failed to create dog");
+
+      await bindDogToOwner({ data: { dogId: dog.id, ownerId: owner.id } });
+
+      await queryClient.invalidateQueries({ queryKey: getGetOwnersGetQueryKey() });
+      await queryClient.invalidateQueries({ queryKey: getGetDogsGetQueryKey() });
+
+      setOnboarded(true);
+      showToastMessage(t("Profile created successfully!"), "success");
+      setTimeout(() => onComplete(), 1500);
+    } catch {
+      showToastMessage(t("Failed to create profile. Please try again."), "error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleNext = () => {
     if (!validateStep(currentStep, stepperData)) {
       return;
@@ -147,10 +219,7 @@ export const useDogProfileStepper = (
     if (currentStep < 10) {
       setCurrentStep(currentStep + 1);
     } else {
-      showToastMessage(t("Excellent! One step left"), "success");
-      setTimeout(() => {
-        onComplete();
-      }, 2000);
+      submitProfile(stepperData);
     }
   };
 
@@ -169,6 +238,7 @@ export const useDogProfileStepper = (
     showToast,
     toastMessage,
     toastVariant,
+    isSubmitting,
     handleNext,
     handleBack,
     updateStepperData,

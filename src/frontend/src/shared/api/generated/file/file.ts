@@ -27,7 +27,7 @@ import type {
   UseSuspenseQueryResult,
 } from "@tanstack/react-query";
 
-import type { GetGetFileParams } from ".././types";
+import type { GetGetFileParams, Rfc7807ProblemDetailsType } from ".././types";
 
 import { customInstance } from "../../client";
 
@@ -46,7 +46,7 @@ export const getGetGetFileQueryKey = (params?: GetGetFileParams) => {
 
 export const getGetGetFileInfiniteQueryOptions = <
   TData = InfiniteData<Awaited<ReturnType<typeof getGetFile>>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   params?: GetGetFileParams,
   options?: {
@@ -77,11 +77,11 @@ export const getGetGetFileInfiniteQueryOptions = <
 export type GetGetFileInfiniteQueryResult = NonNullable<
   Awaited<ReturnType<typeof getGetFile>>
 >;
-export type GetGetFileInfiniteQueryError = unknown;
+export type GetGetFileInfiniteQueryError = Rfc7807ProblemDetailsType;
 
 export function useGetGetFileInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getGetFile>>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   params: undefined | GetGetFileParams,
   options: {
@@ -107,7 +107,7 @@ export function useGetGetFileInfinite<
 };
 export function useGetGetFileInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getGetFile>>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   params?: GetGetFileParams,
   options?: {
@@ -133,7 +133,7 @@ export function useGetGetFileInfinite<
 };
 export function useGetGetFileInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getGetFile>>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   params?: GetGetFileParams,
   options?: {
@@ -152,7 +152,7 @@ export function useGetGetFileInfinite<
 
 export function useGetGetFileInfinite<
   TData = InfiniteData<Awaited<ReturnType<typeof getGetFile>>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   params?: GetGetFileParams,
   options?: {
@@ -184,7 +184,7 @@ export function useGetGetFileInfinite<
 
 export const getGetGetFileQueryOptions = <
   TData = Awaited<ReturnType<typeof getGetFile>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   params?: GetGetFileParams,
   options?: {
@@ -211,11 +211,11 @@ export const getGetGetFileQueryOptions = <
 export type GetGetFileQueryResult = NonNullable<
   Awaited<ReturnType<typeof getGetFile>>
 >;
-export type GetGetFileQueryError = unknown;
+export type GetGetFileQueryError = Rfc7807ProblemDetailsType;
 
 export function useGetGetFile<
   TData = Awaited<ReturnType<typeof getGetFile>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   params: undefined | GetGetFileParams,
   options: {
@@ -237,7 +237,7 @@ export function useGetGetFile<
 };
 export function useGetGetFile<
   TData = Awaited<ReturnType<typeof getGetFile>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   params?: GetGetFileParams,
   options?: {
@@ -259,7 +259,7 @@ export function useGetGetFile<
 };
 export function useGetGetFile<
   TData = Awaited<ReturnType<typeof getGetFile>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   params?: GetGetFileParams,
   options?: {
@@ -274,7 +274,7 @@ export function useGetGetFile<
 
 export function useGetGetFile<
   TData = Awaited<ReturnType<typeof getGetFile>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   params?: GetGetFileParams,
   options?: {
@@ -300,7 +300,7 @@ export function useGetGetFile<
 
 export const getGetGetFileSuspenseQueryOptions = <
   TData = Awaited<ReturnType<typeof getGetFile>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   params?: GetGetFileParams,
   options?: {
@@ -331,11 +331,11 @@ export const getGetGetFileSuspenseQueryOptions = <
 export type GetGetFileSuspenseQueryResult = NonNullable<
   Awaited<ReturnType<typeof getGetFile>>
 >;
-export type GetGetFileSuspenseQueryError = unknown;
+export type GetGetFileSuspenseQueryError = Rfc7807ProblemDetailsType;
 
 export function useGetGetFileSuspense<
   TData = Awaited<ReturnType<typeof getGetFile>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   params: undefined | GetGetFileParams,
   options: {
@@ -353,7 +353,7 @@ export function useGetGetFileSuspense<
 };
 export function useGetGetFileSuspense<
   TData = Awaited<ReturnType<typeof getGetFile>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   params?: GetGetFileParams,
   options?: {
@@ -371,7 +371,7 @@ export function useGetGetFileSuspense<
 };
 export function useGetGetFileSuspense<
   TData = Awaited<ReturnType<typeof getGetFile>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   params?: GetGetFileParams,
   options?: {
@@ -390,7 +390,7 @@ export function useGetGetFileSuspense<
 
 export function useGetGetFileSuspense<
   TData = Awaited<ReturnType<typeof getGetFile>>,
-  TError = unknown
+  TError = Rfc7807ProblemDetailsType
 >(
   params?: GetGetFileParams,
   options?: {

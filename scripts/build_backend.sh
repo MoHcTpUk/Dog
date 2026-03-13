@@ -44,7 +44,7 @@ docker buildx build \
   --platform $PLATFORM \
   -f ../build/backend/Dog.Dockerfile \
   -t ghcr.io/mohctpuk/dog-dog:latest \
-  --push \
+  --load \
   ../src/backend/Dog
 
 wait

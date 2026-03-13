@@ -6,18 +6,18 @@ import { Text, Input, Button, Icon, BottomModal, DatePicker } from "@shared/ui";
 import { getMonthNames } from "@shared/lib/constants";
 import { parseDateParts } from "@shared/utils/date.utils";
 
-interface OwnerData {
+export interface OwnerFormData {
   photo?: string | null;
   name?: string;
   birth_date?: string;
 }
 
 interface OwnerEditFormProps {
-  initialData?: OwnerData;
-  onSave?: (data: OwnerData) => void;
+  initialData?: OwnerFormData;
+  onSave?: (data: OwnerFormData) => void;
+  isSaving?: boolean;
 }
 
-const DEFAULT_BIRTH_DATE = "3 марта 2009";
 const DEFAULT_SELECTED_DATE = {
   day: 3,
   month: 3,
@@ -27,23 +27,37 @@ const DEFAULT_SELECTED_DATE = {
 export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
   initialData,
   onSave,
+  isSaving = false,
 }) => {
   const { t } = useTranslation();
+  const monthNames = getMonthNames(t);
+
+  const formatBirthDateLabel = useCallback(
+    (value?: string) => {
+      const parsed = parseDateParts(value || null, {
+        fallback: DEFAULT_SELECTED_DATE,
+        monthNames,
+      });
+
+      return `${parsed.day} ${monthNames[parsed.month - 1]} ${parsed.year}`;
+    },
+    [monthNames],
+  );
 
   const [photo, setPhoto] = useState<string | null>(
-    initialData?.photo || "https://placehold.co/173x173",
+    initialData?.photo || null,
   );
-  const [name, setName] = useState<string>(initialData?.name || "Альберт");
+  const [name, setName] = useState<string>(initialData?.name || "");
   const [birthDate, setBirthDate] = useState<string>(
-    initialData?.birth_date || DEFAULT_BIRTH_DATE,
+    initialData?.birth_date ? formatBirthDateLabel(initialData.birth_date) : "",
   );
 
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [datePickerSyncToken, setDatePickerSyncToken] = useState(0);
   const [selectedDate, setSelectedDate] = useState(
-    parseDateParts(initialData?.birth_date || DEFAULT_BIRTH_DATE, {
+    parseDateParts(initialData?.birth_date || null, {
       fallback: DEFAULT_SELECTED_DATE,
-      monthNames: getMonthNames(t),
+      monthNames,
     }),
   );
 
@@ -51,17 +65,23 @@ export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
     (dateString: string) => {
       return parseDateParts(dateString, {
         fallback: DEFAULT_SELECTED_DATE,
-        monthNames: getMonthNames(t),
+        monthNames,
       });
     },
-    [t],
+    [monthNames],
   );
 
   useEffect(() => {
-    const nextBirthDate = initialData?.birth_date || DEFAULT_BIRTH_DATE;
+    const nextBirthDate = initialData?.birth_date
+      ? formatBirthDateLabel(initialData.birth_date)
+      : "";
     setBirthDate(nextBirthDate);
     setSelectedDate(parseBirthDate(nextBirthDate));
-  }, [initialData?.birth_date, parseBirthDate]);
+  }, [formatBirthDateLabel, initialData?.birth_date, parseBirthDate]);
+
+  useEffect(() => {
+    setPhoto(initialData?.photo || null);
+  }, [initialData?.photo]);
 
   const handleImageCapture = async () => {
     const image = await platformUtils.media.pickImage();
@@ -75,7 +95,6 @@ export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
   };
 
   const handleDateSave = () => {
-    const monthNames = getMonthNames(t);
     const dateString = `${selectedDate.day} ${
       monthNames[selectedDate.month - 1]
     } ${selectedDate.year}`;
@@ -164,7 +183,14 @@ export const OwnerEditForm: React.FC<OwnerEditFormProps> = ({
           </div>
         </div>
 
-        <Button variant="primary" size="L" fullWidth onClick={handleSave}>
+        <Button
+          variant="primary"
+          size="L"
+          fullWidth
+          onClick={handleSave}
+          loading={isSaving}
+          disabled={isSaving}
+        >
           Сохранить
         </Button>
       </div>

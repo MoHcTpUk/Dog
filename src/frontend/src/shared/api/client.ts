@@ -1,5 +1,5 @@
 import Axios, { AxiosRequestConfig } from "axios";
-import Cookies from "js-cookie";
+import { getAccessToken } from "./auth/session";
 
 const API_BASE_URL =
   process.env.NODE_ENV === "production"
@@ -16,7 +16,7 @@ export const AXIOS_INSTANCE = Axios.create({
 
 AXIOS_INSTANCE.interceptors.request.use(
   (config) => {
-    const token = Cookies.get("auth_token");
+    const token = getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

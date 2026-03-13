@@ -2,39 +2,36 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
-export interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  about?: string | null;
-  avatar?: string;
-  age?: number;
-  gender?: "male" | "female" | "other";
-  categories?: string[];
-  contactMethod?: string;
-  country?: string;
-  city?: string;
-  isOnboarded?: boolean;
+export interface OwnerProfile {
+  id: string | null;
+  name: string;
+  birthdate: string | null;
 }
 
-export interface Dog {
-  id: string;
+export interface CurrentDogProfile {
+  id: string | null;
   name: string;
-  avatar: string;
-  breed?: string;
-  age?: number;
+  avatar?: string | null;
+  breed?: string | null;
+  age?: number | null;
+}
+
+interface HydrateSessionPayload {
+  token?: string | null;
+  owner: OwnerProfile | null;
+  currentDog: CurrentDogProfile | null;
+  isOnboarded: boolean;
 }
 
 export interface AppState {
-  // User data
-  user: User | null;
+  // Session data
+  owner: OwnerProfile | null;
   isAuthenticated: boolean;
   token: string | null;
 
   // Dog data
-  currentDog: Dog | null;
-  setCurrentDog: (dog: Dog | null) => void;
+  currentDog: CurrentDogProfile | null;
+  setCurrentDog: (dog: CurrentDogProfile | null) => void;
 
   // App state
   isLoading: boolean;
@@ -42,12 +39,12 @@ export interface AppState {
   isOnboarded: boolean;
 
   // Actions
-  setUser: (user: User | null) => void;
+  setOwner: (owner: OwnerProfile | null) => void;
   setToken: (token: string | null) => void;
   setLoading: (loading: boolean) => void;
   setInitializing: (initializing: boolean) => void;
   setOnboarded: (onboarded: boolean) => void;
-  initializeApp: () => Promise<void>;
+  hydrateSession: (payload: HydrateSessionPayload) => void;
   logout: () => void;
 
   // Preferences
@@ -62,7 +59,7 @@ export const useAppStore = create<AppState>()(
     persist(
       (set) => ({
         // Initial state
-        user: null,
+        owner: null,
         isAuthenticated: false,
         token: null,
         currentDog: null,
@@ -73,11 +70,7 @@ export const useAppStore = create<AppState>()(
         theme: "auto",
 
         // Actions
-        setUser: (user) =>
-          set({
-            user,
-            isAuthenticated: !!user,
-          }),
+        setOwner: (owner) => set({ owner }),
 
         setToken: (token) =>
           set({
@@ -91,32 +84,26 @@ export const useAppStore = create<AppState>()(
 
         setInitializing: (isInitializing) => set({ isInitializing }),
 
-        initializeApp: async () => {
-          set({ isInitializing: true });
-
-          await new Promise(resolve => setTimeout(resolve, 2000));
-
-          set({
-            isInitializing: false,
-            currentDog: {
-              id: "1",
-              name: "Рекс",
-              avatar: "https://placehold.co/28x28/FF6B9D/white?text=R",
-              breed: "Лабрадор",
-              age: 3,
-            }
-          });
-        },
-
         setOnboarded: (isOnboarded) => set({ isOnboarded }),
+
+        hydrateSession: ({ token, owner, currentDog, isOnboarded }) =>
+          set((state) => ({
+            token: token === undefined ? state.token : token,
+            isAuthenticated:
+              token === undefined ? state.isAuthenticated : !!token,
+            owner,
+            currentDog,
+            isOnboarded,
+          })),
 
         logout: () =>
           set({
-            user: null,
+            owner: null,
             token: null,
             currentDog: null,
             isAuthenticated: false,
             isOnboarded: false,
+            isInitializing: false,
           }),
 
         setLanguage: (language) => set({ language }),
@@ -126,7 +113,7 @@ export const useAppStore = create<AppState>()(
       {
         name: "app-storage",
         partialize: (state) => ({
-          user: state.user,
+          owner: state.owner,
           token: state.token,
           currentDog: state.currentDog,
           isOnboarded: state.isOnboarded,

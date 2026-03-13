@@ -1,5 +1,6 @@
 // src/shared/hooks/useApp.ts
-import { useAppStore, User } from "@store/app.store";
+import { getAccessToken } from "@shared/api/auth/session";
+import { useAppStore } from "@store/app.store";
 import { useCallback } from "react";
 import { useHistory } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -9,14 +10,14 @@ export const useApp = () => {
   const { i18n } = useTranslation();
 
   const {
-    user,
+    owner,
     isAuthenticated,
     token,
     isLoading,
     isOnboarded,
     language,
     theme,
-    setUser,
+    setOwner,
     setToken,
     setLoading,
     setOnboarded,
@@ -26,24 +27,16 @@ export const useApp = () => {
   } = useAppStore();
 
   const login = useCallback(
-    (token: string, userData: User) => {
-      setToken(token);
-      setUser(userData);
-      localStorage.setItem("auth_token", token);
-
-      if (!userData.isOnboarded) {
-        history.push("/onboarding");
-      } else {
-        history.push("/");
-      }
+    (nextToken: string) => {
+      setToken(nextToken);
+      history.push("/");
     },
-    [setToken, setUser, history]
+    [history, setToken]
   );
 
   const logout = useCallback(() => {
     logoutStore();
-    localStorage.removeItem("auth_token");
-    history.push("/auth/login");
+    history.push("/welcome");
   }, [logoutStore, history]);
 
   const setLanguage = useCallback(
@@ -55,7 +48,7 @@ export const useApp = () => {
   );
 
   const checkAuth = useCallback(() => {
-    const storedToken = localStorage.getItem("auth_token");
+    const storedToken = getAccessToken();
     if (storedToken && !token) {
       setToken(storedToken);
     }
@@ -64,7 +57,7 @@ export const useApp = () => {
 
   return {
     // State
-    user,
+    owner,
     isAuthenticated,
     token,
     isLoading,
@@ -75,7 +68,7 @@ export const useApp = () => {
     // Actions
     login,
     logout,
-    setUser,
+    setOwner,
     setLoading,
     setOnboarded,
     setLanguage,

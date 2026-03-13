@@ -15,6 +15,7 @@ import type {
 import type {
   CreateRegistrationRequestCommandType,
   RegistrationRequestDtoType,
+  Rfc7807ProblemDetailsType,
 } from ".././types";
 
 import { customInstance } from "../../client";
@@ -33,7 +34,7 @@ export const postUsersCreateRegistrationRequest = (
 };
 
 export const getPostUsersCreateRegistrationRequestMutationOptions = <
-  TError = unknown,
+  TError = Rfc7807ProblemDetailsType,
   TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
@@ -74,10 +75,11 @@ export type PostUsersCreateRegistrationRequestMutationResult = NonNullable<
 >;
 export type PostUsersCreateRegistrationRequestMutationBody =
   CreateRegistrationRequestCommandType;
-export type PostUsersCreateRegistrationRequestMutationError = unknown;
+export type PostUsersCreateRegistrationRequestMutationError =
+  Rfc7807ProblemDetailsType;
 
 export const usePostUsersCreateRegistrationRequest = <
-  TError = unknown,
+  TError = Rfc7807ProblemDetailsType,
   TContext = unknown
 >(
   options?: {

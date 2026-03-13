@@ -2,7 +2,6 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 
 WORKDIR /app
 
-COPY ./Api/Identity.Api ./Api/Identity.Api
 COPY ./Services/Identity ./Services/Identity
 COPY ./Shared ./Shared
 

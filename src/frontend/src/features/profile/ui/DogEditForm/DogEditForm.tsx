@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { IonImg } from "@ionic/react";
+import { type DogSpecies, useDogSpecies } from "@entities/dog";
 import { platformUtils } from "@shared/hooks";
 import {
   Text,
@@ -16,7 +17,6 @@ import {
   DatePicker,
 } from "@shared/ui";
 import {
-  getBreeds,
   getGenderOptions,
   getActivityOptions,
   getGenderComfortOptions,
@@ -24,12 +24,12 @@ import {
 } from "@features/profile/lib/constants";
 import { parseDateParts } from "@shared/utils/date.utils";
 
-interface DogData {
+export interface DogFormData {
   photos?: string[];
   gender?: string;
   name?: string;
   weight?: number;
-  breed?: string;
+  breed?: DogSpecies | null;
   birthDate?: string;
   health?: {
     sterilized?: boolean;
@@ -50,30 +50,43 @@ interface DogData {
 }
 
 interface DogEditFormProps {
-  initialData?: DogData;
-  onSave?: (data: DogData) => void;
+  initialData?: DogFormData;
+  onSave?: (data: DogFormData) => void;
+  isSaving?: boolean;
 }
 
-const DEFAULT_BIRTH_DATE = "01.09.2023";
 const DEFAULT_SELECTED_DATE = {
   day: 1,
   month: 9,
   year: 2023,
 };
 
+const formatDatePartsAsLabel = (day: number, month: number, year: number) =>
+  `${String(day).padStart(2, "0")}.${String(month).padStart(2, "0")}.${year}`;
+
 export const DogEditForm: React.FC<DogEditFormProps> = ({
   initialData,
   onSave,
+  isSaving = false,
 }) => {
   const { t } = useTranslation();
+  const { species } = useDogSpecies();
+
+  const formatBirthDateLabel = useCallback((value?: string) => {
+    const parsed = parseDateParts(value || null, {
+      fallback: DEFAULT_SELECTED_DATE,
+    });
+
+    return formatDatePartsAsLabel(parsed.day, parsed.month, parsed.year);
+  }, []);
 
   const [photos, setPhotos] = useState<string[]>(initialData?.photos || []);
-  const [gender, setGender] = useState<string>(initialData?.gender || "female");
-  const [name, setName] = useState<string>(initialData?.name || "Клара");
+  const [gender, setGender] = useState<string>(initialData?.gender || "");
+  const [name, setName] = useState<string>(initialData?.name || "");
   const [weight, setWeight] = useState<number>(initialData?.weight || 20);
-  const [breed, setBreed] = useState<string>(initialData?.breed || t("Mixed"));
+  const [breed, setBreed] = useState<DogSpecies | null>(initialData?.breed || null);
   const [birthDate, setBirthDate] = useState<string>(
-    initialData?.birthDate || DEFAULT_BIRTH_DATE,
+    initialData?.birthDate ? formatBirthDateLabel(initialData.birthDate) : "",
   );
   const [health, setHealth] = useState<{
     sterilized: boolean;
@@ -85,7 +98,7 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
     parasite_treated: initialData?.health?.parasite_treated ?? true,
   });
   const [activity, setActivity] = useState<string>(
-    initialData?.character?.activity || "medium",
+    initialData?.character?.activity || "",
   );
   const [comfortableWith, setComfortableWith] = useState<{
     males: boolean;
@@ -101,8 +114,7 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
     same_size: initialData?.character?.comfortable_with?.same_size ?? false,
   });
   const [comment, setComment] = useState<string>(
-    initialData?.comment ||
-      "Боится резких звуков и не любит навязчивость. Идеальна для активных прогулок в компании",
+    initialData?.comment || "",
   );
 
   const [isBreedDrawerOpen, setIsBreedDrawerOpen] = useState(false);
@@ -110,7 +122,7 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
   const [datePickerSyncToken, setDatePickerSyncToken] = useState(0);
   const [searchBreed, setSearchBreed] = useState("");
   const [selectedDate, setSelectedDate] = useState(
-    parseDateParts(initialData?.birthDate || DEFAULT_BIRTH_DATE, {
+    parseDateParts(initialData?.birthDate || null, {
       fallback: DEFAULT_SELECTED_DATE,
     }),
   );
@@ -122,10 +134,16 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
   }, []);
 
   useEffect(() => {
-    const nextBirthDate = initialData?.birthDate || DEFAULT_BIRTH_DATE;
+    const nextBirthDate = initialData?.birthDate
+      ? formatBirthDateLabel(initialData.birthDate)
+      : "";
     setBirthDate(nextBirthDate);
     setSelectedDate(parseBirthDate(nextBirthDate));
-  }, [initialData?.birthDate, parseBirthDate]);
+  }, [formatBirthDateLabel, initialData?.birthDate, parseBirthDate]);
+
+  useEffect(() => {
+    setBreed(initialData?.breed || null);
+  }, [initialData?.breed]);
 
   const handleImageCapture = async () => {
     const image = await platformUtils.media.pickImage();
@@ -143,11 +161,11 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
   };
 
   const handleDateSave = () => {
-    const dateString = `${selectedDate.day
-      .toString()
-      .padStart(2, "0")}.${selectedDate.month.toString().padStart(2, "0")}.${
+    const dateString = formatDatePartsAsLabel(
+      selectedDate.day,
+      selectedDate.month,
       selectedDate.year
-    }`;
+    );
     setBirthDate(dateString);
     setIsDatePickerOpen(false);
   };
@@ -165,9 +183,8 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
     setDatePickerSyncToken((current) => current + 1);
   }, []);
 
-  const breeds = getBreeds(t);
-  const filteredBreeds = breeds.filter((b) =>
-    b.toLowerCase().includes(searchBreed.toLowerCase()),
+  const filteredBreeds = species.filter((item) =>
+    item.name.toLowerCase().includes(searchBreed.toLowerCase()),
   );
 
   const genderOptions = getGenderOptions(t);
@@ -269,7 +286,7 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
           >
             <div className="self-stretch inline-flex justify-between items-center">
               <Text color="primary" className="flex-1">
-                {breed}
+                {breed?.name || t("Mixed")}
               </Text>
             </div>
           </div>
@@ -388,7 +405,14 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
           </div>
         </div>
 
-        <Button variant="primary" size="L" fullWidth onClick={handleSave}>
+        <Button
+          variant="primary"
+          size="L"
+          fullWidth
+          onClick={handleSave}
+          loading={isSaving}
+          disabled={isSaving}
+        >
           Сохранить
         </Button>
       </div>
@@ -422,9 +446,16 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
           onInput={setSearchBreed}
         />
         <TagRadioGroup
-          options={filteredBreeds.map((b) => ({ value: b, label: b }))}
-          value={breed}
-          onChange={setBreed}
+          options={filteredBreeds.map((item) => ({
+            value: String(item.value),
+            label: item.name,
+          }))}
+          value={breed ? String(breed.value) : ""}
+          onChange={(value) =>
+            setBreed(
+              species.find((item) => String(item.value) === value) ?? null
+            )
+          }
           size="medium"
           className="self-stretch justify-start"
         />

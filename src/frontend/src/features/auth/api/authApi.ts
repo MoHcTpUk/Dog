@@ -1,9 +1,12 @@
-import Cookies from "js-cookie";
 import {
   postUsersCreateRegistrationRequest,
   postConnectToken,
 } from "@shared/api/generated";
 import { PostConnectTokenBodyGrantType } from "@shared/api/generated/types";
+import {
+  clearSession,
+  persistSession,
+} from "@shared/api/auth/session";
 
 export interface SendVerificationCodeResponse {
   email: string;
@@ -32,9 +35,6 @@ export const authApi = {
     code: string,
     registrationId: string
   ): Promise<VerifyCodeResponse> {
-    console.log("🔥 Verifying code:", code);
-    console.log("🔥 Registration ID:", registrationId);
-
     const payload = {
       grant_type: PostConnectTokenBodyGrantType.password,
       verificationCode: code,
@@ -43,25 +43,17 @@ export const authApi = {
       scope: "openid profile email offline_access",
     };
 
-    console.log("🔥 Sending payload:", payload);
-
     const response = await postConnectToken(payload);
 
     const accessToken = response.access_token || "";
     const refreshToken = response.refresh_token;
 
     if (accessToken) {
-      Cookies.set("auth_token", accessToken, {
-        expires: response.expires_in ? response.expires_in / 86400 : 7,
-        sameSite: "strict",
+      persistSession({
+        accessToken,
+        expiresIn: response.expires_in,
+        refreshToken,
       });
-
-      if (refreshToken) {
-        Cookies.set("refresh_token", refreshToken, {
-          expires: 30,
-          sameSite: "strict",
-        });
-      }
     }
 
     return {
@@ -81,9 +73,10 @@ export const authApi = {
     const accessToken = response.access_token || "";
 
     if (accessToken) {
-      Cookies.set("auth_token", accessToken, {
-        expires: response.expires_in ? response.expires_in / 86400 : 7,
-        sameSite: "strict",
+      persistSession({
+        accessToken,
+        expiresIn: response.expires_in,
+        refreshToken: response.refresh_token,
       });
     }
 
@@ -96,7 +89,6 @@ export const authApi = {
   },
 
   logout() {
-    Cookies.remove("auth_token");
-    Cookies.remove("refresh_token");
+    clearSession();
   },
 };

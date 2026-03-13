@@ -12,7 +12,11 @@ import type {
   UseMutationResult,
 } from "@tanstack/react-query";
 
-import type { PostConnectToken200, PostConnectTokenBody } from ".././types";
+import type {
+  PostConnectToken200,
+  PostConnectTokenBody,
+  Rfc7807ProblemDetailsType,
+} from ".././types";
 
 import { customInstance } from "../../client";
 
@@ -55,7 +59,7 @@ export const postConnectToken = (
 };
 
 export const getPostConnectTokenMutationOptions = <
-  TError = void,
+  TError = Rfc7807ProblemDetailsType,
   TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
@@ -95,12 +99,15 @@ export type PostConnectTokenMutationResult = NonNullable<
   Awaited<ReturnType<typeof postConnectToken>>
 >;
 export type PostConnectTokenMutationBody = PostConnectTokenBody;
-export type PostConnectTokenMutationError = void;
+export type PostConnectTokenMutationError = Rfc7807ProblemDetailsType;
 
 /**
  * @summary OAuth2 Token Endpoint
  */
-export const usePostConnectToken = <TError = void, TContext = unknown>(
+export const usePostConnectToken = <
+  TError = Rfc7807ProblemDetailsType,
+  TContext = unknown
+>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postConnectToken>>,

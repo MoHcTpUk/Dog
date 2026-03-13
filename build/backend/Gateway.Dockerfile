@@ -2,7 +2,6 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 
 WORKDIR /app
 
-COPY ./Api ./Api
 COPY ./Gateways ./Gateways
 COPY ./Services/Identity ./Services/Identity
 COPY ./Services/Dog ./Services/Dog
