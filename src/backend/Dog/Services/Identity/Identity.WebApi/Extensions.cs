@@ -47,8 +47,7 @@ public static class Extensions
 
                 options.SetIssuer(new Uri(openIddictIssuer));
                 options.SetTokenEndpointUris("/connect/token")
-                    .SetUserinfoEndpointUris("/connect/userinfo")
-                    .SetIntrospectionEndpointUris("/connect/introspect");
+                    .SetUserinfoEndpointUris("/connect/userinfo");
 
                 options.AllowPasswordFlow()
                     .AllowRefreshTokenFlow();
