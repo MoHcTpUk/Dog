@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { OnboardingLayout } from "@app/layouts/OnboardingLayout";
+import { OnboardingLayout } from "@widgets/layout";
 import startPageDog from "@shared/assets/images/welcome/startPageDog.webp";
 
 interface WelcomeViewProps {

@@ -51,6 +51,7 @@ export const DogProfileStepper: React.FC<DogProfileStepperProps> = ({
     showToast,
     toastMessage,
     toastVariant,
+    isSubmitting,
     handleNext,
     handleBack: handleStepBack,
     updateStepperData,
@@ -168,6 +169,7 @@ export const DogProfileStepper: React.FC<DogProfileStepperProps> = ({
                 size="L"
                 fullWidth
                 onClick={handleStepBack}
+                disabled={isSubmitting}
                 className="text-[#3F335A]"
               >
                 {t("Back")}
@@ -178,6 +180,8 @@ export const DogProfileStepper: React.FC<DogProfileStepperProps> = ({
                 size="L"
                 fullWidth
                 onClick={handleNext}
+                loading={isSubmitting}
+                disabled={isSubmitting}
                 className="bg-[#3F335A] hover:bg-[#342B47]"
               >
                 {currentStep === 9 && stepperData.photos.length === 0

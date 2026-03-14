@@ -2,9 +2,7 @@ import Axios, { AxiosRequestConfig } from "axios";
 import { getAccessToken } from "./auth/session";
 
 const API_BASE_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://api.dogappa.local:8443"
-    : "https://api.dogappa.local:8443";
+  process.env.NODE_ENV === "production" ? "https://api.dogappa.local:8443" : "";
 
 export const AXIOS_INSTANCE = Axios.create({
   baseURL: API_BASE_URL,
@@ -20,6 +18,15 @@ AXIOS_INSTANCE.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+      if (typeof config.headers?.delete === "function") {
+        config.headers.delete("Content-Type");
+      } else if (config.headers) {
+        delete (config.headers as Record<string, unknown>)["Content-Type"];
+      }
+    }
+
     return config;
   },
   (error) => Promise.reject(error)

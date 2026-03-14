@@ -2,7 +2,7 @@ import React from "react";
 import { Icon, Tag } from "@shared/ui";
 import { Text } from "@shared/ui/Text";
 import { Place, PlaceCategory } from "../../model/types";
-import { IconName } from "@shared/ui/Icon/Icon";
+import { IconName } from "@shared/ui";
 
 export interface PlaceCardProps {
   place: Place;

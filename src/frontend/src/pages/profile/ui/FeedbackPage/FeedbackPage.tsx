@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { MainLayout } from "@app/layouts/MainLayout";
 import { platformUtils } from "@shared/hooks";
 import { Icon, Text, Textarea, Button } from "@shared/ui";
+import { MainLayout } from "@widgets/layout";
 
 export const FeedbackPage: React.FC = () => {
   const history = useHistory();

@@ -10,9 +10,9 @@ import {
 } from "@features/home";
 import { Toggle, Icon, Tag, IconName } from "@shared/ui";
 import { Text } from "@shared/ui/Text";
-import { MainLayout } from "@app/layouts/MainLayout";
 import { mockPlaces, placeCategories } from "@shared/mocks/places.mock";
 import { useMapGL } from "@features/map/context";
+import { MainLayout } from "@widgets/layout";
 
 const mockWalks: Walk[] = [
   {

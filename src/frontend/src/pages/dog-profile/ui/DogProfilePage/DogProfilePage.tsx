@@ -7,7 +7,7 @@ import {
   type DogProfile,
   useDogById,
 } from "@entities/dog";
-import { useMyOwner } from "@entities/owner";
+import { useSessionStore } from "@entities/session";
 import { Text } from "@shared/ui";
 import {
   DogProfileModal,
@@ -48,7 +48,7 @@ export const DogProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
   const { dog, isLoading } = useDogById(id);
-  const { owner } = useMyOwner();
+  const ownerName = useSessionStore((state) => state.owner?.name ?? "Хозяин");
 
   if (isLoading) {
     return (
@@ -85,7 +85,7 @@ export const DogProfilePage: React.FC = () => {
 
   return (
     <DogProfileModal
-      dog={mapDogToModalModel(dog, owner?.name ?? "Хозяин")}
+      dog={mapDogToModalModel(dog, ownerName)}
       onClose={handleClose}
       onInviteClick={handleInviteClick}
     />

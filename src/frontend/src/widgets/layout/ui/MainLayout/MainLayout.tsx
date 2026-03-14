@@ -1,5 +1,5 @@
 import React from "react";
-import { IonPage, IonContent } from "@ionic/react";
+import { IonContent, IonPage } from "@ionic/react";
 
 export interface MainLayoutProps {
   children: React.ReactNode;

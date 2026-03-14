@@ -1,9 +1,8 @@
-// src/shared/hooks/useApp.ts
-import { getAccessToken } from "@shared/api/auth/session";
-import { useAppStore } from "@store/app.store";
 import { useCallback } from "react";
-import { useHistory } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router-dom";
+import { useSessionStore } from "@entities/session";
+import { getAccessToken } from "@shared/api/auth/session";
 
 export const useApp = () => {
   const history = useHistory();
@@ -14,17 +13,20 @@ export const useApp = () => {
     isAuthenticated,
     token,
     isLoading,
+    isInitializing,
     isOnboarded,
+    currentDog,
     language,
     theme,
     setOwner,
     setToken,
     setLoading,
     setOnboarded,
+    setCurrentDog,
     logout: logoutStore,
     setLanguage: setLanguageStore,
     setTheme,
-  } = useAppStore();
+  } = useSessionStore();
 
   const login = useCallback(
     (nextToken: string) => {
@@ -37,45 +39,46 @@ export const useApp = () => {
   const logout = useCallback(() => {
     logoutStore();
     history.push("/welcome");
-  }, [logoutStore, history]);
+  }, [history, logoutStore]);
 
   const setLanguage = useCallback(
     (lang: string) => {
       setLanguageStore(lang);
       i18n.changeLanguage(lang);
     },
-    [setLanguageStore, i18n]
+    [i18n, setLanguageStore]
   );
 
   const checkAuth = useCallback(() => {
     const storedToken = getAccessToken();
+
     if (storedToken && !token) {
       setToken(storedToken);
     }
-    return !!storedToken;
-  }, [token, setToken]);
+
+    return Boolean(storedToken);
+  }, [setToken, token]);
 
   return {
-    // State
     owner,
     isAuthenticated,
     token,
     isLoading,
+    isInitializing,
     isOnboarded,
+    currentDog,
     language,
     theme,
-
-    // Actions
     login,
     logout,
     setOwner,
     setLoading,
     setOnboarded,
+    setCurrentDog,
     setLanguage,
     setTheme,
     checkAuth,
   };
 };
 
-// Export types for convenience
 export type UseAppReturn = ReturnType<typeof useApp>;

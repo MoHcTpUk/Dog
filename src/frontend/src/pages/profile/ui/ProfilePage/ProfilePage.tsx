@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { MainLayout } from "@app/layouts/MainLayout";
+import { useMyOwner } from "@entities/owner";
+import { useSessionStore } from "@entities/session";
 import {
   Icon,
   Text,
@@ -10,7 +11,7 @@ import {
   CenterModal,
   Button,
 } from "@shared/ui";
-import { useAppStore } from "@shared/store/app.store";
+import { MainLayout } from "@widgets/layout";
 
 interface MenuItemConfig {
   labelKey: string;
@@ -21,13 +22,16 @@ interface MenuItemConfig {
 export const ProfilePage: React.FC = () => {
   const history = useHistory();
   const { t } = useTranslation();
-  const { currentDog, owner, logout } = useAppStore();
+  const { currentDog, owner: ownerFromStore, logout } = useSessionStore();
+  const { owner: fetchedOwner } = useMyOwner();
   const [notificationCount] = useState(2);
   const [isReferralDrawerOpen, setIsReferralDrawerOpen] = useState(false);
   const [isThankYouModalOpen, setIsThankYouModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] =
     useState(false);
+
+  const owner = ownerFromStore ?? fetchedOwner;
 
   const handleNotificationClick = () => {
     history.push("/notifications");

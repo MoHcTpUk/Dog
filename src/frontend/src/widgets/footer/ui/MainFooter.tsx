@@ -1,14 +1,14 @@
 import React from "react";
 import { useHistory, useLocation } from "react-router-dom";
+import { useSessionStore } from "@entities/session";
 import { Avatar, Icon } from "@shared/ui";
-import { useAppStore } from "@shared/store/app.store";
 
 type TabType = "profile" | "map" | "list" | "dogs";
 
 export const MainFooter: React.FC = () => {
   const history = useHistory();
   const location = useLocation();
-  const { currentDog } = useAppStore();
+  const { currentDog } = useSessionStore();
 
   const getActiveTab = (): TabType => {
     if (location.pathname.includes("/profile")) return "profile";

@@ -55,6 +55,7 @@ export const mapDogDtoToProfile = (dog: DogDtoType): DogProfile => ({
   about: dog.about ?? null,
   ownerId: dog.ownerId ?? null,
   avatar: null,
+  photoIds: dog.photoIds ?? [],
 });
 
 export const mapEnumerationToDogSpecies = (

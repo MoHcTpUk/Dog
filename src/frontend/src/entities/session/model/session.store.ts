@@ -1,4 +1,3 @@
-// src/shared/store/app.store.ts
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
@@ -23,42 +22,32 @@ interface HydrateSessionPayload {
   isOnboarded: boolean;
 }
 
-export interface AppState {
-  // Session data
+export interface SessionState {
   owner: OwnerProfile | null;
   isAuthenticated: boolean;
   token: string | null;
-
-  // Dog data
   currentDog: CurrentDogProfile | null;
-  setCurrentDog: (dog: CurrentDogProfile | null) => void;
-
-  // App state
   isLoading: boolean;
   isInitializing: boolean;
   isOnboarded: boolean;
-
-  // Actions
+  language: string;
+  theme: "light" | "dark" | "auto";
   setOwner: (owner: OwnerProfile | null) => void;
   setToken: (token: string | null) => void;
+  setCurrentDog: (dog: CurrentDogProfile | null) => void;
   setLoading: (loading: boolean) => void;
   setInitializing: (initializing: boolean) => void;
   setOnboarded: (onboarded: boolean) => void;
   hydrateSession: (payload: HydrateSessionPayload) => void;
   logout: () => void;
-
-  // Preferences
-  language: string;
-  theme: "light" | "dark" | "auto";
   setLanguage: (language: string) => void;
   setTheme: (theme: "light" | "dark" | "auto") => void;
 }
 
-export const useAppStore = create<AppState>()(
+export const useSessionStore = create<SessionState>()(
   devtools(
     persist(
       (set) => ({
-        // Initial state
         owner: null,
         isAuthenticated: false,
         token: null,
@@ -69,13 +58,12 @@ export const useAppStore = create<AppState>()(
         language: "en",
         theme: "auto",
 
-        // Actions
         setOwner: (owner) => set({ owner }),
 
         setToken: (token) =>
           set({
             token,
-            isAuthenticated: !!token,
+            isAuthenticated: Boolean(token),
           }),
 
         setCurrentDog: (currentDog) => set({ currentDog }),
@@ -90,7 +78,7 @@ export const useAppStore = create<AppState>()(
           set((state) => ({
             token: token === undefined ? state.token : token,
             isAuthenticated:
-              token === undefined ? state.isAuthenticated : !!token,
+              token === undefined ? state.isAuthenticated : Boolean(token),
             owner,
             currentDog,
             isOnboarded,

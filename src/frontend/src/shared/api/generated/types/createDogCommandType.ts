@@ -17,4 +17,5 @@ export interface CreateDogCommandType {
   activity?: ActivityType;
   /** @nullable */
   about?: string | null;
+  photoIds?: string[];
 }

@@ -1,4 +1,4 @@
-import type { CurrentDogProfile } from "@shared/store/app.store";
+import type { CurrentDogProfile } from "@entities/session";
 import type { DogProfile } from "./dog.types";
 
 export const mapDogProfileToCurrentDog = (

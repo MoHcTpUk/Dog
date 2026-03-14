@@ -23,28 +23,29 @@ export const CodeInput: React.FC<CodeInputProps> = ({
   const [values, setValues] = useState<string[]>(new Array(length).fill(''));
   const inputRefs = useRef<(HTMLIonInputElement | null)[]>([]);
 
+  const focusInput = async (index: number) => {
+    const el = inputRefs.current[index];
+    if (!el) return;
+    const native = await el.getInputElement();
+    native?.focus();
+  };
+
   const handlePastedCode = (pastedDigits: string, startIndex: number = 0) => {
     const newValues = [...values];
     const digits = pastedDigits.slice(0, length);
-    
-    for (let i = 0; i < digits.length && (startIndex + i) < length; i++) {
+
+    for (let i = 0; i < digits.length && startIndex + i < length; i++) {
       newValues[startIndex + i] = digits[i];
     }
-    
+
     setValues(newValues);
-    
     const code = newValues.join('');
     onCodeChange?.(code);
-    
-    // Focus the next empty input or the last input if all are filled
+
     const nextEmptyIndex = newValues.findIndex((val, idx) => idx > startIndex && val === '');
     const targetIndex = nextEmptyIndex === -1 ? Math.min(startIndex + digits.length, length - 1) : nextEmptyIndex;
-    
-    setTimeout(() => {
-      inputRefs.current[targetIndex]?.setFocus();
-    }, 0);
-    
-    // Call onComplete if all digits are filled
+    focusInput(targetIndex);
+
     if (newValues.every(val => val !== '') && onComplete) {
       onComplete(code);
     }
@@ -52,15 +53,15 @@ export const CodeInput: React.FC<CodeInputProps> = ({
 
   const handleInputChange = (value: string | null | undefined, index: number) => {
     const stringValue = value?.toString() || '';
+    // Strip non-digits; if multiple chars (e.g. existing + new), keep last digit typed
     const digits = stringValue.replace(/[^0-9]/g, '');
 
-    // If multiple digits are pasted, distribute them across inputs
     if (digits.length > 1) {
       handlePastedCode(digits, index);
       return;
     }
 
-    const digit = digits.slice(-1);
+    const digit = digits;
     const newValues = [...values];
     newValues[index] = digit;
     setValues(newValues);
@@ -68,12 +69,10 @@ export const CodeInput: React.FC<CodeInputProps> = ({
     const code = newValues.join('');
     onCodeChange?.(code);
 
-    // Auto-focus next input
     if (digit && index < length - 1) {
-      inputRefs.current[index + 1]?.setFocus();
+      focusInput(index + 1);
     }
 
-    // Call onComplete when all digits are filled
     if (newValues.every(val => val !== '') && onComplete) {
       onComplete(code);
     }
@@ -81,15 +80,13 @@ export const CodeInput: React.FC<CodeInputProps> = ({
 
   const handleKeyDown = (e: KeyboardEvent, index: number) => {
     if (e.key === 'Backspace' && !values[index] && index > 0) {
-      inputRefs.current[index - 1]?.setFocus();
+      focusInput(index - 1);
     }
   };
 
   const handlePaste = (e: ClipboardEvent, index: number) => {
     e.preventDefault();
-    const pastedText = e.clipboardData?.getData('text') || '';
-    const digits = pastedText.replace(/[^0-9]/g, '');
-    
+    const digits = (e.clipboardData?.getData('text') || '').replace(/[^0-9]/g, '');
     if (digits.length > 0) {
       handlePastedCode(digits, index);
     }
@@ -97,15 +94,11 @@ export const CodeInput: React.FC<CodeInputProps> = ({
 
   const focusFirstEmptyInput = () => {
     const firstEmptyIndex = values.findIndex(val => val === '');
-    const targetIndex = firstEmptyIndex === -1 ? length - 1 : firstEmptyIndex;
-    inputRefs.current[targetIndex]?.setFocus();
+    focusInput(firstEmptyIndex === -1 ? length - 1 : firstEmptyIndex);
   };
 
   useEffect(() => {
-    // Focus first input on mount
-    setTimeout(() => {
-      inputRefs.current[0]?.setFocus();
-    }, 100);
+    setTimeout(() => focusInput(0), 100);
   }, []);
 
   return (
@@ -124,27 +117,24 @@ export const CodeInput: React.FC<CodeInputProps> = ({
             style={hasError ? { borderColor: 'var(--color-error)' } : {}}
             onClick={() => !disabled && focusFirstEmptyInput()}
           >
-          <IonInput
-            ref={(el) => {
-              inputRefs.current[index] = el;
-            }}
-            value={values[index]}
-            onIonInput={(e) => handleInputChange(e.detail.value, index)}
-            onKeyDown={(e) => handleKeyDown(e.nativeEvent, index)}
-            onPaste={(e) => handlePaste(e.nativeEvent, index)}
-            type="tel"
-            inputmode="numeric"
-            maxlength={1}
-            disabled={disabled}
-            className="text-center text-base font-normal text-gray-700"
-            style={{
-              '--color': hasError ? 'var(--color-error)' : values[index] ? '#374151' : '#64748b',
-              '--placeholder-color': '#94a3b8',
-              textAlign: 'center',
-            }}
-          />
-        </div>
-      ))}
+            <IonInput
+              ref={(el) => { inputRefs.current[index] = el; }}
+              value={values[index]}
+              onIonInput={(e) => handleInputChange(e.detail.value, index)}
+              onKeyDown={(e) => handleKeyDown(e.nativeEvent, index)}
+              onPaste={(e) => handlePaste(e.nativeEvent, index)}
+              type="tel"
+              inputmode="numeric"
+              disabled={disabled}
+              className="text-center text-base font-normal text-gray-700"
+              style={{
+                '--color': hasError ? 'var(--color-error)' : values[index] ? '#374151' : '#64748b',
+                '--placeholder-color': '#94a3b8',
+                textAlign: 'center',
+              }}
+            />
+          </div>
+        ))}
       </div>
       {hasError && errorMessage && (
         <div className="text-sm text-center mt-1" style={{ color: 'var(--color-error)' }}>

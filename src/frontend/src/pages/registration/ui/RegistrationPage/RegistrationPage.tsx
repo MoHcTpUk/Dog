@@ -1,14 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { IonPage, IonContent } from "@ionic/react";
 import { useTranslation } from "react-i18next";
 import { useIonRouter } from "@ionic/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Text } from "@shared/ui/Text/Text";
-import { Button } from "@shared/ui/Button/Button";
-import { Input } from "@shared/ui/Input/Input";
-import { BackIcon } from "@shared/ui/icons/BackIcon";
+import { Button, Input, Text } from "@shared/ui";
+import { BackIcon } from "@shared/ui/icons";
+import { useAuth } from "@features/auth";
 
 const registrationSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email format"),
@@ -19,6 +18,8 @@ type RegistrationFormData = z.infer<typeof registrationSchema>;
 export const RegistrationPage: React.FC = () => {
   const { t } = useTranslation();
   const router = useIonRouter();
+  const { sendVerificationCode, isLoading } = useAuth();
+  const [apiError, setApiError] = useState<string>("");
 
   const {
     handleSubmit,
@@ -35,10 +36,21 @@ export const RegistrationPage: React.FC = () => {
     router.goBack();
   };
 
-  const onSubmit = (data: RegistrationFormData) => {
-    // Navigate to code verification page with email data
-    router.push('/verification', 'forward', 'push');
-    console.log('Registration data:', data);
+  const onSubmit = async (data: RegistrationFormData) => {
+    setApiError("");
+
+    try {
+      const response = await sendVerificationCode(data.email);
+
+      sessionStorage.setItem("verification_email", response.email);
+      sessionStorage.setItem("verification_registrationId", response.id);
+      sessionStorage.setItem("verification_verificationCode", response.verificationCode);
+      sessionStorage.setItem("verification_isRegistration", "true");
+
+      router.push("/verification", "forward", "push");
+    } catch {
+      setApiError(t("Failed to send verification code. Please try again."));
+    }
   };
 
   return (
@@ -68,8 +80,11 @@ export const RegistrationPage: React.FC = () => {
                   placeholder={t("E-mail")}
                   type="email"
                   value={emailValue || ""}
-                  onInput={(value) => setValue("email", value)}
-                  error={errors.email?.message ? t(errors.email.message) : undefined}
+                  onInput={(value) => {
+                    setValue("email", value);
+                    setApiError("");
+                  }}
+                  error={errors.email?.message ? t(errors.email.message) : apiError || undefined}
                 />
               </div>
 
@@ -81,8 +96,9 @@ export const RegistrationPage: React.FC = () => {
                   fullWidth
                   className="bg-gray-700 text-white"
                   onClick={handleSubmit(onSubmit)}
+                  disabled={isLoading}
                 >
-                  {t("Get email code")}
+                  {isLoading ? t("Sending...") : t("Get email code")}
                 </Button>
                 <Button
                   variant="secondary"

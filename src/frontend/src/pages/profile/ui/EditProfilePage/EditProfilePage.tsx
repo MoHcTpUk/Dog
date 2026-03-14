@@ -7,8 +7,8 @@ import {
   useMyDogs,
   useUpdateDog,
 } from "@entities/dog";
+import { useSessionStore } from "@entities/session";
 import { useMyOwner, useUpdateOwner } from "@entities/owner";
-import { MainLayout } from "@app/layouts/MainLayout";
 import {
   DogEditForm,
   type DogFormData,
@@ -17,7 +17,7 @@ import {
 } from "@features/profile";
 import { Icon, Text } from "@shared/ui";
 import { parseDateParts } from "@shared/utils/date.utils";
-import { useAppStore } from "@shared/store/app.store";
+import { MainLayout } from "@widgets/layout";
 import { ProfileTabSwitcher, ProfileTab } from "@widgets/ProfileTabSwitcher";
 
 const DEFAULT_DATE_PARTS = {
@@ -81,14 +81,16 @@ const getEditableDog = (
 
 export const EditProfilePage: React.FC = () => {
   const history = useHistory();
-  const currentDogId = useAppStore((state) => state.currentDog?.id);
+  const currentDogId = useSessionStore((state) => state.currentDog?.id);
   const [activeTab, setActiveTab] = useState<ProfileTab>("dog");
   const [notificationCount] = useState(2);
 
+  const ownerFromStore = useSessionStore((state) => state.owner);
+  const { owner: fetchedOwner } = useMyOwner();
   const { dogs, isLoading: isDogsLoading } = useMyDogs();
-  const { owner, isLoading: isOwnerLoading } = useMyOwner();
   const { updateDog, isPending: isDogSaving } = useUpdateDog();
   const { updateOwner, isPending: isOwnerSaving } = useUpdateOwner();
+  const owner = ownerFromStore ?? fetchedOwner;
 
   const editableDog = getEditableDog(dogs, currentDogId);
 
@@ -239,7 +241,7 @@ export const EditProfilePage: React.FC = () => {
                 : "opacity-0 pointer-events-none absolute top-0 left-0 right-0"
             }`}
           >
-            {isOwnerLoading ? (
+            {!owner ? (
               <Text variant="regular-14" color="muted">
                 Загружаем профиль хозяина...
               </Text>

@@ -15,8 +15,8 @@ export type PostConnectTokenBody = {
   client_id?: string;
   /** Refresh token (required for grant_type=refresh_token) */
   refresh_token?: string;
-  /** Registration verification code */
+  /** Email verification code for auth flow */
   verificationCode?: string;
-  /** Registration id */
+  /** Auth request id */
   id?: string;
 };

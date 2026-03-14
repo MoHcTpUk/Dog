@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { Icon } from '@shared/ui';
-import type { IconName } from '@shared/ui/Icon/Icon';
+import type { IconName } from '@shared/ui';
 import type { PlaceCategory } from '@shared/types/place';
 import './PlacePin.animations.css';
 

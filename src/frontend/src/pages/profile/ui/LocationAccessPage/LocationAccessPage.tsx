@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import { MainLayout } from "@app/layouts/MainLayout";
+import { MainLayout } from "@widgets/layout";
 import { Icon, Text, Button, BottomDrawer } from "@shared/ui";
 
 type PermissionStatus = "prompt" | "granted" | "denied";

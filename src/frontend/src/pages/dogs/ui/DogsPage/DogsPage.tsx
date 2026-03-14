@@ -5,9 +5,9 @@ import {
   type DogProfile,
   useMyDogs,
 } from "@entities/dog";
-import { MainLayout } from "@app/layouts/MainLayout";
+import { useSessionStore } from "@entities/session";
 import { Icon, Text } from "@shared/ui";
-import { useAppStore } from "@shared/store/app.store";
+import { MainLayout } from "@widgets/layout";
 
 const DOG_PLACEHOLDER_IMAGE = "https://placehold.co/384x384?text=Dog";
 
@@ -58,7 +58,7 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
 
 export const DogsPage: React.FC = () => {
   const history = useHistory();
-  const setCurrentDog = useAppStore((state) => state.setCurrentDog);
+  const setCurrentDog = useSessionStore((state) => state.setCurrentDog);
   const { dogs, isLoading } = useMyDogs();
   const [notificationCount] = useState(2);
 

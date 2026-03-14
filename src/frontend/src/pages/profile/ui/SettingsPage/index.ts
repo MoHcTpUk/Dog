@@ -1,2 +1,1 @@
-export { SettingsPage } from './SettingsPage';
-export { SettingsPageLazy } from './SettingsPage.lazy';
+export { SettingsPageLazy as SettingsPage } from './SettingsPage.lazy';

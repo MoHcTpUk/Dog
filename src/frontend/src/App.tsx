@@ -1,11 +1,12 @@
 import React from "react";
 import { IonApp, setupIonicReact } from "@ionic/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useSessionStore } from "@entities/session";
 import { AppRoutes } from "./app/routes/AppRoutes";
-import { useAppStore } from "./shared/store/app.store";
 import { LoaderScreen } from "./shared/ui";
 import { MapGLProvider } from "./features/map/context/MapGLContext";
 import { SessionBootstrap } from "./app/providers/SessionBootstrap";
+import { shouldRetryQuery } from "./shared/api/queryDefaults";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -33,14 +34,14 @@ setupIonicReact({
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
+      retry: shouldRetryQuery,
       refetchOnWindowFocus: false,
     },
   },
 });
 
 const App: React.FC = () => {
-  const isInitializing = useAppStore((state) => state.isInitializing);
+  const isInitializing = useSessionStore((state) => state.isInitializing);
 
   return (
     <QueryClientProvider client={queryClient}>

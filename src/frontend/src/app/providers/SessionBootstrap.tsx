@@ -2,11 +2,8 @@ import { useEffect } from "react";
 import { mapDogProfileToCurrentDog, useMyDogs } from "@entities/dog";
 import type { DogProfile } from "@entities/dog";
 import { useMyOwner } from "@entities/owner";
+import { type CurrentDogProfile, useSessionStore } from "@entities/session";
 import { getAccessToken } from "@shared/api/auth/session";
-import {
-  type CurrentDogProfile,
-  useAppStore,
-} from "@shared/store/app.store";
 
 const pickCurrentDog = (
   currentDog: CurrentDogProfile | null,
@@ -33,19 +30,23 @@ const isSameCurrentDog = (
   left?.avatar === right?.avatar;
 
 export const SessionBootstrap = () => {
-  const token = useAppStore((state) => state.token);
-  const currentDog = useAppStore((state) => state.currentDog);
-  const setToken = useAppStore((state) => state.setToken);
-  const setInitializing = useAppStore((state) => state.setInitializing);
-  const hydrateSession = useAppStore((state) => state.hydrateSession);
+  const token = useSessionStore((state) => state.token);
+  const ownerFromStore = useSessionStore((state) => state.owner);
+  const currentDog = useSessionStore((state) => state.currentDog);
+  const setToken = useSessionStore((state) => state.setToken);
+  const setInitializing = useSessionStore((state) => state.setInitializing);
+  const hydrateSession = useSessionStore((state) => state.hydrateSession);
 
   const sessionToken = getAccessToken();
   const hasSession = Boolean(sessionToken);
-
-  const { owner, isLoading: isOwnerLoading, isError: isOwnerError, isFetched: isOwnerFetched } =
-    useMyOwner();
   const { dogs, isLoading: isDogsLoading, isError: isDogsError, isFetched: isDogsFetched } =
     useMyDogs();
+  const {
+    owner: fetchedOwner,
+    isLoading: isOwnerLoading,
+    isError: isOwnerError,
+    isFetched: isOwnerFetched,
+  } = useMyOwner();
 
   useEffect(() => {
     if (!hasSession) {
@@ -76,13 +77,20 @@ export const SessionBootstrap = () => {
       return;
     }
 
-    if (isOwnerLoading || isDogsLoading || !isOwnerFetched || !isDogsFetched) {
+    if (
+      isDogsLoading ||
+      !isDogsFetched ||
+      isOwnerLoading ||
+      !isOwnerFetched
+    ) {
       return;
     }
 
-    if (isOwnerError || isDogsError) {
+    const resolvedOwner = fetchedOwner ?? ownerFromStore;
+
+    if (isDogsError || isOwnerError) {
       hydrateSession({
-        owner: null,
+        owner: resolvedOwner,
         currentDog: null,
         isOnboarded: false,
       });
@@ -91,18 +99,22 @@ export const SessionBootstrap = () => {
     }
 
     const nextCurrentDog = pickCurrentDog(currentDog, dogs);
+    const hasBoundDog = resolvedOwner?.id
+      ? dogs.some((dog) => dog.ownerId === resolvedOwner.id)
+      : false;
 
     hydrateSession({
-      owner,
+      owner: resolvedOwner,
       currentDog: isSameCurrentDog(currentDog, nextCurrentDog)
         ? currentDog
         : nextCurrentDog,
-      isOnboarded: Boolean(owner && dogs.length > 0),
+      isOnboarded: Boolean(resolvedOwner?.id) && hasBoundDog,
     });
     setInitializing(false);
   }, [
     currentDog,
     dogs,
+    fetchedOwner,
     hasSession,
     hydrateSession,
     isDogsError,
@@ -111,7 +123,7 @@ export const SessionBootstrap = () => {
     isOwnerError,
     isOwnerFetched,
     isOwnerLoading,
-    owner,
+    ownerFromStore,
     setInitializing,
   ]);
 

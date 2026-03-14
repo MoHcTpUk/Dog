@@ -13,43 +13,43 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  CreateRegistrationRequestCommandType,
-  RegistrationRequestDtoType,
+  AuthRequestDtoType,
+  CreateAuthRequestCommandType,
   Rfc7807ProblemDetailsType,
 } from ".././types";
 
 import { customInstance } from "../../client";
 
-export const postUsersCreateRegistrationRequest = (
-  createRegistrationRequestCommandType: CreateRegistrationRequestCommandType,
+export const postUsersCreateAuthRequest = (
+  createAuthRequestCommandType: CreateAuthRequestCommandType,
   signal?: AbortSignal
 ) => {
-  return customInstance<RegistrationRequestDtoType>({
-    url: `/Users/CreateRegistrationRequest`,
+  return customInstance<AuthRequestDtoType>({
+    url: `/Users/CreateAuthRequest`,
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    data: createRegistrationRequestCommandType,
+    data: createAuthRequestCommandType,
     signal,
   });
 };
 
-export const getPostUsersCreateRegistrationRequestMutationOptions = <
+export const getPostUsersCreateAuthRequestMutationOptions = <
   TError = Rfc7807ProblemDetailsType,
   TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postUsersCreateRegistrationRequest>>,
+    Awaited<ReturnType<typeof postUsersCreateAuthRequest>>,
     TError,
-    { data: CreateRegistrationRequestCommandType },
+    { data: CreateAuthRequestCommandType },
     TContext
   >;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postUsersCreateRegistrationRequest>>,
+  Awaited<ReturnType<typeof postUsersCreateAuthRequest>>,
   TError,
-  { data: CreateRegistrationRequestCommandType },
+  { data: CreateAuthRequestCommandType },
   TContext
 > => {
-  const mutationKey = ["postUsersCreateRegistrationRequest"];
+  const mutationKey = ["postUsersCreateAuthRequest"];
   const { mutation: mutationOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -59,46 +59,44 @@ export const getPostUsersCreateRegistrationRequestMutationOptions = <
     : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postUsersCreateRegistrationRequest>>,
-    { data: CreateRegistrationRequestCommandType }
+    Awaited<ReturnType<typeof postUsersCreateAuthRequest>>,
+    { data: CreateAuthRequestCommandType }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postUsersCreateRegistrationRequest(data);
+    return postUsersCreateAuthRequest(data);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostUsersCreateRegistrationRequestMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postUsersCreateRegistrationRequest>>
+export type PostUsersCreateAuthRequestMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postUsersCreateAuthRequest>>
 >;
-export type PostUsersCreateRegistrationRequestMutationBody =
-  CreateRegistrationRequestCommandType;
-export type PostUsersCreateRegistrationRequestMutationError =
-  Rfc7807ProblemDetailsType;
+export type PostUsersCreateAuthRequestMutationBody =
+  CreateAuthRequestCommandType;
+export type PostUsersCreateAuthRequestMutationError = Rfc7807ProblemDetailsType;
 
-export const usePostUsersCreateRegistrationRequest = <
+export const usePostUsersCreateAuthRequest = <
   TError = Rfc7807ProblemDetailsType,
   TContext = unknown
 >(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postUsersCreateRegistrationRequest>>,
+      Awaited<ReturnType<typeof postUsersCreateAuthRequest>>,
       TError,
-      { data: CreateRegistrationRequestCommandType },
+      { data: CreateAuthRequestCommandType },
       TContext
     >;
   },
   queryClient?: QueryClient
 ): UseMutationResult<
-  Awaited<ReturnType<typeof postUsersCreateRegistrationRequest>>,
+  Awaited<ReturnType<typeof postUsersCreateAuthRequest>>,
   TError,
-  { data: CreateRegistrationRequestCommandType },
+  { data: CreateAuthRequestCommandType },
   TContext
 > => {
-  const mutationOptions =
-    getPostUsersCreateRegistrationRequestMutationOptions(options);
+  const mutationOptions = getPostUsersCreateAuthRequestMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };

@@ -11,7 +11,7 @@ import {
 } from "@ionic/react";
 import { useHistory, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useApp } from "@shared/hooks";
+import { useApp } from "@app/hooks";
 import cn from "classnames";
 
 interface AppHeaderProps {

@@ -17,5 +17,6 @@ export interface UpdateDogCommandType {
   activity?: ActivityType;
   /** @nullable */
   about?: string | null;
+  photoIds?: string[];
   id?: string;
 }

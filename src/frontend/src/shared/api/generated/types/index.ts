@@ -5,24 +5,24 @@
  * OpenAPI spec version: v1
  */
 
-export * from "./createRegistrationRequestCommandType";
-export * from "./getGetFileParams";
-export * from "./postConnectToken200";
-export * from "./postConnectTokenBody";
-export * from "./postConnectTokenBodyGrantType";
-export * from "./registrationRequestDtoType";
 export * from "./activityType";
 export * from "./bindDogToOwnerCommandType";
 export * from "./createDogCommandType";
 export * from "./createOwnerCommandType";
+export * from "./createRegistrationRequestCommandType";
 export * from "./deleteDogCommandType";
 export * from "./deleteOwnerCommandType";
 export * from "./dogDtoType";
 export * from "./enumerationDtoType";
 export * from "./genderType";
 export * from "./getDogsGetParams";
+export * from "./getGetFileParams";
 export * from "./getOwnersGetParams";
 export * from "./ownerDtoType";
+export * from "./postConnectToken200";
+export * from "./postConnectTokenBody";
+export * from "./postConnectTokenBodyGrantType";
+export * from "./registrationRequestDtoType";
 export * from "./resultContainerOfDogDtoType";
 export * from "./resultContainerOfEnumerationDtoType";
 export * from "./resultContainerOfOwnerDtoType";
@@ -33,3 +33,8 @@ export * from "./speciesType";
 export * from "./unbindDogFromOwnerCommandType";
 export * from "./updateDogCommandType";
 export * from "./updateOwnerCommandType";
+export * from "./authRequestDtoType";
+export * from "./createAuthRequestCommandType";
+export * from "./fileUploadResultType";
+export * from "./postDogsDogIdAddPhotoBody";
+export * from "./postDogsDogIdAddPhotoBodyHeaders";

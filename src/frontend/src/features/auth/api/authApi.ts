@@ -1,5 +1,5 @@
 import {
-  postUsersCreateRegistrationRequest,
+  postUsersCreateAuthRequest,
   postConnectToken,
 } from "@shared/api/generated";
 import { PostConnectTokenBodyGrantType } from "@shared/api/generated/types";
@@ -11,7 +11,7 @@ import {
 export interface SendVerificationCodeResponse {
   email: string;
   id: string;
-  activationCode: string;
+  verificationCode: string;
 }
 
 export interface VerifyCodeResponse {
@@ -23,11 +23,11 @@ export interface VerifyCodeResponse {
 
 export const authApi = {
   async sendVerificationCode(email: string): Promise<SendVerificationCodeResponse> {
-    const response = await postUsersCreateRegistrationRequest({ email });
+    const response = await postUsersCreateAuthRequest({ email });
     return {
       email: response.email,
       id: response.id,
-      activationCode: response.activationCode,
+      verificationCode: response.verificationCode,
     };
   },
 

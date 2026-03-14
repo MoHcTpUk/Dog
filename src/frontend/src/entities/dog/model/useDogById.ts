@@ -1,4 +1,5 @@
 import { hasActiveSession } from "@shared/api/auth/session";
+import { SESSION_QUERY_STALE_TIME } from "@shared/api/queryDefaults";
 import { useGetDogsGet } from "@shared/api/generated";
 import { mapDogDtoToProfile } from "./dog.mappers";
 import type { DogProfile } from "./dog.types";
@@ -9,6 +10,7 @@ export const useDogById = (dogId?: string) => {
     {
       query: {
         enabled: hasActiveSession() && Boolean(dogId),
+        staleTime: SESSION_QUERY_STALE_TIME,
         select: (response) => {
           const [dog] = response.items ?? [];
           return dog ? mapDogDtoToProfile(dog) : null;

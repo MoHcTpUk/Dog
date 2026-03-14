@@ -1,6 +1,5 @@
 import React, { useRef, useMemo, useCallback, useEffect } from "react";
 import { useLocation, useHistory } from "react-router-dom";
-import { MainLayout } from "@app/layouts/MainLayout";
 import { useMapGL } from "@features/map/context";
 import {
   centerMapOnInitialUserLocation,
@@ -17,6 +16,7 @@ import {
   hasSearchParam,
   removeSearchParam,
 } from "../../lib/mapPage.utils";
+import { MainLayout } from "@widgets/layout";
 
 let hasAutocenteredToUserLocation = false;
 

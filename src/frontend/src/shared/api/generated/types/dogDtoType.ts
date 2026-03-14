@@ -18,6 +18,7 @@ export interface DogDtoType {
   activity?: ActivityType;
   /** @nullable */
   about?: string | null;
+  photoIds?: string[];
   /** @nullable */
   ownerId?: string | null;
 }

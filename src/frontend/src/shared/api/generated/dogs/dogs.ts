@@ -35,7 +35,9 @@ import type {
   BindDogToOwnerCommandType,
   CreateDogCommandType,
   DeleteDogCommandType,
+  FileUploadResultType,
   GetDogsGetParams,
+  PostDogsDogIdAddPhotoBody,
   ResultContainerOfDogDtoType,
   ResultContainerOfEnumerationDtoType,
   Rfc7807ProblemDetailsType,
@@ -124,6 +126,115 @@ export const usePostDogsCreate = <
 
   return useMutation(mutationOptions, queryClient);
 };
+export const postDogsDogIdAddPhoto = (
+  dogId: string,
+  postDogsDogIdAddPhotoBody: PostDogsDogIdAddPhotoBody,
+  signal?: AbortSignal
+) => {
+  const formUrlEncoded = new URLSearchParams();
+  if (postDogsDogIdAddPhotoBody.ContentType !== undefined) {
+    formUrlEncoded.append(`ContentType`, postDogsDogIdAddPhotoBody.ContentType);
+  }
+  if (postDogsDogIdAddPhotoBody.ContentDisposition !== undefined) {
+    formUrlEncoded.append(
+      `ContentDisposition`,
+      postDogsDogIdAddPhotoBody.ContentDisposition
+    );
+  }
+  if (postDogsDogIdAddPhotoBody.Headers !== undefined) {
+    formUrlEncoded.append(
+      `Headers`,
+      JSON.stringify(postDogsDogIdAddPhotoBody.Headers)
+    );
+  }
+  if (postDogsDogIdAddPhotoBody.Length !== undefined) {
+    formUrlEncoded.append(
+      `Length`,
+      postDogsDogIdAddPhotoBody.Length.toString()
+    );
+  }
+  if (postDogsDogIdAddPhotoBody.Name !== undefined) {
+    formUrlEncoded.append(`Name`, postDogsDogIdAddPhotoBody.Name);
+  }
+  if (postDogsDogIdAddPhotoBody.FileName !== undefined) {
+    formUrlEncoded.append(`FileName`, postDogsDogIdAddPhotoBody.FileName);
+  }
+
+  return customInstance<FileUploadResultType>({
+    url: `/Dogs/${dogId}/AddPhoto`,
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    data: formUrlEncoded,
+    signal,
+  });
+};
+
+export const getPostDogsDogIdAddPhotoMutationOptions = <
+  TError = Rfc7807ProblemDetailsType,
+  TContext = unknown
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postDogsDogIdAddPhoto>>,
+    TError,
+    { dogId: string; data: PostDogsDogIdAddPhotoBody },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postDogsDogIdAddPhoto>>,
+  TError,
+  { dogId: string; data: PostDogsDogIdAddPhotoBody },
+  TContext
+> => {
+  const mutationKey = ["postDogsDogIdAddPhoto"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postDogsDogIdAddPhoto>>,
+    { dogId: string; data: PostDogsDogIdAddPhotoBody }
+  > = (props) => {
+    const { dogId, data } = props ?? {};
+
+    return postDogsDogIdAddPhoto(dogId, data);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostDogsDogIdAddPhotoMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postDogsDogIdAddPhoto>>
+>;
+export type PostDogsDogIdAddPhotoMutationBody = PostDogsDogIdAddPhotoBody;
+export type PostDogsDogIdAddPhotoMutationError = Rfc7807ProblemDetailsType;
+
+export const usePostDogsDogIdAddPhoto = <
+  TError = Rfc7807ProblemDetailsType,
+  TContext = unknown
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postDogsDogIdAddPhoto>>,
+      TError,
+      { dogId: string; data: PostDogsDogIdAddPhotoBody },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof postDogsDogIdAddPhoto>>,
+  TError,
+  { dogId: string; data: PostDogsDogIdAddPhotoBody },
+  TContext
+> => {
+  const mutationOptions = getPostDogsDogIdAddPhotoMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
 export const putDogsUpdate = (updateDogCommandType: UpdateDogCommandType) => {
   return customInstance<ResultContainerOfDogDtoType>({
     url: `/Dogs/Update`,
@@ -196,6 +307,84 @@ export const usePutDogsUpdate = <
   TContext
 > => {
   const mutationOptions = getPutDogsUpdateMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+export const deleteDogsDogIdRemovePhotoPhotoId = (
+  dogId: string,
+  photoId: string
+) => {
+  return customInstance<ResultContainerOfDogDtoType>({
+    url: `/Dogs/${dogId}/RemovePhoto/${photoId}`,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteDogsDogIdRemovePhotoPhotoIdMutationOptions = <
+  TError = Rfc7807ProblemDetailsType,
+  TContext = unknown
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteDogsDogIdRemovePhotoPhotoId>>,
+    TError,
+    { dogId: string; photoId: string },
+    TContext
+  >;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteDogsDogIdRemovePhotoPhotoId>>,
+  TError,
+  { dogId: string; photoId: string },
+  TContext
+> => {
+  const mutationKey = ["deleteDogsDogIdRemovePhotoPhotoId"];
+  const { mutation: mutationOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey } };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteDogsDogIdRemovePhotoPhotoId>>,
+    { dogId: string; photoId: string }
+  > = (props) => {
+    const { dogId, photoId } = props ?? {};
+
+    return deleteDogsDogIdRemovePhotoPhotoId(dogId, photoId);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteDogsDogIdRemovePhotoPhotoIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteDogsDogIdRemovePhotoPhotoId>>
+>;
+
+export type DeleteDogsDogIdRemovePhotoPhotoIdMutationError =
+  Rfc7807ProblemDetailsType;
+
+export const useDeleteDogsDogIdRemovePhotoPhotoId = <
+  TError = Rfc7807ProblemDetailsType,
+  TContext = unknown
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteDogsDogIdRemovePhotoPhotoId>>,
+      TError,
+      { dogId: string; photoId: string },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteDogsDogIdRemovePhotoPhotoId>>,
+  TError,
+  { dogId: string; photoId: string },
+  TContext
+> => {
+  const mutationOptions =
+    getDeleteDogsDogIdRemovePhotoPhotoIdMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { MainLayout } from "@app/layouts/MainLayout";
+import { MainLayout } from "@widgets/layout";
 import { Icon, Text, Switch } from "@shared/ui";
 
 interface NotificationSetting {

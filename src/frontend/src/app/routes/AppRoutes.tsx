@@ -1,9 +1,10 @@
-import { FC } from "react";
+import { type ComponentType, FC } from "react";
 import { IonRouterOutlet } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { Route, Redirect, useLocation, Switch } from "react-router-dom";
 import { Location } from "history";
 import { useMapGL } from "@features/map/context";
+import { useSessionStore } from "@entities/session";
 
 import { WelcomePage } from "@pages/welcome";
 import { LoginPage } from "@pages/login";
@@ -30,6 +31,61 @@ interface LocationState {
   background?: Location;
 }
 
+const AuthRoute: FC<{ exact?: boolean; path: string; component: FC }> = ({ component: Component, ...rest }) => {
+  const isAuthenticated = useSessionStore((s) => s.isAuthenticated);
+  const isOnboarded = useSessionStore((s) => s.isOnboarded);
+  return (
+    <Route
+      {...rest}
+      render={() => {
+        if (isAuthenticated && isOnboarded) return <Redirect to="/home" />;
+        if (isAuthenticated && !isOnboarded) return <Redirect to="/onboarding" />;
+        return <Component />;
+      }}
+    />
+  );
+};
+
+const OnboardingRoute: FC<{ exact?: boolean; path: string; component: FC }> = ({ component: Component, ...rest }) => {
+  const isAuthenticated = useSessionStore((s) => s.isAuthenticated);
+  return (
+    <Route
+      {...rest}
+      render={() => {
+        if (!isAuthenticated) return <Redirect to="/welcome" />;
+        return <Component />;
+      }}
+    />
+  );
+};
+
+const ProtectedRoute: FC<{
+  exact?: boolean;
+  path: string;
+  component: ComponentType;
+}> = ({ component: Component, ...rest }) => {
+  const isAuthenticated = useSessionStore((s) => s.isAuthenticated);
+  const isOnboarded = useSessionStore((s) => s.isOnboarded);
+  return (
+    <Route
+      {...rest}
+      render={() => {
+        if (!isAuthenticated) return <Redirect to="/welcome" />;
+        if (!isOnboarded) return <Redirect to="/onboarding" />;
+        return <Component />;
+      }}
+    />
+  );
+};
+
+const RootRedirect: FC = () => {
+  const isAuthenticated = useSessionStore((s) => s.isAuthenticated);
+  const isOnboarded = useSessionStore((s) => s.isOnboarded);
+  if (isAuthenticated && isOnboarded) return <Redirect to="/home" />;
+  if (isAuthenticated) return <Redirect to="/onboarding" />;
+  return <Redirect to="/welcome" />;
+};
+
 const AppContent: FC = () => {
   const location = useLocation<LocationState>();
   const background = location.state?.background;
@@ -53,29 +109,27 @@ const AppContent: FC = () => {
       <PlaceCreationOverlay />
       <IonRouterOutlet animated={true}>
         <Switch location={background || location}>
-          <Route exact path="/welcome" component={WelcomePage} />
-          <Route exact path="/login" component={LoginPage} />
-          <Route exact path="/registration" component={RegistrationPage} />
-          <Route exact path="/onboarding" component={OnboardingPage} />
-          <Route exact path="/verification" component={CodeVerificationPage} />
-          <Route exact path="/home" component={HomePage} />
-          <Route exact path="/map" component={MapPage} />
-          <Route exact path="/walk/:id/edit" render={() => <WalkFormPage mode="edit" />} />
-          <Route exact path="/place/create/select" component={PlaceSelectPage} />
-          <Route exact path="/place/:id/report" component={PlaceReportPage} />
-          <Route exact path="/dog" component={DogsPage} />
-          <Route exact path="/dog/:id" component={DogProfilePage} />
-          <Route exact path="/profile" component={ProfilePage} />
-          <Route exact path="/profile/edit" component={EditProfilePage} />
-          <Route exact path="/profile/promocodes" component={PromocodesPage} />
-          <Route exact path="/profile/settings" component={SettingsPage} />
-          <Route exact path="/profile/feedback" component={FeedbackPage} />
-          <Route exact path="/profile/terms" component={TermsPage} />
-          <Route exact path="/profile/location" component={LocationAccessPage} />
-          <Route exact path="/notifications" component={NotificationsPage} />
-          <Route exact path="/">
-            <Redirect to="/home" />
-          </Route>
+          <AuthRoute exact path="/welcome" component={WelcomePage} />
+          <AuthRoute exact path="/login" component={LoginPage} />
+          <AuthRoute exact path="/registration" component={RegistrationPage} />
+          <AuthRoute exact path="/verification" component={CodeVerificationPage} />
+          <OnboardingRoute exact path="/onboarding" component={OnboardingPage} />
+          <ProtectedRoute exact path="/home" component={HomePage} />
+          <ProtectedRoute exact path="/map" component={MapPage} />
+          <ProtectedRoute exact path="/walk/:id/edit" component={() => <WalkFormPage mode="edit" />} />
+          <ProtectedRoute exact path="/place/create/select" component={PlaceSelectPage} />
+          <ProtectedRoute exact path="/place/:id/report" component={PlaceReportPage} />
+          <ProtectedRoute exact path="/dog" component={DogsPage} />
+          <ProtectedRoute exact path="/dog/:id" component={DogProfilePage} />
+          <ProtectedRoute exact path="/profile" component={ProfilePage} />
+          <ProtectedRoute exact path="/profile/edit" component={EditProfilePage} />
+          <ProtectedRoute exact path="/profile/promocodes" component={PromocodesPage} />
+          <ProtectedRoute exact path="/profile/settings" component={SettingsPage} />
+          <ProtectedRoute exact path="/profile/feedback" component={FeedbackPage} />
+          <ProtectedRoute exact path="/profile/terms" component={TermsPage} />
+          <ProtectedRoute exact path="/profile/location" component={LocationAccessPage} />
+          <ProtectedRoute exact path="/notifications" component={NotificationsPage} />
+          <Route exact path="/" component={RootRedirect} />
         </Switch>
       </IonRouterOutlet>
 

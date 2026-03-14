@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useAppStore } from "@shared/store/app.store";
+import { useSessionStore } from "@entities/session";
 import { getGetOwnersGetQueryKey, getGetDogsGetQueryKey } from "@shared/api/generated";
 import { authApi } from "../api/authApi";
 
 export const useAuth = () => {
-  const { setToken, logout: logoutStore } = useAppStore();
+  const { setToken, logout: logoutStore } = useSessionStore();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

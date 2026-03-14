@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { MainLayout } from '@app/layouts/MainLayout';
+import { MainLayout } from '@widgets/layout';
 import { Icon, Text, NotificationCard } from '@shared/ui';
 import { Notification } from '@shared/types/notification';
 

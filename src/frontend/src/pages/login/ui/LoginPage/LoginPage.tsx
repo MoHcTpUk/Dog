@@ -5,10 +5,8 @@ import { useIonRouter } from "@ionic/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Text } from "@shared/ui/Text/Text";
-import { Button } from "@shared/ui/Button/Button";
-import { Input } from "@shared/ui/Input/Input";
-import { BackIcon } from "@shared/ui/icons/BackIcon";
+import { Button, Input, Text } from "@shared/ui";
+import { BackIcon } from "@shared/ui/icons";
 import { useAuth } from "@features/auth";
 
 const loginSchema = z.object({
@@ -44,14 +42,12 @@ export const LoginPage: React.FC = () => {
     try {
       const response = await sendVerificationCode(data.email);
 
-      console.log("🔥 Response from API:", response);
-      console.log("🔥 Activation code:", response.activationCode);
 
       // TEMPORARY: Using sessionStorage because Ionic router doesn't pass state properly
       // TODO: Remove when backend sends code via email/phone instead of response
       sessionStorage.setItem("verification_email", response.email);
       sessionStorage.setItem("verification_registrationId", response.id);
-      sessionStorage.setItem("verification_activationCode", response.activationCode);
+      sessionStorage.setItem("verification_verificationCode", response.verificationCode);
       sessionStorage.setItem("verification_isRegistration", "false");
 
       router.push("/verification", "forward", "push");

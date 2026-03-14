@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import classNames from "classnames";
 import { IonTextarea } from "@ionic/react";
-import { Text } from "@shared/ui/Text/Text";
+import { Text } from "../Text";
 
 export interface TextareaProps {
   label?: string;

@@ -9,3 +9,5 @@ export { useUpdateDog } from './model/useUpdateDog';
 export { Activity, Gender } from './model/dog.enums';
 export type { DogProfile, DogSpecies } from './model/dog.types';
 export { getAgeFromBirthdate, mapDogProfileToCurrentDog } from './model/dog.helpers';
+export { useUploadDogPhoto } from './model/useUploadDogPhoto';
+export { useRemoveDogPhoto } from './model/useRemoveDogPhoto';

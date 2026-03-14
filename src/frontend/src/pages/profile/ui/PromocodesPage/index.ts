@@ -1,2 +1,1 @@
-export { PromocodesPage } from './PromocodesPage';
-export { PromocodesPageLazy } from './PromocodesPage.lazy';
+export { PromocodesPageLazy as PromocodesPage } from './PromocodesPage.lazy';
