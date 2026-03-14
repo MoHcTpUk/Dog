@@ -5,7 +5,10 @@ using Environments = Shared.Environments;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<OpenApiDocumentTransformer>();
+});
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddControllers(options => { options.Filters.Add<RemoteProblemDetailsExceptionFilter>(); });
