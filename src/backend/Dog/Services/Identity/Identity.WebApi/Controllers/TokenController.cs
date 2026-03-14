@@ -78,6 +78,7 @@ public class TokenController(
 
         var principal = identityService.CreateClaimsPrincipal(user, request.GetScopes());
         principal.SetScopes(request.GetScopes());
+        principal.SetResources("dog-app", "gateway-webapi");
 
         foreach (var claim in principal.Claims) claim.SetDestinations(GetDestinations(claim, principal));
 
@@ -128,6 +129,7 @@ public class TokenController(
         var scopes = principal.GetScopes();
         principal = identityService.CreateClaimsPrincipal(user, scopes);
         principal.SetScopes(scopes);
+        principal.SetResources("dog-app", "gateway-webapi");
 
         foreach (var claim in principal.Claims) claim.SetDestinations(GetDestinations(claim, principal));
 

@@ -2,6 +2,7 @@ using Dog.Api.Services;
 using Dog.Contracts.Commands.Dog;
 using Dog.Contracts.Dtos;
 using Dog.Contracts.Queries;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Api;
 using Shared.Api.Services;
@@ -11,6 +12,7 @@ using Shared.Enumeration;
 namespace Gateway.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("[controller]")]
 public class DogsController(IDogService service, IFileStorageService fileStorageService)
     : AbstractController<IDogService, ResultContainer<DogDto>, CreateDogCommand, UpdateDogCommand, DeleteDogCommand,

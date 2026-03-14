@@ -79,13 +79,13 @@ services:
       labels:
         - "traefik.enable=true"
         # HTTP роутер (редирект на HTTPS)
-        - "traefik.http.routers.identity-webapi.rule=Host(`identity.dogappa.local`)"
+        - "traefik.http.routers.identity-webapi.rule=Host(`auth.dogappa.local`)"
         - "traefik.http.routers.identity-webapi.entrypoints=web"
         - "traefik.http.routers.identity-webapi.middlewares=identity-webapi-redirect"
         - "traefik.http.middlewares.identity-webapi-redirect.redirectscheme.scheme=https"
         - "traefik.http.middlewares.identity-webapi-redirect.redirectscheme.permanent=true"
         # HTTPS роутер
-        - "traefik.http.routers.identity-webapi-secure.rule=Host(`identity.dogappa.local`)"
+        - "traefik.http.routers.identity-webapi-secure.rule=Host(`auth.dogappa.local`)"
         - "traefik.http.routers.identity-webapi-secure.entrypoints=websecure"
         - "traefik.http.routers.identity-webapi-secure.tls=true"
         - "traefik.http.services.identity-webapi.loadbalancer.server.port=8080"

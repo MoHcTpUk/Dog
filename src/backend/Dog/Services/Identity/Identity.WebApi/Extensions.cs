@@ -1,6 +1,9 @@
 using Identity.Application;
 using Identity.Infrastructure;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Abstractions;
 using OpenIddict.Validation.AspNetCore;
 using Shared.Api;
@@ -40,11 +43,17 @@ public static class Extensions
             })
             .AddServer(options =>
             {
+                var openIddictIssuer = configuration["OpenIddict:Issuer"] ?? "http://identity-webapi:8080/";
+
+                options.SetIssuer(new Uri(openIddictIssuer));
                 options.SetTokenEndpointUris("/connect/token")
-                    .SetUserinfoEndpointUris("/connect/userinfo");
+                    .SetUserinfoEndpointUris("/connect/userinfo")
+                    .SetIntrospectionEndpointUris("/connect/introspect");
 
                 options.AllowPasswordFlow()
                     .AllowRefreshTokenFlow();
+
+                options.DisableAccessTokenEncryption();
 
                 options.RegisterScopes(
                     OpenIddictConstants.Scopes.OpenId,
@@ -52,8 +61,19 @@ public static class Extensions
                     OpenIddictConstants.Scopes.Profile,
                     OpenIddictConstants.Scopes.Roles);
 
-                options.AddDevelopmentEncryptionCertificate()
-                    .AddDevelopmentSigningCertificate();
+                options.AddDevelopmentSigningCertificate();
+
+                var signingSecret = configuration["OpenIddict:SigningKey"];
+                if (!string.IsNullOrWhiteSpace(signingSecret))
+                {
+                    var keyBytes = Encoding.UTF8.GetBytes(signingSecret);
+
+                    options.AddEncryptionKey(new SymmetricSecurityKey(SHA256.HashData(keyBytes)));
+                }
+                else
+                {
+                    options.AddDevelopmentEncryptionCertificate();
+                }
 
                 options.UseReferenceRefreshTokens();
 

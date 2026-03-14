@@ -4,6 +4,7 @@ using Users.Api;
 using Environments = Shared.Environments;
 using Shared.Api.Filters;
 using Microsoft.AspNetCore.Mvc;
+using OpenIddict.Validation.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,34 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+
+builder.Services.ConfigureHttpClientDefaults(httpBuilder =>
+{
+    // OpenIddict.Validation.SystemNetHttp expects HttpClientHandler as primary handler.
+    httpBuilder.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler());
+});
+
+var openIddictIssuer = builder.Configuration["OpenIddict:Issuer"] ??
+                       (builder.Environment.IsDevelopment() || builder.Environment.EnvironmentName == Environments.Local
+                           ? "http://localhost:5126/"
+                           : "http://identity-webapi:8080/");
+var openIddictAudience = builder.Configuration["OpenIddict:Audience"] ?? "dog-app";
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+});
+
+builder.Services.AddOpenIddict()
+    .AddValidation(options =>
+    {
+        options.SetIssuer(new Uri(openIddictIssuer));
+        options.AddAudiences(openIddictAudience);
+        options.UseSystemNetHttp();
+        options.UseAspNetCore();
+    });
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddUsersApi(builder.Configuration);
 builder.Services.AddDogApi(builder.Configuration);
@@ -73,6 +102,14 @@ if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == Enviro
 }
 
 app.MapGet("/test", () => "Hello from Gateway!").AllowAnonymous();
+
+app.UseWhen(
+    context => !context.Request.Path.StartsWithSegments("/connect", StringComparison.OrdinalIgnoreCase),
+    branch =>
+    {
+        branch.UseAuthentication();
+        branch.UseAuthorization();
+    });
 
 app.MapControllers();
 

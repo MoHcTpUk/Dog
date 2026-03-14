@@ -10,6 +10,8 @@ internal sealed class AppInitializer(IServiceProvider serviceProvider, IConfigur
         using var scope = serviceProvider.CreateScope();
         var applicationManager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
         var clientId = configuration["OpenIddict:ClientId"] ?? "dog-app";
+        var gatewayClientId = configuration["OpenIddict:GatewayClientId"] ?? "gateway-webapi";
+        var gatewayClientSecret = configuration["OpenIddict:GatewayClientSecret"] ?? "gateway-webapi-secret";
 
         // Проверяем, существует ли клиент
         var existingClient = await applicationManager.FindByClientIdAsync(clientId, cancellationToken);
@@ -30,6 +32,20 @@ internal sealed class AppInitializer(IServiceProvider serviceProvider, IConfigur
                     "scp:email",
                     "scp:profile",
                     "scp:roles"
+                }
+            }, cancellationToken);
+
+        var existingGatewayClient = await applicationManager.FindByClientIdAsync(gatewayClientId, cancellationToken);
+        if (existingGatewayClient == null)
+            await applicationManager.CreateAsync(new OpenIddictApplicationDescriptor
+            {
+                ClientId = gatewayClientId,
+                ClientSecret = gatewayClientSecret,
+                DisplayName = "Gateway WebApi",
+                ClientType = OpenIddictConstants.ClientTypes.Confidential,
+                Permissions =
+                {
+                    OpenIddictConstants.Permissions.Endpoints.Introspection
                 }
             }, cancellationToken);
     }

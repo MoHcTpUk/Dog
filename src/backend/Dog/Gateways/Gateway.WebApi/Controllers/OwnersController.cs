@@ -2,6 +2,7 @@ using Dog.Contracts.Commands.Owner;
 using Dog.Contracts.Dtos;
 using Dog.Contracts.Queries;
 using Dog.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Api;
 using Shared.Dtos;
@@ -9,6 +10,7 @@ using Shared.Dtos;
 namespace Gateway.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("[controller]")]
 public class OwnersController(IOwnerService service)
     : AbstractController<IOwnerService, ResultContainer<OwnerDto>, CreateOwnerCommand, UpdateOwnerCommand,

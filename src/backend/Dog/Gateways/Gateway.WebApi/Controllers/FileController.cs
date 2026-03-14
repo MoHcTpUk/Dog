@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Api.Services;
 
 namespace Gateway.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Microsoft.AspNetCore.Components.Route("[controller]")]
 public class FileController(IFileStorageService fileStorageService) : ControllerBase
 {
