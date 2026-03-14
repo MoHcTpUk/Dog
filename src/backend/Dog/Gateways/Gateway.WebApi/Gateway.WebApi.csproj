@@ -11,7 +11,6 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
     <PackageReference Include="OpenIddict.Validation.AspNetCore" Version="5.7.0" />
     <PackageReference Include="OpenIddict.Validation.SystemNetHttp" Version="5.7.0" />
-    <PackageReference Include="Yarp.ReverseProxy" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>

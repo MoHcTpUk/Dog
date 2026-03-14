@@ -50,7 +50,7 @@ public static class OpenApiConfiguration
                     new OpenApiOperation
                     {
                         Summary = "OAuth2 Token Endpoint",
-                        Description = "Obtain OAuth2 access token. Supports grant_type=password (Resource Owner Password Credentials) and grant_type=refresh_token. Requests are proxied to Identity.WebApi via YARP.",
+                        Description = "Obtain OAuth2 access token. Supports grant_type=password (Resource Owner Password Credentials) and grant_type=refresh_token. Authorization is handled via separate auth domain (e.g. https://auth.dogappa.local:8443).",
                         Tags = new List<OpenApiTag> { new() { Name = "Authentication" } },
                         RequestBody = new OpenApiRequestBody
                         {

@@ -24,9 +24,6 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     options.SuppressModelStateInvalidFilter = true;
 });
 
-builder.Services.AddReverseProxy()
-    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
-
 builder.Services.ConfigureHttpClientDefaults(httpBuilder =>
 {
     // OpenIddict.Validation.SystemNetHttp expects HttpClientHandler as primary handler.
@@ -112,7 +109,5 @@ app.UseWhen(
     });
 
 app.MapControllers();
-
-app.MapReverseProxy();
 
 app.Run();
