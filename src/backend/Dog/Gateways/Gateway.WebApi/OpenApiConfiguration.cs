@@ -12,6 +12,15 @@ public static class OpenApiConfiguration
             Version = "v1"
         };
 
+        if (document.Servers is { Count: > 0 })
+        {
+            foreach (var server in document.Servers)
+            {
+                if (!string.IsNullOrEmpty(server.Url) && server.Url.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
+                    server.Url = "https://" + server.Url.Substring(7);
+            }
+        }
+
         document.Components ??= new OpenApiComponents();
         document.Components.Schemas ??= new Dictionary<string, OpenApiSchema>();
         document.Components.Schemas.TryAdd("Rfc7807ProblemDetails", new OpenApiSchema

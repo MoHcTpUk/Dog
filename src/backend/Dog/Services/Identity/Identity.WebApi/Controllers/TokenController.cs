@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Identity.Application.Services;
+using Identity.Domain.Aggregates;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -61,10 +62,21 @@ public class TokenController(
 
     private async Task<IActionResult> ExchangePasswordAsync(OpenIddictRequest request, CancellationToken cancellationToken)
     {
-        var user = await identityService.ValidateUserAsync(
-            request.Username ?? string.Empty,
-            request.Password ?? string.Empty,
-            cancellationToken);
+        ApplicationUser? user;
+        if (HttpContext.Items.TryGetValue("VerifiedAuthUserEmail", out var verifiedAuthUserEmailObj) &&
+            verifiedAuthUserEmailObj is string verifiedAuthUserEmail &&
+            string.Equals(verifiedAuthUserEmail, request.Username, StringComparison.OrdinalIgnoreCase))
+        {
+            user = await identityService.GetUserByEmailAsync(verifiedAuthUserEmail, cancellationToken);
+        }
+        else
+        {
+            user = await identityService.ValidateUserAsync(
+                request.Username ?? string.Empty,
+                request.Password ?? string.Empty,
+                cancellationToken);
+        }
+
         if (user is null)
         {
             return Forbid(

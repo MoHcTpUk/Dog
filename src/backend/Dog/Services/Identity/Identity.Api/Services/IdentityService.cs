@@ -8,16 +8,12 @@ public class IdentityService(ICommandBus commandBus) : IIdentityService
 {
     private const string IdentityServiceSubject = MessagingSubject.IdentityService;
 
-    public async Task<CreateIdentityUserResult> CreateUserAsync(CreateIdentityUserCommand command)
+    public async Task<Guid> CreateUserAsync(CreateIdentityUserCommand command)
     {
-        var result = await commandBus.SendAsync<CreateIdentityUserCommand, CreateIdentityUserResult>(
+        var result = await commandBus.SendAsync<CreateIdentityUserCommand, Guid>(
             command, IdentityServiceSubject);
 
-        return result ?? new CreateIdentityUserResult
-        {
-            Success = false,
-            ErrorMessage = "No response from IdentityService"
-        };
+        return result;
     }
 
     public async Task<SetIdentityUserPasswordResult> SetUserPasswordAsync(SetIdentityUserPasswordCommand command)

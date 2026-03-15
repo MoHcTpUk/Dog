@@ -4,7 +4,7 @@ namespace Identity.Contracts.Services;
 
 public interface IIdentityService
 {
-    Task<CreateIdentityUserResult> CreateUserAsync(CreateIdentityUserCommand command);
+    Task<Guid> CreateUserAsync(CreateIdentityUserCommand command);
 
     Task<SetIdentityUserPasswordResult> SetUserPasswordAsync(SetIdentityUserPasswordCommand command);
 

@@ -20,7 +20,8 @@ This file provides project context for AI agents in Cursor.
 1. **Local frontend dev**: `cd src/frontend && npm install && npm run dev`
 2. **Build images**: from `scripts/` — `./build_backend.sh`, `./build_frontend.sh`, or `./build_all.sh`
 3. **Local deploy**: from `deploy/` — `./start_local.sh`; stop — `./stop.sh`
-4. **Switch Gateway**: `deploy/switch-gateway-mode.sh docker|local`
+4. **Backend redeploy (stop → build → start)**: from `scripts/` — `./redeploy_backend_local.sh`
+5. **Switch Gateway**: `deploy/switch-gateway-mode.sh docker|local`
 
 ## Cursor rules
 

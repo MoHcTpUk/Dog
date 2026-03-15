@@ -7,4 +7,5 @@ alwaysApply: false
 # Backend (.NET)
 
 - Stack: .NET 9; structure — Gateway, services (Identity, Dog) with Domain/Application/Infrastructure/WebApi or Api layers.
-- Image build: from `scripts/` — `./build_backend.sh`;
+- Image build: from `scripts/` — `./build_backend.sh`.
+- Full backend redeploy (stop stacks → build backend → start local): from `scripts/` — `./redeploy_backend_local.sh`.

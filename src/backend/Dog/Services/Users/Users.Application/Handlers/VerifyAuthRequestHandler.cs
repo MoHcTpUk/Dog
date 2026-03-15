@@ -1,3 +1,4 @@
+using AutoMapper;
 using Identity.Contracts.Commands;
 using Identity.Contracts.Services;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,8 @@ namespace Users.Application.Handlers;
 public class VerifyAuthRequestHandler(
     IAuthRequestRepository authRequestRepository,
     IUserRepository userRepository,
-    IIdentityService identityService
+    IIdentityService identityService,
+    IMapper mapper
 )
     : ICommandHandler<VerifyAuthRequestCommand, UserDto>
 {
@@ -40,16 +42,6 @@ public class VerifyAuthRequestHandler(
         var username = authRequest.Email.Split('@')[0].ToLowerInvariant();
         var temporaryPassword = GenerateTemporaryPassword();
 
-        var newUser = new UserAggregate
-        {
-            Email = authRequest.Email,
-            UserName = username,
-            Id = Guid.NewGuid()
-        };
-
-        await userRepository.CreateAsync([newUser], cancellationToken);
-        await userRepository.SaveChangesAsync();
-
         var createUserCommand = new CreateIdentityUserCommand
         {
             Email = authRequest.Email,
@@ -57,20 +49,25 @@ public class VerifyAuthRequestHandler(
             Password = temporaryPassword
         };
 
-        await identityService.CreateUserAsync(createUserCommand);
-        
+        var identityUserId = await identityService.CreateUserAsync(createUserCommand);
+
         authRequestRepository.DeleteAsync([authRequest]);
         await authRequestRepository.SaveChangesAsync();
 
-        return new UserDto
+        var newUser = new UserAggregate
         {
             Email = authRequest.Email,
-            Id = newUser.Id,
             UserName = username,
-            Password = temporaryPassword,
-            FirstName = string.Empty,
-            LastName = string.Empty
+            Id = identityUserId
         };
+
+        await userRepository.CreateAsync([newUser], cancellationToken);
+        await userRepository.SaveChangesAsync();
+
+        var userDto = mapper.Map<UserDto>(newUser);
+        userDto.Password = temporaryPassword;
+
+        return userDto;
     }
 
     private async Task<UserDto> ProcessExistUser(UserAggregate existingUser, AuthRequest authRequest,
@@ -92,15 +89,10 @@ public class VerifyAuthRequestHandler(
         authRequestRepository.DeleteAsync([authRequest]);
         await authRequestRepository.SaveChangesAsync();
 
-        return new UserDto
-        {
-            Email = authRequest.Email,
-            Id = existingUser.Id,
-            UserName = existingUser.UserName,
-            Password = temporaryPassword,
-            FirstName = string.Empty,
-            LastName = string.Empty
-        };
+        var userDto = mapper.Map<UserDto>(existingUser);
+        userDto.Password = temporaryPassword;
+
+        return userDto;
     }
 
     private static string GenerateTemporaryPassword()

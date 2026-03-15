@@ -14,6 +14,16 @@ public static class OpenApiConfiguration
             Description = "OAuth2/OpenID Connect token endpoint. Served at https://auth.dogappa.local:8443 (or equivalent)."
         };
 
+        if (document.Servers is { Count: > 0 })
+        {
+            foreach (var server in document.Servers)
+            {
+                if (!string.IsNullOrEmpty(server.Url) &&
+                    server.Url.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
+                    server.Url = "https://" + server.Url.Substring(7);
+            }
+        }
+        
         document.Components ??= new OpenApiComponents();
         document.Components.SecuritySchemes = new Dictionary<string, OpenApiSecurityScheme>
         {

@@ -64,7 +64,7 @@ public sealed class VerifyAuthToTokenMiddleware(RequestDelegate next)
             return;
         }
 
-        string userName;
+        string userEmail;
         string password;
         try
         {
@@ -75,8 +75,9 @@ public sealed class VerifyAuthToTokenMiddleware(RequestDelegate next)
             };
 
             var verifiedUser = await userService.VerifyAuthRequest(command);
-            userName = verifiedUser.Email;
+            userEmail = verifiedUser.Email;
             password = verifiedUser.Password;
+            context.Items["VerifiedAuthUserEmail"] = userEmail;
         }
         catch (RemoteProblemDetailsException ex)
         {
@@ -99,7 +100,7 @@ public sealed class VerifyAuthToTokenMiddleware(RequestDelegate next)
         var form = new Dictionary<string, string?>
         {
             ["grant_type"] = OpenIddictConstants.GrantTypes.Password,
-            ["username"] = userName,
+            ["username"] = userEmail,
             ["password"] = password,
             ["scope"] = scope,
             ["client_id"] = "dog-app"

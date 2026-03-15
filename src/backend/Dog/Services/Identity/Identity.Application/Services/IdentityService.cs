@@ -8,7 +8,7 @@ namespace Identity.Application.Services;
 public class IdentityService(
     IApplicationUserRepository userRepository) : IIdentityService
 {
-    public async Task<string> CreateUserAsync(string email, string userName, string password,
+    public async Task<Guid> CreateUserAsync(string email, string userName, string password,
         CancellationToken cancellationToken)
     {
         var existingUser = await userRepository.GetByEmailAsync(email, cancellationToken);
@@ -28,7 +28,7 @@ public class IdentityService(
         await userRepository.CreateAsync([newUser], cancellationToken);
         await userRepository.SaveChangesAsync();
 
-        return newUser.Id.ToString();
+        return newUser.Id;
     }
 
     public async Task<ApplicationUser?> ValidateUserAsync(string email, string password,
@@ -40,6 +40,11 @@ public class IdentityService(
         if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash)) return null;
 
         return user;
+    }
+
+    public async Task<ApplicationUser?> GetUserByEmailAsync(string email, CancellationToken cancellationToken)
+    {
+        return await userRepository.GetByEmailAsync(email, cancellationToken);
     }
 
     public async Task SetUserPasswordAsync(string email, string password, CancellationToken cancellationToken)

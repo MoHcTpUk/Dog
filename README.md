@@ -71,9 +71,10 @@ cd ../deploy && ./start_local.sh
 ### Rebuild backend only + redeploy app stack
 
 ```bash
-cd scripts && ./build_backend.sh
-cd ../deploy && ./start_local.sh
+cd scripts && ./redeploy_backend_local.sh
 ```
+
+Or manually: `./build_backend.sh` then `../deploy/start_local.sh`. The script runs `deploy/stop.sh` → `build_backend.sh` → `deploy/start_local.sh`.
 
 ### Switch Gateway to local (for debugging)
 
@@ -157,6 +158,7 @@ All scripts must be run from the `scripts/` directory. Build scripts accept an o
 
 | Script                    | Description                                                        |
 | ------------------------- | ------------------------------------------------------------------ |
+| `redeploy_backend_local.sh` | Stop stacks, build backend images, start local deploy (run from `scripts/`) |
 | `create_local_domain.sh`  | Adds `*.dogappa.local` entries to `/etc/hosts` (requires `sudo`)  |
 | `ios_dev.sh <cmd>`        | Capacitor iOS helper: `open`, `sync`, `run`, `sync:run`, `build:sync:run` |
 | `remove_all.sh`           | Removes all stacks and leaves Docker Swarm                        |
