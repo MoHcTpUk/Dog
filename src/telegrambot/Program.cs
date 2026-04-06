@@ -1,4 +1,4 @@
-﻿using Telegram.Bot;
+using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -30,6 +30,13 @@ class Program
     {
         Console.WriteLine("Starting Telegram Bot...");
 
+        using var cts = new CancellationTokenSource();
+        Console.CancelKeyPress += (sender, e) =>
+        {
+            e.Cancel = true;
+            cts.Cancel();
+        };
+
         var services = new ServiceCollection();
         ConfigureServices(services);
         _serviceProvider = services.BuildServiceProvider();
@@ -37,21 +44,13 @@ class Program
         await InitializeDatabaseAsync();
 
         var botClient = new TelegramBotClient(BotToken);
-        
-        var me = await botClient.GetMe();
+
+        var me = await WaitForSuccessfulConnectionAsync(botClient, cts.Token);
         Console.WriteLine($"Bot started: @{me.Username}");
 
         var receiverOptions = new ReceiverOptions
         {
             AllowedUpdates = []
-        };
-
-        using var cts = new CancellationTokenSource();
-
-        Console.CancelKeyPress += (sender, e) =>
-        {
-            e.Cancel = true;
-            cts.Cancel();
         };
 
         botClient.StartReceiving(
@@ -70,6 +69,41 @@ class Program
         catch (TaskCanceledException)
         {
             Console.WriteLine("Bot stopped gracefully.");
+        }
+    }
+
+    static async Task<User> WaitForSuccessfulConnectionAsync(ITelegramBotClient botClient, CancellationToken cancellationToken)
+    {
+        var attempt = 0;
+        var delay = TimeSpan.FromSeconds(5);
+        var maxDelay = TimeSpan.FromSeconds(60);
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            attempt++;
+
+            try
+            {
+                var me = await botClient.GetMe(cancellationToken);
+                if (attempt > 1)
+                    Console.WriteLine($"Telegram connection restored on attempt {attempt}");
+
+                return me;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to connect to Telegram (attempt {attempt}): {ex.Message}");
+                Console.WriteLine($"Retrying in {(int)delay.TotalSeconds} seconds...");
+                await Task.Delay(delay, cancellationToken);
+
+                var nextDelaySeconds = Math.Min(delay.TotalSeconds * 2, maxDelay.TotalSeconds);
+                delay = TimeSpan.FromSeconds(nextDelaySeconds);
+            }
         }
     }
 
