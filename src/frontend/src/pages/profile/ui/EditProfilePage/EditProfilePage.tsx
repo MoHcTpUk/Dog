@@ -4,8 +4,11 @@ import {
   Activity,
   Gender,
   type DogProfile,
+  mapDogPhotoIdsToEntries,
   useMyDogs,
+  useRemoveDogPhoto,
   useUpdateDog,
+  useUploadDogPhoto,
 } from "@entities/dog";
 import { useSessionStore } from "@entities/session";
 import { useMyOwner, useUpdateOwner } from "@entities/owner";
@@ -19,6 +22,8 @@ import { Icon, Text } from "@shared/ui";
 import { parseDateParts } from "@shared/utils/date.utils";
 import { MainLayout } from "@widgets/layout";
 import { ProfileTabSwitcher, ProfileTab } from "@widgets/ProfileTabSwitcher";
+import { syncDogPhotos } from "@entities/dog/model/dog.photos";
+import { mapDogProfileToCurrentDog } from "@entities/dog";
 
 const DEFAULT_DATE_PARTS = {
   day: 1,
@@ -82,6 +87,8 @@ const getEditableDog = (
 export const EditProfilePage: React.FC = () => {
   const history = useHistory();
   const currentDogId = useSessionStore((state) => state.currentDog?.id);
+  const setCurrentDog = useSessionStore((state) => state.setCurrentDog);
+  const setOwner = useSessionStore((state) => state.setOwner);
   const [activeTab, setActiveTab] = useState<ProfileTab>("dog");
   const [notificationCount] = useState(2);
 
@@ -89,6 +96,8 @@ export const EditProfilePage: React.FC = () => {
   const { owner: fetchedOwner } = useMyOwner();
   const { dogs, isLoading: isDogsLoading } = useMyDogs();
   const { updateDog, isPending: isDogSaving } = useUpdateDog();
+  const { uploadPhoto, isPending: isPhotoUploading } = useUploadDogPhoto();
+  const { removePhoto, isPending: isPhotoRemoving } = useRemoveDogPhoto();
   const { updateOwner, isPending: isOwnerSaving } = useUpdateOwner();
   const owner = ownerFromStore ?? fetchedOwner;
 
@@ -112,7 +121,7 @@ export const EditProfilePage: React.FC = () => {
         ? undefined
         : data.weight ?? editableDog.weight ?? undefined;
 
-    await updateDog({
+    const updateResult = await updateDog({
       id: editableDog.id,
       name: data.name?.trim() || editableDog.name,
       ...(data.gender === "male" && { gender: Gender.Male }),
@@ -134,6 +143,52 @@ export const EditProfilePage: React.FC = () => {
       about: data.comment?.trim() || null,
     });
 
+    const nextPhotos = await syncDogPhotos({
+      dogId: editableDog.id,
+      nextSources: data.photos ?? [],
+      existingPhotos: mapDogPhotoIdsToEntries(editableDog.photoIds),
+      uploadPhoto,
+      removePhoto,
+    });
+    const updatedDog = updateResult?.items?.[0];
+    const nextDog: DogProfile = {
+      ...editableDog,
+      name: updatedDog?.name ?? (data.name?.trim() || editableDog.name),
+      gender:
+        updatedDog?.gender === Gender.Male || updatedDog?.gender === Gender.Female
+          ? updatedDog.gender
+          : data.gender === "male"
+            ? Gender.Male
+            : data.gender === "female"
+              ? Gender.Female
+              : editableDog.gender,
+      weight: updatedDog?.weight ?? nextWeight ?? null,
+      species: data.breed ?? editableDog.species,
+      birthdate:
+        updatedDog?.birthdate ??
+        (data.birthDate || editableDog.birthdate
+          ? toIsoDate(data.birthDate, editableDog.birthdate)
+          : null),
+      activity:
+        updatedDog?.activity ??
+        (data.character?.activity === "low"
+          ? Activity.Low
+          : data.character?.activity === "medium"
+            ? Activity.Medium
+            : data.character?.activity === "high"
+              ? Activity.High
+              : data.character?.activity === ""
+                ? null
+                : editableDog.activity),
+      about: updatedDog?.about ?? (data.comment?.trim() || null),
+      photoIds: nextPhotos
+        .map((photo) => photo.photoId)
+        .filter((photoId): photoId is string => Boolean(photoId)),
+      photoUrls: nextPhotos.map((photo) => photo.source),
+      avatar: nextPhotos[0]?.source ?? null,
+    };
+
+    setCurrentDog(mapDogProfileToCurrentDog(nextDog));
     history.goBack();
   };
 
@@ -142,7 +197,7 @@ export const EditProfilePage: React.FC = () => {
       return;
     }
 
-    await updateOwner({
+    const updateResult = await updateOwner({
       id: owner.id,
       name: data.name?.trim() || owner.name,
       ...(data.birth_date || owner.birthdate
@@ -150,12 +205,23 @@ export const EditProfilePage: React.FC = () => {
         : {}),
     });
 
+    const updatedOwner = updateResult?.items?.[0];
+    setOwner({
+      id: owner.id,
+      name: updatedOwner?.name ?? (data.name?.trim() || owner.name),
+      birthdate:
+        updatedOwner?.birthdate ??
+        (data.birth_date || owner.birthdate
+          ? toIsoDate(data.birth_date, owner.birthdate)
+          : null),
+    });
+
     history.goBack();
   };
 
   const dogInitialData: DogFormData | undefined = editableDog
     ? {
-        photos: editableDog.avatar ? [editableDog.avatar] : [],
+        photos: editableDog.photoUrls,
         gender: mapGenderToFormValue(editableDog.gender),
         name: editableDog.name,
         weight: editableDog.weight ?? undefined,
@@ -226,7 +292,7 @@ export const EditProfilePage: React.FC = () => {
               <DogEditForm
                 initialData={dogInitialData}
                 onSave={handleSaveDog}
-                isSaving={isDogSaving}
+                isSaving={isDogSaving || isPhotoUploading || isPhotoRemoving}
               />
             ) : (
               <Text variant="regular-14" color="muted">

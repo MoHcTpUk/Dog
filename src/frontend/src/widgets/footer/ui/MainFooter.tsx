@@ -36,8 +36,9 @@ export const MainFooter: React.FC = () => {
         className="p-3.5 rounded-full flex justify-start items-start transition-colors"
       >
         <Avatar
-          src={currentDog?.avatar || "https://placehold.co/28x28"}
+          src={currentDog?.avatar ?? undefined}
           alt={currentDog?.name || "Dog"}
+          initials={currentDog?.name?.slice(0, 1).toUpperCase() || "D"}
           size="small"
           variant="circular"
           className="w-7 h-7"

@@ -18,6 +18,7 @@ export interface DogProfile {
   ownerId: string | null;
   avatar: string | null;
   photoIds: string[];
+  photoUrls: string[];
 }
 
 export const isDogSpecies = (value: SpeciesType | null | undefined): value is DogSpecies =>

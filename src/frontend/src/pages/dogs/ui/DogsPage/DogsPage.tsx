@@ -9,8 +9,6 @@ import { useSessionStore } from "@entities/session";
 import { Icon, Text } from "@shared/ui";
 import { MainLayout } from "@widgets/layout";
 
-const DOG_PLACEHOLDER_IMAGE = "https://placehold.co/384x384?text=Dog";
-
 interface DogCardProps {
   dog: DogProfile;
   onClick: (dog: DogProfile) => void;
@@ -27,11 +25,20 @@ const DogCard: React.FC<DogCardProps> = ({ dog, onClick }) => {
     >
       <div className="self-stretch flex flex-col justify-start items-start gap-3.5">
         <div className="self-stretch rounded-2xl overflow-hidden h-60">
-          <img
-            className="w-full h-60 object-cover"
-            src={dog.avatar ?? DOG_PLACEHOLDER_IMAGE}
-            alt={dog.name}
-          />
+          {dog.avatar ? (
+            <img
+              className="w-full h-60 object-cover"
+              src={dog.avatar}
+              alt={dog.name}
+            />
+          ) : (
+            <div className="w-full h-60 bg-stone-100 flex flex-col items-center justify-center gap-3 text-text-secondary">
+              <Icon name="camera" size={28} />
+              <Text variant="regular-14" color="muted">
+                Фото пока не добавлено
+              </Text>
+            </div>
+          )}
         </div>
         <div className="self-stretch px-3 inline-flex justify-start items-center gap-2.5">
           <div className="flex-1 inline-flex flex-col justify-center items-start gap-[5px]">

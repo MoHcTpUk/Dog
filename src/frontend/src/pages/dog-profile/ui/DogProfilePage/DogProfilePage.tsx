@@ -14,9 +14,6 @@ import {
   type DogProfileModalProps,
 } from "@widgets/DogProfileModal";
 
-const DOG_PLACEHOLDER_IMAGE = "https://placehold.co/384x384?text=Dog";
-const OWNER_PLACEHOLDER_IMAGE = "https://placehold.co/120x120?text=Owner";
-
 const mapDogToModalModel = (
   dog: DogProfile,
   ownerName: string
@@ -24,7 +21,8 @@ const mapDogToModalModel = (
   id: dog.id ?? "",
   name: dog.name,
   breed: dog.species?.name ?? "Порода не указана",
-  avatar: dog.avatar ?? DOG_PLACEHOLDER_IMAGE,
+  avatar: dog.avatar ?? "",
+  photos: dog.photoUrls,
   gender:
     dog.gender === Gender.Female
       ? "female"
@@ -40,7 +38,7 @@ const mapDogToModalModel = (
     id: dog.ownerId ?? "me",
     name: ownerName,
     age: 0,
-    avatar: OWNER_PLACEHOLDER_IMAGE,
+    avatar: "",
   },
 });
 

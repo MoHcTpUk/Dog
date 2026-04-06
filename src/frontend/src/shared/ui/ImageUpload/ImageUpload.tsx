@@ -9,6 +9,7 @@ export interface ImageUploadProps {
   images: string[];
   onChange: (images: string[]) => void;
   maxImages?: number;
+  title?: string | null;
 }
 
 interface ImageActionDrawerProps {
@@ -54,6 +55,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   images,
   onChange,
   maxImages = 4,
+  title,
 }) => {
   const { t } = useTranslation();
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
@@ -108,9 +110,11 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 
   return (
     <div className="InputCover self-stretch inline-flex flex-col justify-start items-start gap-9 w-full">
-      <Text variant="bold-24" tag="h1" className="mb-2 text-start">
-        {t("Upload dog photos")}
-      </Text>
+      {title !== null ? (
+        <Text variant="bold-24" tag="h1" className="mb-2 text-start">
+          {title ?? t("Upload dog photos")}
+        </Text>
+      ) : null}
 
       {images.length === 0 && canAddMore ? (
         <div

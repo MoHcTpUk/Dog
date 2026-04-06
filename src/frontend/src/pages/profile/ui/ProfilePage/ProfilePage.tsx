@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@features/auth";
 import { useMyOwner } from "@entities/owner";
 import { useSessionStore } from "@entities/session";
 import {
+  Avatar,
   Icon,
   Text,
   MenuItem,
@@ -22,7 +24,8 @@ interface MenuItemConfig {
 export const ProfilePage: React.FC = () => {
   const history = useHistory();
   const { t } = useTranslation();
-  const { currentDog, owner: ownerFromStore, logout } = useSessionStore();
+  const { logout: performLogout } = useAuth();
+  const { currentDog, owner: ownerFromStore } = useSessionStore();
   const { owner: fetchedOwner } = useMyOwner();
   const [notificationCount] = useState(2);
   const [isReferralDrawerOpen, setIsReferralDrawerOpen] = useState(false);
@@ -99,7 +102,7 @@ export const ProfilePage: React.FC = () => {
   };
 
   const handleLogout = () => {
-    logout();
+    performLogout();
     setIsLogoutModalOpen(false);
     history.push("/welcome");
   };
@@ -138,10 +141,13 @@ export const ProfilePage: React.FC = () => {
         <div className="self-stretch flex flex-col justify-start items-center gap-10">
           <div className="self-stretch p-5 bg-white rounded-3xl flex flex-col justify-end items-center gap-5 overflow-hidden">
             <div className="self-stretch inline-flex justify-start items-center gap-3.5">
-              <img
-                className="size-12 rounded-xl object-cover"
-                src={currentDog?.avatar || "https://placehold.co/50x50"}
+              <Avatar
+                src={currentDog?.avatar ?? undefined}
                 alt={currentDog?.name || "Dog"}
+                initials={currentDog?.name?.slice(0, 1).toUpperCase() || "D"}
+                size="medium"
+                variant="rounded"
+                className="size-12"
               />
               <div
                 className="flex-1 pr-2.5 flex justify-start items-center gap-2.5 cursor-pointer"

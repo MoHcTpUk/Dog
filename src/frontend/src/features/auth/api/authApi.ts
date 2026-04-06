@@ -7,6 +7,7 @@ import {
   clearSession,
   persistSession,
 } from "@shared/api/auth/session";
+import { logVerificationCode } from "../lib/pendingVerification";
 
 export interface SendVerificationCodeResponse {
   email: string;
@@ -24,6 +25,8 @@ export interface VerifyCodeResponse {
 export const authApi = {
   async sendVerificationCode(email: string): Promise<SendVerificationCodeResponse> {
     const response = await postUsersCreateAuthRequest({ email });
+    logVerificationCode(response.email, response.verificationCode);
+
     return {
       email: response.email,
       id: response.id,
@@ -48,13 +51,15 @@ export const authApi = {
     const accessToken = response.access_token || "";
     const refreshToken = response.refresh_token;
 
-    if (accessToken) {
-      persistSession({
-        accessToken,
-        expiresIn: response.expires_in,
-        refreshToken,
-      });
+    if (!accessToken) {
+      throw new Error("Access token was not returned by the backend");
     }
+
+    persistSession({
+      accessToken,
+      expiresIn: response.expires_in,
+      refreshToken,
+    });
 
     return {
       accessToken,
@@ -72,13 +77,15 @@ export const authApi = {
 
     const accessToken = response.access_token || "";
 
-    if (accessToken) {
-      persistSession({
-        accessToken,
-        expiresIn: response.expires_in,
-        refreshToken: response.refresh_token,
-      });
+    if (!accessToken) {
+      throw new Error("Access token was not returned by the backend");
     }
+
+    persistSession({
+      accessToken,
+      expiresIn: response.expires_in,
+      refreshToken: response.refresh_token,
+    });
 
     return {
       accessToken,

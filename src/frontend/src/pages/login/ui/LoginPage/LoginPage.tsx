@@ -8,6 +8,7 @@ import { z } from "zod";
 import { Button, Input, Text } from "@shared/ui";
 import { BackIcon } from "@shared/ui/icons";
 import { useAuth } from "@features/auth";
+import { persistPendingVerification } from "@features/auth/lib/pendingVerification";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email format"),
@@ -42,13 +43,12 @@ export const LoginPage: React.FC = () => {
     try {
       const response = await sendVerificationCode(data.email);
 
-
-      // TEMPORARY: Using sessionStorage because Ionic router doesn't pass state properly
-      // TODO: Remove when backend sends code via email/phone instead of response
-      sessionStorage.setItem("verification_email", response.email);
-      sessionStorage.setItem("verification_registrationId", response.id);
-      sessionStorage.setItem("verification_verificationCode", response.verificationCode);
-      sessionStorage.setItem("verification_isRegistration", "false");
+      persistPendingVerification({
+        email: response.email,
+        registrationId: response.id,
+        isRegistration: false,
+        verificationCode: response.verificationCode,
+      });
 
       router.push("/verification", "forward", "push");
     } catch {

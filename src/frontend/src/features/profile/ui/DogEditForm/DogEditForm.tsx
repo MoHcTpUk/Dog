@@ -1,13 +1,10 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { IonImg } from "@ionic/react";
 import { type DogSpecies, useDogSpecies } from "@entities/dog";
-import { platformUtils } from "@shared/hooks";
 import {
   Text,
   Input,
   Button,
-  Icon,
   TagRadioGroup,
   TagCheckboxGroup,
   Slider,
@@ -15,6 +12,7 @@ import {
   Textarea,
   BottomModal,
   DatePicker,
+  ImageUpload,
 } from "@shared/ui";
 import {
   getGenderOptions,
@@ -145,17 +143,6 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
     setBreed(initialData?.breed || null);
   }, [initialData?.breed]);
 
-  const handleImageCapture = async () => {
-    const image = await platformUtils.media.pickImage();
-    if (image) {
-      setPhotos([...photos, image]);
-    }
-  };
-
-  const handleDeletePhoto = (index: number) => {
-    setPhotos(photos.filter((_, i) => i !== index));
-  };
-
   const handleBreedSave = () => {
     setIsBreedDrawerOpen(false);
   };
@@ -215,32 +202,7 @@ export const DogEditForm: React.FC<DogEditFormProps> = ({
           <Text variant="medium-16" className="self-stretch">
             Фото
           </Text>
-          <div className="self-stretch inline-flex justify-start items-start gap-1">
-            <div
-              className="w-44 h-44 px-5 py-6 bg-white rounded-3xl inline-flex flex-col justify-center items-center gap-5 overflow-hidden cursor-pointer"
-              onClick={handleImageCapture}
-            >
-              <Icon name="camera" size={24} />
-            </div>
-            {photos.slice(0, 2).map((photo, index) => (
-              <div
-                key={index}
-                className="w-44 h-44 relative rounded-3xl overflow-hidden"
-              >
-                <IonImg
-                  className="w-44 h-44 absolute rounded-3xl object-cover"
-                  src={photo}
-                  alt={`Dog photo ${index + 1}`}
-                />
-                <div
-                  className="p-2 right-2 top-2 absolute bg-white/60 rounded-full inline-flex flex-col justify-start items-start gap-2.5 overflow-hidden cursor-pointer"
-                  onClick={() => handleDeletePhoto(index)}
-                >
-                  <Icon name="trash" size={16} />
-                </div>
-              </div>
-            ))}
-          </div>
+          <ImageUpload images={photos} onChange={setPhotos} maxImages={4} title={null} />
         </div>
 
         <div className="self-stretch flex flex-col justify-start items-center gap-3.5">

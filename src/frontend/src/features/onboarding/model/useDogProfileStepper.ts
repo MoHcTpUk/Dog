@@ -18,16 +18,21 @@ import {
   Activity,
   Gender,
   getAgeFromBirthdate,
+  mapDogPhotoIdsToEntries,
   useRemoveDogPhoto,
   useUpdateDog,
   useUploadDogPhoto,
 } from "@entities/dog";
 import { useUpdateOwner } from "@entities/owner";
 import { useSessionStore } from "@entities/session";
+import { syncDogPhotos } from "@entities/dog/model/dog.photos";
 import { DogProfileData, StepErrors } from "./types";
 
 type StepperToastVariant = "info" | "error" | "success";
-type UploadedDogPhoto = { source: string; photoId: string };
+type UploadedDogPhoto = {
+  photoId: string;
+  source: string;
+};
 
 const getCurrentDate = () => {
   const today = new Date();
@@ -146,7 +151,6 @@ export const useDogProfileStepper = (
   const [draftOwnerId, setDraftOwnerId] = useState<string | null>(null);
   const [isDogBoundToOwner, setIsDogBoundToOwner] = useState(false);
   const [uploadedPhotos, setUploadedPhotos] = useState<UploadedDogPhoto[]>([]);
-
   const { mutateAsync: createOwner } = usePostOwnersCreate();
   const { mutateAsync: createDog } = usePostDogsCreate();
   const { mutateAsync: bindDogToOwner } = usePostDogsBindToOwner();
@@ -164,11 +168,15 @@ export const useDogProfileStepper = (
     setShowToast(true);
   };
 
-  const syncCurrentDog = (dogId: string, data: DogProfileData) => {
+  const syncCurrentDog = (
+    dogId: string,
+    data: DogProfileData,
+    avatar?: string | null
+  ) => {
     setCurrentDog({
       id: dogId,
       name: data.name.trim(),
-      avatar: null,
+      avatar: avatar ?? null,
       breed: data.breed?.name ?? null,
       age: getAgeFromBirthdate(getDogBirthdate(data)),
     });
@@ -186,7 +194,7 @@ export const useDogProfileStepper = (
       }
 
       setDraftDogId(dog.id);
-      syncCurrentDog(dog.id, data);
+      syncCurrentDog(dog.id, data, uploadedPhotos[0]?.source ?? null);
       return dog.id;
     }
 
@@ -197,7 +205,7 @@ export const useDogProfileStepper = (
     const dog = dogResult?.items?.[0];
     const dogId = dog?.id ?? draftDogId;
 
-    syncCurrentDog(dogId, data);
+    syncCurrentDog(dogId, data, uploadedPhotos[0]?.source ?? null);
     return dogId;
   };
 
@@ -237,45 +245,22 @@ export const useDogProfileStepper = (
     return ownerId;
   };
 
-  const syncDogPhotos = async (dogId: string, photos: string[]) => {
-    const nextSources = new Set(photos);
-    const photosToRemove = uploadedPhotos.filter(
-      (photo) => !nextSources.has(photo.source)
-    );
-
-    for (const photo of photosToRemove) {
-      await removePhoto(dogId, photo.photoId);
-    }
-
-    const remainingPhotos = uploadedPhotos.filter((photo) =>
-      nextSources.has(photo.source)
-    );
-    const uploadedSources = new Set(
-      remainingPhotos.map((photo) => photo.source)
-    );
-
-    const nextUploadedPhotos = [...remainingPhotos];
-
-    for (const source of photos) {
-      if (uploadedSources.has(source)) {
-        continue;
-      }
-
-      const uploadedPhoto = await uploadPhoto(dogId, source);
-      nextUploadedPhotos.push({
-        source,
-        photoId: uploadedPhoto.id,
-      });
-    }
-
-    setUploadedPhotos(nextUploadedPhotos);
-  };
-
   const persistCurrentStep = async (step: number, data: DogProfileData) => {
     const dogId = await persistDog(Math.min(step, 9), data);
 
     if (step === 9) {
-      await syncDogPhotos(dogId, data.photos);
+      const nextPhotos = await syncDogPhotos({
+        dogId,
+        nextSources: data.photos,
+        existingPhotos:
+          uploadedPhotos.length > 0
+            ? uploadedPhotos
+            : mapDogPhotoIdsToEntries([]),
+        uploadPhoto,
+        removePhoto,
+      });
+      setUploadedPhotos(nextPhotos);
+      syncCurrentDog(dogId, data, nextPhotos[0]?.source ?? null);
       return;
     }
 

@@ -1,5 +1,6 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { customInstance } from "@shared/api/client";
+import { getGetDogsGetQueryKey } from "@shared/api/generated";
 import type { FileUploadResultType } from "@shared/api/generated/types";
 
 const dataUrlToFile = (dataUrl: string, filename: string): File => {
@@ -36,6 +37,7 @@ export const uploadDogPhotoRequest = (
 };
 
 export const useUploadDogPhoto = () => {
+  const queryClient = useQueryClient();
   const { mutateAsync, isPending } = useMutation({
     mutationFn: ({
       dogId,
@@ -47,7 +49,10 @@ export const useUploadDogPhoto = () => {
   });
 
   const uploadPhoto = (dogId: string, dataUrl: string) =>
-    mutateAsync({ dogId, dataUrl });
+    mutateAsync({ dogId, dataUrl }).then(async (result) => {
+      await queryClient.invalidateQueries({ queryKey: getGetDogsGetQueryKey() });
+      return result;
+    });
 
   return { uploadPhoto, isPending };
 };

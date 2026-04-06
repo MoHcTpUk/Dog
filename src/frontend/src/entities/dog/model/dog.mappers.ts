@@ -1,5 +1,6 @@
 import type { DogDtoType, EnumerationDtoType } from "@shared/api/generated/types";
 import { Activity, Gender } from "./dog.enums";
+import { mapDogPhotoIdsToEntries } from "./dog.photos";
 import type { DogProfile, DogSpecies } from "./dog.types";
 import { isDogSpecies } from "./dog.types";
 
@@ -44,19 +45,25 @@ const normalizeSpecies = (
   return null;
 };
 
-export const mapDogDtoToProfile = (dog: DogDtoType): DogProfile => ({
-  id: dog.id ?? null,
-  name: dog.name,
-  gender: normalizeGender(dog.gender),
-  weight: dog.weight ?? null,
-  species: normalizeSpecies(dog.species),
-  birthdate: dog.birthdate ?? null,
-  activity: normalizeActivity(dog.activity),
-  about: dog.about ?? null,
-  ownerId: dog.ownerId ?? null,
-  avatar: null,
-  photoIds: dog.photoIds ?? [],
-});
+export const mapDogDtoToProfile = (dog: DogDtoType): DogProfile => {
+  const photoIds = dog.photoIds ?? [];
+  const photoUrls = mapDogPhotoIdsToEntries(photoIds).map((photo) => photo.source);
+
+  return {
+    id: dog.id ?? null,
+    name: dog.name,
+    gender: normalizeGender(dog.gender),
+    weight: dog.weight ?? null,
+    species: normalizeSpecies(dog.species),
+    birthdate: dog.birthdate ?? null,
+    activity: normalizeActivity(dog.activity),
+    about: dog.about ?? null,
+    ownerId: dog.ownerId ?? null,
+    avatar: photoUrls[0] ?? null,
+    photoIds,
+    photoUrls,
+  };
+};
 
 export const mapEnumerationToDogSpecies = (
   item: EnumerationDtoType

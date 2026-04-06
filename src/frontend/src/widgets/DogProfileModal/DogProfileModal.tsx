@@ -5,6 +5,10 @@ import { Dog } from '@shared/types/walk';
 
 type DogProfileModalDog = Omit<Dog, 'gender'> & {
   gender: 'male' | 'female' | 'unknown';
+  photos?: string[];
+  owner: Dog["owner"] & {
+    avatar?: string;
+  };
 };
 
 export interface DogProfileModalProps {
@@ -21,7 +25,11 @@ export const DogProfileModal: React.FC<DogProfileModalProps> = ({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const images = dog ? [dog.avatar, dog.avatar, dog.avatar, dog.avatar] : [];
+  const images = dog?.photos?.filter(Boolean).length
+    ? dog.photos.filter(Boolean)
+    : dog?.avatar
+      ? [dog.avatar]
+      : [];
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -114,33 +122,44 @@ export const DogProfileModal: React.FC<DogProfileModalProps> = ({
                 ref={scrollContainerRef}
                 className="slider-container w-[334px] h-[334px] flex overflow-x-auto overflow-y-hidden gap-3"
               >
-                {images.map((image, index) => (
-                  <div
-                    key={index}
-                    className="slider-item w-[334px] h-[334px] flex-shrink-0 rounded-3xl overflow-hidden"
-                  >
-                    <IonImg
-                      src={image}
-                      alt={`${dog.name} ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
+                {images.length ? (
+                  images.map((image, index) => (
+                    <div
+                      key={index}
+                      className="slider-item w-[334px] h-[334px] flex-shrink-0 rounded-3xl overflow-hidden"
+                    >
+                      <IonImg
+                        src={image}
+                        alt={`${dog.name} ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <div className="slider-item w-[334px] h-[334px] flex-shrink-0 rounded-3xl overflow-hidden bg-stone-100 flex flex-col items-center justify-center gap-3 text-text-secondary">
+                    <Icon name="camera" size={28} color="var(--color-text-secondary)" />
+                    <Text variant="regular-14" color="secondary">
+                      Фото пока не добавлено
+                    </Text>
                   </div>
-                ))}
+                )}
               </div>
 
-              <div className="flex items-center gap-1.5">
-                {images.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`rounded-full cursor-pointer ${
-                      index === currentImageIndex
-                        ? 'w-[7px] h-[7px] bg-primary'
-                        : 'w-[5px] h-[5px] bg-white'
-                    }`}
-                    onClick={() => handleDotClick(index)}
-                  />
-                ))}
-              </div>
+              {images.length > 1 ? (
+                <div className="flex items-center gap-1.5">
+                  {images.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`rounded-full cursor-pointer ${
+                        index === currentImageIndex
+                          ? 'w-[7px] h-[7px] bg-primary'
+                          : 'w-[5px] h-[5px] bg-white'
+                      }`}
+                      onClick={() => handleDotClick(index)}
+                    />
+                  ))}
+                </div>
+              ) : null}
             </div>
 
             <div className="w-full flex flex-col gap-1">
@@ -235,11 +254,17 @@ export const DogProfileModal: React.FC<DogProfileModalProps> = ({
                   </div>
 
                   <div className="w-[60px] h-[60px] rounded-xl overflow-hidden flex-shrink-0">
-                    <IonImg
-                      src={dog.owner.avatar}
-                      alt={dog.owner.name}
-                      className="w-full h-full object-cover"
-                    />
+                    {dog.owner.avatar ? (
+                      <IonImg
+                        src={dog.owner.avatar}
+                        alt={dog.owner.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-stone-100 flex items-center justify-center text-text-primary text-lg font-semibold">
+                        {dog.owner.name.slice(0, 1).toUpperCase()}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

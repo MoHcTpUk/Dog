@@ -5,7 +5,11 @@ import { getGetOwnersGetQueryKey, getGetDogsGetQueryKey } from "@shared/api/gene
 import { authApi } from "../api/authApi";
 
 export const useAuth = () => {
-  const { setToken, logout: logoutStore } = useSessionStore();
+  const {
+    hydrateSession,
+    logout: logoutStore,
+    setInitializing,
+  } = useSessionStore();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +37,13 @@ export const useAuth = () => {
     try {
       const response = await authApi.verifyCode(code, registrationId);
 
-      setToken(response.accessToken);
+      setInitializing(true);
+      hydrateSession({
+        token: response.accessToken,
+        owner: null,
+        currentDog: null,
+        isOnboarded: false,
+      });
 
       await queryClient.invalidateQueries({ queryKey: getGetOwnersGetQueryKey() });
       await queryClient.invalidateQueries({ queryKey: getGetDogsGetQueryKey() });

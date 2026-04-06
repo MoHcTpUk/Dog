@@ -1,12 +1,21 @@
 import Axios, { AxiosRequestConfig } from "axios";
 import { getAccessToken } from "./auth/session";
 
-const API_BASE_URL =
+export const API_BASE_URL =
   process.env.NODE_ENV === "production" ? "https://api.dogappa.local:8443" : "";
+
+export const resolveApiPath = (path: string) => {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
+  return API_BASE_URL ? `${API_BASE_URL}${normalizedPath}` : normalizedPath;
+};
 
 export const AXIOS_INSTANCE = Axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
+  paramsSerializer: {
+    indexes: null,
+  },
   headers: {
     "Content-Type": "application/json",
   },

@@ -6,6 +6,12 @@ import { Button, CodeInput, Text } from "@shared/ui";
 import { BackIcon } from "@shared/ui/icons";
 import { useResendTimer } from "@shared/hooks/useResendTimer";
 import { useAuth } from "@features/auth";
+import {
+  clearPendingVerification,
+  readPendingVerification,
+  updatePendingVerificationCode,
+  updatePendingVerificationRegistrationId,
+} from "@features/auth/lib/pendingVerification";
 
 // interface CodeVerificationPageProps {
 //   email: string;
@@ -18,32 +24,21 @@ export const CodeVerificationPage: React.FC = () => {
   const router = useIonRouter();
   const { verifyCode, sendVerificationCode, isLoading } = useAuth();
   const [codeError, setCodeError] = useState<string>("");
-
-  // TEMPORARY: Using sessionStorage because Ionic router doesn't pass state properly
-  // TODO: Remove verificationCode display when backend sends code via email/phone
-  const [email] = useState<string>(() => {
-    return sessionStorage.getItem("verification_email") || "user@example.com";
-  });
-
-  const [registrationId, setRegistrationId] = useState<string>(() => {
-    return sessionStorage.getItem("verification_registrationId") || "";
-  });
-
-  const [verificationCode, setVerificationCode] = useState<string>(() => {
-    const code = sessionStorage.getItem("verification_verificationCode") || "";
-    return code;
-  });
-
-  const [isRegistration] = useState<boolean>(() => {
-    return sessionStorage.getItem("verification_isRegistration") === "true";
-  });
+  const [pendingVerification, setPendingVerification] = useState(() =>
+    readPendingVerification()
+  );
 
   const { timeLeft, canResend, startTimer, formatTime } = useResendTimer(59);
 
   React.useEffect(() => {
-    // Start timer when component mounts
     startTimer();
   }, [startTimer]);
+
+  React.useEffect(() => {
+    if (!pendingVerification) {
+      router.push("/welcome", "back", "replace");
+    }
+  }, [pendingVerification, router]);
 
   const handleBack = () => {
     router.goBack();
@@ -52,43 +47,48 @@ export const CodeVerificationPage: React.FC = () => {
   const handleCodeComplete = async (code: string) => {
     setCodeError("");
 
-    if (!registrationId) {
+    if (!pendingVerification?.registrationId) {
       setCodeError(t("Registration ID is missing. Please try again."));
       return;
     }
 
     try {
-      await verifyCode(code, registrationId);
-
-      if (isRegistration) {
-        router.push("/onboarding", "forward", "push");
-      } else {
-        router.push("/home", "forward", "push");
-      }
-    } catch (error) {
+      await verifyCode(code, pendingVerification.registrationId);
+      clearPendingVerification();
+      router.push("/", "root", "replace");
+    } catch {
       setCodeError(t("Invalid code. Please try again."));
     }
   };
 
   const handleResendCode = async () => {
-    if (canResend) {
-      setCodeError("");
+    if (!canResend || !pendingVerification?.email) {
+      return;
+    }
 
-      try {
-        const response = await sendVerificationCode(email);
-        setRegistrationId(response.id);
-        setVerificationCode(response.verificationCode);
-        sessionStorage.setItem("verification_registrationId", response.id);
-        sessionStorage.setItem("verification_verificationCode", response.verificationCode);
-        startTimer();
-      } catch {
-        setCodeError(t("Failed to resend code. Please try again."));
-      }
+    setCodeError("");
+
+    try {
+      const response = await sendVerificationCode(pendingVerification.email);
+
+      updatePendingVerificationRegistrationId(response.id);
+      setPendingVerification((current) =>
+        current
+          ? {
+              ...current,
+              registrationId: response.id,
+              verificationCode: response.verificationCode,
+            }
+          : current
+      );
+      updatePendingVerificationCode(response.verificationCode);
+      startTimer();
+    } catch {
+      setCodeError(t("Failed to resend code. Please try again."));
     }
   };
 
   const handleCodeChange = () => {
-    // Clear error when user starts typing
     if (codeError) {
       setCodeError("");
     }
@@ -118,8 +118,15 @@ export const CodeVerificationPage: React.FC = () => {
                 {t("Check your email")}
               </Text>
 
-              {/* Code input */}
               <div className="self-stretch flex flex-col justify-center items-center gap-3">
+                {pendingVerification?.email ? (
+                  <Text
+                    variant="medium-14"
+                    className="self-stretch text-center text-slate-500"
+                  >
+                    {pendingVerification.email}
+                  </Text>
+                ) : null}
                 <CodeInput
                   length={4}
                   onComplete={handleCodeComplete}
@@ -128,13 +135,18 @@ export const CodeVerificationPage: React.FC = () => {
                   errorMessage={codeError}
                   className="self-stretch"
                 />
-                <Text variant="medium-small-12" className="text-slate-400 text-center">
-                  {t("Code")}: <span className="font-mono font-bold">{verificationCode || "..."}</span>
+                <Text
+                  variant="medium-small-12"
+                  className="text-slate-400 text-center"
+                >
+                  {t("Code")}:{" "}
+                  <span className="font-mono font-bold">
+                    {pendingVerification?.verificationCode || "..."}
+                  </span>
                 </Text>
               </div>
             </div>
 
-            {/* Resend code timer/button - at bottom but visible above keyboard */}
             <div className="self-stretch flex flex-col justify-start items-start gap-3.5">
               {canResend ? (
                 <Button

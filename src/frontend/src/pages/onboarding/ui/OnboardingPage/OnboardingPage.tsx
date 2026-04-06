@@ -1,7 +1,11 @@
 import React from "react";
 import { IonPage, IonContent } from "@ionic/react";
 import { useHistory } from "react-router-dom";
-import { StepperIntroView, DogProfileStepper, VerificationView } from "@features/onboarding";
+import {
+  StepperIntroView,
+  DogProfileStepper,
+  VerificationView,
+} from "@features/onboarding";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -15,9 +19,7 @@ export const OnboardingPage: React.FC = () => {
   });
   const { t } = useTranslation();
 
-  const showToastMessage = (message: string) => {
-    console.log(message);
-  };
+  const showToastMessage = (_message: string) => {};
 
   const handleVerificationComplete = () => {
     history.push("/home");
