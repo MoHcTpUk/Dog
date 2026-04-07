@@ -2,7 +2,7 @@ import Axios, { AxiosRequestConfig } from "axios";
 import { getAccessToken } from "./auth/session";
 
 export const API_BASE_URL =
-  process.env.NODE_ENV === "production" ? "https://api.dogappa.local:8443" : "";
+  "https://api.dogappa.com";
 
 export const resolveApiPath = (path: string) => {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;

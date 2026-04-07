@@ -3,7 +3,7 @@ const { defineConfig } = require("orval");
 module.exports = defineConfig({
   gateway: {
     input: {
-      target: "https://api.dogappa.local:8443/openapi/v1.json",
+      target: "https://api.dogappa.com/openapi/v1.json",
     },
 
     output: {

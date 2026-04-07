@@ -11,7 +11,7 @@ export default defineConfig({
   server: {
     proxy: {
       "^/(Users|Dogs|Owners|connect|openapi|GetFile)": {
-        target: "https://api.dogappa.local:8443",
+        target: "https://api.dogappa.com",
         changeOrigin: true,
         secure: false,
       },
